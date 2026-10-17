@@ -198,6 +198,7 @@ input[type=time]:focus{outline:none;border-color:var(--ok);box-shadow:0 0 0 3px 
 <h1><span id="wk"></span><button id="sy" class="sy">☁︎ …</button></h1>
 <div class="sytx" id="sytx" hidden></div>
 <button class="miss" id="miss" hidden></button>
+<a class="miss bkr" id="moved" hidden href="https://heinrichstrochibaldo.github.io/rabuch/" target="_blank" rel="noopener" style="text-decoration:none">Трекер переехал в «РабУч» на экране «Домой». Здесь — только запасная копия, отметки сюда не вносите ›</a>
 <button class="miss bkr" id="bkr" hidden>Давно не было копии данных · Сохранить ›</button>
 <section class="sum rise" id="sum">
   <div class="ring">
@@ -214,7 +215,6 @@ input[type=time]:focus{outline:none;border-color:var(--ok);box-shadow:0 0 0 3px 
 </section>
 <button class="go" id="go" hidden></button>
 <div class="set">
-  <span>Свайп по окну или тап по дню снизу — другой день. Тап по кольцу — неделя / день. «⋯» — отпуск, больничный, отгул. Цвета: бирюзовый — в норме, жёлтый — переработка, серый — недоработка.</span>
   <button class="rst" id="hist" style="margin-left:0" title="История">🗓</button>
   <button class="rst" id="addx" style="margin-left:0" title="Добавить день">➕</button>
 </div>
@@ -237,8 +237,8 @@ input[type=time]:focus{outline:none;border-color:var(--ok);box-shadow:0 0 0 3px 
   <div id="svb"></div>
 </div></div>
 <script>
-var VER="1.0",STANDALONE=!!(window.navigator.standalone||(window.matchMedia&&matchMedia("(display-mode: standalone)").matches));
-var NAMES=["Понедельник","Вторник","Среда","Четверг","Пятница","Суббота","Воскресенье"],START=480,END=990,BRK=30,N=480,C=326.73;
+var VER="1.0.3",STANDALONE=!!(window.navigator.standalone||(window.matchMedia&&matchMedia("(display-mode: standalone)").matches));
+var NAMES=["Понедельник","Вторник","Среда","Четверг","Пятница","Суббота","Воскресенье"],START=480,END=990,BRK=30,MINP=270,N=480,C=326.73;   // MINP: минимум присутствия в рабочий день — 4,5 ч от прихода (обед вычитается как обычно)
 var reduced=window.matchMedia&&matchMedia("(prefers-reduced-motion:reduce)").matches;
 var now0=new Date();
 var mon=new Date(now0.getFullYear(),now0.getMonth(),now0.getDate()-((now0.getDay()+6)%7));
@@ -310,7 +310,7 @@ function dayBig(nm){
     setT(rem,"—");setT(rl,D.ha?"доп. день · уход не отмечен":"доп. день · отметьте приход");setT(tot,"—");return}
   if(D.b!=null){
     var df=D.w-D.norm;setT(rem,(df<0?"−":"+")+hmm(Math.abs(df)));ms.style.display="none";
-    setT(rl,df>5?"итог дня: переработка":df<-5?"итог дня: недоработка":"итог дня: в срок");setT(tot,hm(D.w));return;
+    setT(rl,D.b-D.st<MINP?"итог дня: меньше 4,5 ч — не отработан":df>5?"итог дня: переработка":df<-5?"итог дня: недоработка":"итог дня: в срок");setT(tot,hm(D.w));return;
   }
   if(!D.isToday||nm<=D.st){ms.style.display="none";if(D.past){setT(rem,"—");setT(rl,D.ha?"уход не отмечен":"день не отмечен");setT(tot,"—")}else{setT(rem,hmm(D.tg-D.st));setT(rl,"длина рабочего дня");setT(tot,"0:00")}return}
   var left=D.tg-nm,over=left<=0,w=Math.max(0,nm-D.st-BRK);
@@ -322,21 +322,23 @@ var SDR={q:-2,o:null};
 function setDayRing(df,over){var q=df==null?-1:Math.round(df*251),o=!!over;if(q===SDR.q&&o===SDR.o)return;SDR.q=q;SDR.o=o;var r=$("ring2");r.style.strokeDashoffset=C2*(1-(df||0));r.style.opacity=(df==null||q<4)?0:"";r.classList.toggle("over",o)}
 var RQ=-1;
 function setWeekRing(f){var q=Math.round(f*327);if(q===RQ)return;RQ=q;$("ring").style.strokeDashoffset=C*(1-f)}
-function nowMin(){var n=new Date();return n.getHours()*60+n.getMinutes()+n.getSeconds()/60}
+function nowMin(){var n=new Date();return n.getHours()*60+n.getMinutes()+n.getSeconds()/60+n.getMilliseconds()/60000}
 var todayIdx=(now0.getDay()+6)%7,X={},$=function(id){return X[id]||(X[id]=document.getElementById(id))};
 function stt(i){var a=mins(S.d[i].a);return a!=null?a:START}
 // ---- телеметрия (для отладки; потом удалить целиком вместе со служебным экраном) ----
-var TEL={ev:[],sec:[],ctx:"idle",ctxT:0},BENCH={cur:null,res:[],run:false};
+var TEL={ev:[],sec:[],ctx:"idle",ctxT:0,hz:60},BENCH={cur:null,res:[],run:false};
 try{var tj=JSON.parse(localStorage.getItem("hours:tel")||"null");if(tj){TEL.ev=tj.ev||[];TEL.sec=tj.sec||[]}}catch(e){}
+function FB(){return 1000/TEL.hz}   // длительность кадра: 16,7 мс на 60 Гц, 8,3 мс на 120 Гц
 function act(n){TEL.ctx=n;TEL.ctxT=performance.now()}
 function ctxNow(){return performance.now()-TEL.ctxT<600?TEL.ctx:"idle"}
 function tlog(kind,ms,x){if(ms<6)return;TEL.ev.push({t:Date.now(),k:kind,ms:Math.round(ms*10)/10,c:ctxNow(),x:x||("live:"+(LS?1:0)+" sv:"+(document.getElementById("sv").classList.contains("open")?1:0)+" age:"+Math.round(performance.now()/1000)+"с")});if(TEL.ev.length>300)TEL.ev.splice(0,TEL.ev.length-300)}
 (function(){
   var last=0,cnt=0,mx=0,jk=0,sl=0,s0=0;
   function f(ts){
-    if(last){var d=ts-last;if(BENCH.cur)BENCH.cur.push(d);cnt++;if(d>mx)mx=d;if(d>20)jk++;if(d>33)sl++;if(d>25&&d<2000)tlog("frame",d)}
+    if(last){var d=ts-last;if(BENCH.cur)BENCH.cur.push(d);cnt++;if(d>mx)mx=d;if(d>FB()*1.5)jk++;if(d>FB()*2.5)sl++;if(d>25&&d<2000)tlog("frame",d)}
     last=ts;if(!s0)s0=ts;
     if(ts-s0>=1000){
+      if(ts-s0<3000&&cnt*1000/(ts-s0)>=90)TEL.hz=120;
       if(ts-s0<3000)TEL.sec.push({t:Date.now(),f:Math.round(cnt*1000/(ts-s0)),mx:Math.round(mx),j:jk,s:sl,c:ctxNow(),d:(performance.now()-(TEL.dbgT||-9e9)<1500?1:0)});
       if(TEL.sec.length>600)TEL.sec.shift();cnt=0;mx=0;jk=0;sl=0;s0=ts;
     }
@@ -392,7 +394,9 @@ var fd=new Date(mon.getFullYear(),mon.getMonth(),mon.getDate()+4);
 $("wk").textContent=NAMES[todayIdx]+", "+now0.getDate()+" "+["января","февраля","марта","апреля","мая","июня","июля","августа","сентября","октября","ноября","декабря"][now0.getMonth()];
 // ---- банк месяца: переработки/недоработки закрытых дней переносятся в пределах месяца ----
 var BKC={},BKN={};
-function chipC(ch,c){ch.classList.remove("over","under","err","n");if(c)ch.classList.add(c)}
+// классы состояния меняем только при реальном изменении — лишние записи в DOM заставляют iPhone пересчитывать стили
+function setCls(el,base,c){var v=base+(c?" "+c:"");if(el.className!==v)el.className=v}
+function chipC(ch,c){ch._c=c||""}   // итоговый класс подсказки применяется один раз в конце update()
 function bdf(r){return(r.cls==="over"||r.cls==="under"||r.cls==="ok")?r.df:0}
 function monthEnd(d){var x=new Date(d.getFullYear(),d.getMonth(),d.getDate()+1);while(x.getMonth()===d.getMonth()){if(infoDate(x).kind==="work")return false;x.setDate(x.getDate()+1)}return true}
 function bankPrev(mk){   // закрытые дни месяца mk до понедельника текущей недели
@@ -420,81 +424,83 @@ function update(){
       if(k==="work"){if(R[i]&&!R[i].live)sO+=R[i].w;else{sO+=INF[i].norm;kn=false}}
       else if(k==="extra"&&INF[i].counted&&R[i]&&!R[i].live)sO+=R[i].w;
     }
-    var rf=Ws-sO-bp;RIS[ri]={m:mk,rem:rf,fT:stt(ri)+BRK+Math.max(0,rf),known:kn,bank:bp,end:monthEnd(new Date(mon.getFullYear(),mon.getMonth(),mon.getDate()+ri)),wk:ri===Ri};
+    var rf=Ws-sO-bp;RIS[ri]={m:mk,rem:rf,fT:Math.max(stt(ri)+MINP,stt(ri)+BRK+Math.max(0,rf)),known:kn,bank:bp,end:monthEnd(new Date(mon.getFullYear(),mon.getMonth(),mon.getDate()+ri)),wk:ri===Ri};
   }
   for(i=0;i<7;i++)T[i]=RIS[i]?RIS[i].fT:stt(i)+(INF[i].norm||0)+BRK;
   GO=null;
   for(i=0;i<7;i++){
     var e=els[i],f=INF[i],t=e.tot;k=f.kind;r=R[i];
-    e.c.hidden=(k==="rest");if(!ANIM)e.c.classList.toggle("off",i!==SEL);if(k==="rest")continue;
+    if(e.c.hidden!==(k==="rest"))e.c.hidden=(k==="rest");if(!ANIM)e.c.classList.toggle("off",i!==SEL);if(k==="rest")continue;
     var nt=i!==todayIdx,ha=!!S.d[i].a,hb=!!S.d[i].b,ov=i===todayIdx-1&&ha&&!hb&&nm<360&&nm<stt(i),pb=(!nt&&ha&&!hb)||ov;   // ov: ночная смена вчерашнего дня ещё идёт
     if(ov)GO={i:i,k:"b"};else if(!nt&&!GO&&k!=="type"&&k!=="hol"&&(!ha||!hb))GO={i:i,k:ha?"b":"a"};
     e.ma.classList.toggle("emp",!ha);e.mb.classList.toggle("emp",!hb);var fu2=i>todayIdx;e.ma.classList.toggle("gone",fu2&&!ha);e.mb.classList.toggle("gone",(!nt&&!ha&&!hb)||(fu2&&!hb)||(!ha&&!hb&&!nt));e.c.classList.toggle("xd",k==="extra");
     var isV=(k==="type"||k==="hol");
     e.c.classList.toggle("void",isV);e.c.classList.toggle("fri",!!RIS[i]);e.c.classList.toggle("live",!!(r&&r.live));
-    e.tb.textContent=k==="type"?EM[f.tp]:k==="extra"?"➕":"⋯";
-    e.sx.textContent=(k==="hol"?" · праздник":"")+(f.short?" · сокр.":"")+(k==="extra"?" · доп.":"");
+    setT(e.tb,k==="type"?EM[f.tp]:k==="extra"?"➕":"⋯");
+    setT(e.sx,(k==="hol"?" · праздник":"")+(f.short?" · сокр.":"")+(k==="extra"?" · доп.":""));
     if(isV){
-      t.textContent="";t._v=null;
-      e.fk.textContent=k==="hol"?"Праздник":LBL[f.tp];e.ft._v=null;setT(e.ft,k==="hol"?"🎉":EM[f.tp]);
-      e.chip.textContent=k==="hol"?"нерабочий день":"день не требует отметок";chipC(e.chip,"n");continue;
+      setT(t,"");t._v=null;
+      setT(e.fk,k==="hol"?"Праздник":LBL[f.tp]);e.ft._v=null;setT(e.ft,k==="hol"?"🎉":EM[f.tp]);
+      setT(e.chip,k==="hol"?"нерабочий день":"день не требует отметок");chipC(e.chip,"n");continue;
     }
-    e.val.classList.remove("over","under","ok");e.lab.classList.toggle("tg",k==="extra");
-    if(r&&!r.live)setNum(t,r.w,hm,false);else if(r){t._v=null}else{t.textContent="—";t._v=null}
+e.lab.classList.toggle("tg",k==="extra");
+    if(r&&!r.live)setNum(t,r.w,hm,false);else if(r){t._v=null}else{setT(t,"—");t._v=null}
     if(k==="extra"){
-      e.fk.textContent="Доп. день";e.ft._v=null;setT(e.ft,r?hmm(r.w):"—");
-      e.chip.textContent=f.counted?"в счёт нормы":"сверх нормы";chipC(e.chip,f.counted?"":"over");
-      e.lab.textContent=f.counted?"в счёт нормы":"сверх нормы";
-      if(r){setNum(e.val,r.w,function(m){return"+"+hmm(m)});e.val.classList.add("over")}else{e.val._v=null;e.val.textContent="—"}
+      setT(e.fk,"Доп. день");e.ft._v=null;setT(e.ft,r?hmm(r.w):"—");
+      setT(e.chip,f.counted?"в счёт нормы":"сверх нормы");chipC(e.chip,f.counted?"":"over");
+      setT(e.lab,f.counted?"в счёт нормы":"сверх нормы");
+      if(r){setNum(e.val,r.w,function(m){return"+"+hmm(m)});setCls(e.val,"dv val","over")}else{e.val._v=null;setT(e.val,"—");setCls(e.val,"dv val","")}
       continue;
     }
     if(!RIS[i]){
-      e.fk.textContent="Цель ухода";setNum(e.ft,T[i],clockT,true);
+      setT(e.fk,"Цель ухода");setNum(e.ft,T[i],clockT,true);
       var closed=r&&!r.live,dd0=closed?r.w-f.norm:0,bn=bnow(MD[i]);
-      e.chip.textContent=closed?(dd0>5?"переработка +"+hmm(dd0):dd0<-5?"недоработка −"+hmm(-dd0):"ровно в срок")
-        :bn>=5?"с банком можно в "+clockT(Math.max(stt(i)+BRK,T[i]-bn))
+      var lowD=closed&&r.b-stt(i)<MINP;   // день короче минимума: банк его не закрывает
+      setT(e.chip,lowD?"меньше 4,5 ч — день не отработан":closed?(dd0>5?"переработка +"+hmm(dd0):dd0<-5?"недоработка −"+hmm(-dd0):"ровно в срок")
+        :bn>=5?"с банком можно в "+clockT(Math.max(stt(i)+MINP,T[i]-bn))
         :bn<=-5?"долг "+hmm(-bn)+" · уход в "+clockT(T[i]-bn)
-        :r?"идёт рабочий день":f.short?"сокращённый день":"обычный день";
+        :r?"идёт рабочий день":f.short?"сокращённый день":"обычный день");
       chipC(e.chip,closed?(dd0>5?"over":dd0<-5?"under":""):bn<=-5?"under":"");
     }
     if(r&&!r.live){
       var df=r.b-T[i];setNum(e.val,df,sg);
-      e.lab.textContent=df>5?"переработка":df<-5?"недоработка":"ровно в срок";
-      e.val.classList.add(df>5?"over":df<-5?"under":"ok");
+      setT(e.lab,df>5?"переработка":df<-5?"недоработка":"ровно в срок");
+      setCls(e.val,"dv val",df>5?"over":df<-5?"under":"ok");
     }else if(r){
       e.val._v=null;
-      if(nm<T[i]){e.lab.textContent="до ухода осталось";e.val.textContent=hmm(T[i]-nm)}
-      else{e.lab.textContent="переработка идёт";e.val.textContent="+"+hmm(nm-T[i]);e.val.classList.add("over")}
-    }else{e.val._v=null;e.lab.textContent=RIS[i]?(RIS[i].rem>0?"уход в "+clockT(RIS[i].fT):"норма набрана"):"уход с "+clockT(T[i]);e.val.textContent="—"}
+      if(nm<T[i]){setT(e.lab,"до ухода осталось");setT(e.val,hmm(T[i]-nm));setCls(e.val,"dv val","")}
+      else{setT(e.lab,"переработка идёт");setT(e.val,"+"+hmm(nm-T[i]));setCls(e.val,"dv val","over")}
+    }else{e.val._v=null;setT(e.lab,RIS[i]?(RIS[i].rem>0?"уход в "+clockT(RIS[i].fT):"норма набрана"):"уход с "+clockT(T[i]));setT(e.val,"—");setCls(e.val,"dv val","")}
   }
   for(var rk in RIS){
     var ix=+rk,G=RIS[ix],F=els[ix],chip=F.chip,fr=R[ix],us=stt(ix)+INF[ix].norm+BRK,shut=fr&&!fr.live;
-    F.fk.textContent=G.end?"Конец месяца":G.known?"Остаток недели":"Прогноз ухода";
+    setT(F.fk,G.end?"Конец месяца":G.known?"Остаток недели":"Прогноз ухода");
     chipC(chip,"");
-    if(G.rem<=0){F.ft._v=null;F.ft.textContent="можно";chip.textContent="норма набрана — можно домой"}
+    if(G.rem<=0){var mp=stt(ix)+MINP,canGo=ix<todayIdx||(ix===todayIdx&&nm>=mp);F.ft._v=null;setT(F.ft,canGo?"можно":clockT(mp));setT(chip,canGo?"норма набрана — можно домой":"норма набрана — можно с "+clock(mp))}
     else{
       setNum(F.ft,G.fT,clockT,true);
       var dd=us-G.fT;chipC(chip,dd<-5?"under":"");
-      chip.textContent=dd>5?"на "+hmm(dd)+" раньше, чем в "+clock(us):dd<-5?"на "+hmm(-dd)+" позже, чем в "+clock(us):"как обычно";
+      setT(chip,dd>5?"на "+hmm(dd)+" раньше, чем в "+clock(us):dd<-5?"на "+hmm(-dd)+" позже, чем в "+clock(us):"как обычно");
     }
     if(shut){
-      if(G.end){var bm0=bnow(G.m),mt=Math.abs(bm0)<=5?"в норме":sg(bm0);chip.textContent=G.wk?"неделя "+hmm(counted)+" · месяц "+mt:"итог месяца "+mt;chipC(chip,bm0>5?"over":bm0<-5?"under":"")}
-      else{var wd=counted-W;chip.textContent="неделя "+hmm(counted)+" · "+(Math.abs(wd)<=5?"в норме":sg(wd));chipC(chip,wd>5?"over":wd<-5?"under":"")}
+      if(G.end){var bm0=bnow(G.m),mt=Math.abs(bm0)<=5?"в норме":sg(bm0);setT(chip,G.wk?"неделя "+hmm(counted)+" · месяц "+mt:"итог месяца "+mt);chipC(chip,bm0>5?"over":bm0<-5?"under":"")}
+      else{var wd=counted-W;setT(chip,"неделя "+hmm(counted)+" · "+(Math.abs(wd)<=5?"в норме":sg(wd)));chipC(chip,wd>5?"over":wd<-5?"under":"")}
+      if(fr.b-stt(ix)<MINP){setT(chip,"меньше 4,5 ч — день не отработан");chipC(chip,"under")}
     }
   }
   for(i=0;i<7;i++){
     var e2=els[i],f2=INF[i],ok2=f2.kind==="work"||f2.kind==="extra",ra=mins(S.d[i].a),rb=mins(S.d[i].b);
     var bad=ok2&&rb!=null&&endOf(ra,rb)==null,fu=ok2&&i===todayIdx&&ra!=null&&ra>nm+30&&rb==null;
-    if(bad){e2.chip.textContent="уход раньше прихода — проверьте";chipC(e2.chip,"err")}
-    else if(fu){e2.chip.textContent="приход позже текущего времени?";chipC(e2.chip,"err")}
+    if(bad){setT(e2.chip,"уход раньше прихода — проверьте");chipC(e2.chip,"err")}
+    else if(fu){setT(e2.chip,"приход позже текущего времени?");chipC(e2.chip,"err")}
     e2.inp.classList.toggle("need",bad||f2.k===MISS);e2.ai.classList.toggle("need",fu);
   }
+  els.forEach(function(e){setCls(e.chip,"chip",e.chip._c)});
   var remain=Math.max(0,W-counted),frac=W>0?Math.max(0,Math.min(1,counted/W)):0;
   var lcn=live!=null&&(INF[live].kind==="work"||INF[live].counted);
   LS=live==null?null:{i:live,st:stt(live),tg:T[live],base:counted-(lcn?R[live].w:0),baseAll:totalAll-R[live].w,W:W,cnt:lcn,ex:INF[live].kind==="extra",ul:(RIS[live]&&Math.abs(RIS[live].bank)>=5)?"с банком уход в ":"уход в "};lastSec=-1;
   setWeekRing(frac);
   $("sum").classList.toggle("done",remain<=0);$("sum").classList.toggle("ovr",counted-W>5&&W>0);
-  $("rl").textContent=W<=0?"на этой неделе нет рабочих часов":remain<=0?(counted-W>=1?"сверх нормы недели":"норма недели выполнена"):"осталось до "+(W/60)+" ч";
   MODEL={W:W,counted:counted,INF:INF,R:R,T:T,frac:frac,live:live,totalAll:totalAll,remain:remain,RIS:RIS};applySel(nm);
   // баланс месяца и прошлая неделя
   var mT=iso(now0).slice(0,7),bm=bnow(mT),nd=(BKN[mT]||0)+(wkn[mT]||0),b=$("bal"),bkl="Баланс месяца";
@@ -502,9 +508,9 @@ function update(){
     while(dd1.getMonth()===pm0.getMonth()){var rr1=rec(dd1);if(rr1.cls==="over"||rr1.cls==="under"||rr1.cls==="ok"){ps+=rr1.df;pc++}dd1.setDate(dd1.getDate()+1)}
     if(pc){bm=ps;nd=pc;bkl="Итог "+MG[pm0.getMonth()]}}
   setT($("bk"),bkl);
-  var bc=!nd?"":Math.abs(bm)<=5?"ok":bm>0?"over":"under",LEAN=document.body.classList.contains("lean");b.classList.remove("ok","over","under");if(bc)b.classList.add(bc);
-  if(LEAN){b.textContent=!nd?"—":bc==="ok"?"0:00":sg(bm);setT($("pw"),!nd?"нет данных":bc==="ok"?"в норме":bc==="over"?"переработка":"недоработка")}
-  else{b.textContent=!nd?"Нет данных":bc==="ok"?"В норме":(bc==="over"?"Переработка ":"Недоработка ")+hmm(bm);
+  var bc=!nd?"":Math.abs(bm)<=5?"ok":bm>0?"over":"under",LEAN=document.body.classList.contains("lean");setCls(b,"b",bc);
+  if(LEAN){setT(b,!nd?"—":bc==="ok"?"0:00":sg(bm));setT($("pw"),!nd?"нет данных":bc==="ok"?"в норме":bc==="over"?"переработка":"недоработка")}
+  else{setT(b,!nd?"Нет данных":bc==="ok"?"В норме":(bc==="over"?"Переработка ":"Недоработка ")+hmm(bm));
   var pws=0,pwn=0;for(i=1;i<=7;i++){var rp=rec(new Date(mon.getFullYear(),mon.getMonth(),mon.getDate()-i));if(rp.cls==="over"||rp.cls==="under"||rp.cls==="ok"){pws+=rp.df;pwn++}}
   setT($("pw"),pwn?"прошлая неделя "+(Math.abs(pws)<=5?"в норме":sg(pws)):"")}
   var dh="";vis().forEach(function(i){var rr=rec(new Date(mon.getFullYear(),mon.getMonth(),mon.getDate()+i)),em=(rr.cls==="type"||rr.cls==="hol")?rr.em:"";dh+='<button class="dt'+(i===SEL?" on":"")+(i===todayIdx?" td":"")+(em?" em":"")+'" data-c="'+rr.cls+'" data-i="'+i+'"><b>'+DN[i][0].toUpperCase()+DN[i][1]+'</b><i>'+em+'</i></button>'});
@@ -654,7 +660,7 @@ var INIT=0,INITD=5000;
 async function cloudInit(){
   if(DBX||INIT===1)return;INIT=1;
   try{
-    if(!window.claude||!claude.use){setStatus("local","Данные хранятся только на этом телефоне. Раз в месяц сохраняйте копию файлом (служебный экран: тройной тап по дате).");$("sy").hidden=true;INIT=2;try{if(navigator.storage&&navigator.storage.persist)navigator.storage.persist()}catch(e){}setTimeout(bkCheck,0);return}
+    if(!window.claude||!claude.use){setStatus("local","Данные хранятся только на этом телефоне. Раз в неделю сохраняйте копию файлом (служебный экран: тройной тап по дате).");$("sy").hidden=true;INIT=2;try{if(navigator.storage&&navigator.storage.persist)navigator.storage.persist()}catch(e){}setTimeout(bkCheck,0);return}
     var db=await claude.use("db");
     if(!db){setStatus("off","Облако недоступно в этом режиме открытия. Откройте трекер из приложения Claude. Данные пока только на этом устройстве.");INIT=2;return}
     var u=await claude.use("user"),id=u?await u.id():null,P=function(n){return id?"data/users/"+id+"/"+n:"state/"+n};
@@ -714,7 +720,8 @@ function hDetail(k){
 function hInfo(k){
   var r=rec(parseISO(k));
   if(r.inv)return"Уход раньше прихода — проверьте время";
-  return (r.b?"Отработано <b>"+hm(r.w)+"</b> · "+(r.f.kind==="extra"?"доп. день":"итог <b>"+sg(r.df)+"</b>"):"Уход не отмечен")+(r.a?"":" · приход не отмечен — с 8:00");
+  var st0=mins(r.a)!=null?mins(r.a):START,low=r.b&&r.f.kind==="work"&&endOf(st0,mins(r.b))-st0<MINP;
+  return (r.b?"Отработано <b>"+hm(r.w)+"</b> · "+(r.f.kind==="extra"?"доп. день":"итог <b>"+sg(r.df)+"</b>"):"Уход не отмечен")+(low?" · меньше 4,5 ч — день не отработан":"")+(r.a?"":" · приход не отмечен — с 8:00");
 }
 function hRender(keep){
   var v=HS.v,h="",i,sum=0,bal=0,c,r,d,det="";
@@ -931,7 +938,7 @@ try{localStorage.removeItem("hours:theme")}catch(e){}   // тема всегда
 var QUIET=false,lastAct=performance.now(),loopT=0;
 function wake(){lastAct=performance.now();if(!QUIET)return;QUIET=false;document.body.classList.remove("quiet");clearTimeout(loopT);if(!reduced)requestAnimationFrame(loop);telStart()}
 ["pointerdown","keydown","touchstart","wheel"].forEach(function(ev){document.addEventListener(ev,wake,{passive:true,capture:true})});
-document.addEventListener("visibilitychange",function(){if(!document.hidden)wake()});
+document.addEventListener("visibilitychange",function(){if(!document.hidden){wake();bkCheck()}});
 function quietCheck(){if(!QUIET&&!BENCH.run&&performance.now()-lastAct>60000){QUIET=true;document.body.classList.add("quiet")}if(BENCH.run)lastAct=performance.now()}
 // ---- забытый уход и отмена «сейчас» ----
 var MISS=null,TU=null,TT=0;
@@ -1005,7 +1012,7 @@ function importData(o){
       else if(!l||v.t>l.t){if(!l||l.v!==v.v)ch++;TY[k]=v}}
     if(ch){setTYall(TY);schedule("types")}f+=ch;
   }
-  update();return{n:n,f:f};
+  update();setTimeout(bkCheck,0);return{n:n,f:f};
 }
 var BK="";try{BK=localStorage.getItem("hours:bk")||""}catch(e){}
 function bkMark(){BK=new Date().toISOString();try{localStorage.setItem("hours:bk",BK)}catch(e){}bkCheck()}
@@ -1025,11 +1032,12 @@ async function saveFile(){
   try{var u=URL.createObjectURL(new Blob([b.txt],{type:"application/json"})),a=document.createElement("a");a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(u)},4000);bkMark();svMsg("Файл "+name+" скачан: недель "+b.n+".")}
   catch(e){svMsg("Файлом не получилось — используйте копию текстом ниже.")}
 }
-// напоминание раз в месяц — только когда данные живут лишь на телефоне (без облака Claude)
+// напоминание раз в неделю — только когда данные живут лишь на телефоне (без облака Claude)
+if(window.claude&&!STANDALONE)$("moved").hidden=false;   // чат-версия после переезда в PWA
 function bkCheck(){
   var el=$("bkr");if(!el)return;if(SY.st!=="local"){el.hidden=true;return}
   var has=false;try{for(var q=0;q<localStorage.length;q++){var k=localStorage.key(q);if(/^hours:\d{4}-/.test(k)&&hasData((JSON.parse(localStorage.getItem(k))||{}).d)){has=true;break}}}catch(e){}
-  el.hidden=!(has&&(!BK||Date.now()-Date.parse(BK)>30*864e5));
+  el.hidden=!(has&&(!BK||Date.now()-Date.parse(BK)>7*864e5));
 }
 function svCopy(text,done){
   function fb(){var ta=document.getElementById("svta");if(!ta){return}ta.style.display="block";ta.value=text;ta.focus();ta.select();try{document.execCommand("copy")}catch(e){}done("Текст выделен в поле: если не скопировался сам, нажмите «Копировать» в меню iOS.")}
@@ -1043,7 +1051,7 @@ function telReport(){
   var agg={};TEL.ev.forEach(function(e){if(e.c==="debug")return;var k=e.k+" / "+e.c,b=agg[k]||(agg[k]={n:0,sum:0,max:0});b.n++;b.sum+=e.ms;if(e.ms>b.max)b.max=e.ms});
   var top=Object.keys(agg).sort(function(a,b){return agg[b].sum-agg[a].sum}).slice(0,10).map(function(k){return k+": "+agg[k].n+"× · сумма "+Math.round(agg[k].sum)+" мс · макс "+Math.round(agg[k].max)+" мс"});
   var L=["ОТЧЁТ ТЕЛЕМЕТРИИ "+new Date().toISOString(),"UA: "+navigator.userAgent,"экран: "+innerWidth+"×"+innerHeight+" @"+(window.devicePixelRatio||1)+"x · reduced-motion: "+reduced+" · версия: "+VER+" · режим: "+(STANDALONE?"PWA":"чат")+" · облако: "+(DBX?"да":"нет"),
-    "секунд записано без экрана отладки: "+s.length+" (с открытым экраном: "+(all.length-s.length)+", не учтены) · средний fps: "+(s.length?Math.round(sum/s.length):0)+" · мин fps: "+(s.length?mn:0)+" · секунд с просадками (>20 мс): "+jn+" · кадров >33 мс: "+sl+" · самый долгий кадр: "+mxf+" мс",
+    "секунд записано без экрана отладки: "+s.length+" (с открытым экраном: "+(all.length-s.length)+", не учтены) · средний fps: "+(s.length?Math.round(sum/s.length):0)+" · мин fps: "+(s.length?mn:0)+" · экран: "+TEL.hz+" Гц · секунд с пропуском кадра: "+jn+" · кадров с пропуском 2+: "+sl+" · самый долгий кадр: "+mxf+" мс",
     "","ТОП ПО СУММЕ ПОТЕРЬ:"].concat(top,BENCH.res.length?["","АВТОТЕСТ (на режим по 5 с тишины и 5 с автосвайпов):",benchText()]:[],["","ПОСЛЕДНИЕ СОБЫТИЯ:"],TEL.ev.slice(-40).map(function(e){return new Date(e.t).toTimeString().slice(0,8)+" "+e.k+" "+e.ms+" мс ["+e.c+"] "+e.x}));
   return L.join("\n");
 }
@@ -1054,16 +1062,16 @@ function telRender(){
   if(cv._w!==w){cv._w=w;cv.width=w*dpr;cv.height=h*dpr}
   var g=cv.getContext("2d");if(!g)return;g.setTransform(dpr,0,0,dpr,0,0);g.clearRect(0,0,w,h);
   var s=TEL.sec.slice(-120),bw=w/120;
-  g.strokeStyle="rgba(128,128,128,.45)";g.beginPath();g.moveTo(0,h/2);g.lineTo(w,h/2);g.stroke();
+  g.strokeStyle="rgba(128,128,128,.45)";g.beginPath();g.moveTo(0,h/2);g.lineTo(w,h/2);g.moveTo(0,1);g.lineTo(w,1);g.stroke();
   s.forEach(function(x,i){var bh=Math.min(h,h*x.f/120);g.fillStyle=x.d?"#94a3b8":x.s>0?"#ef4444":x.j>0?"#f59e0b":"#34d399";g.fillRect(w-(s.length-i)*bw,h-bh,Math.max(1,bw-1),bh)});
   var sum=0,mn=999,jn=0,mxf=0;s.forEach(function(x){sum+=x.f;if(x.f<mn)mn=x.f;if(x.j>0)jn++;if(x.mx>mxf)mxf=x.mx});
   var cur=s.length?s[s.length-1].f:0;
-  document.getElementById("tels").innerHTML="Линия — 60 кадров/с. Зелёный — без просадок, жёлтый — кадры дольше 20 мс, красный — дольше 33 мс, серый — секунды с открытым экраном отладки (не учитываются).<br>Сейчас <b>"+cur+"</b> · среднее <b>"+(s.length?Math.round(sum/s.length):0)+"</b> · минимум <b>"+(s.length?mn:0)+"</b> · секунд с просадками <b>"+jn+"</b> из "+s.length+" · самый долгий кадр <b>"+mxf+" мс</b>";
+  document.getElementById("tels").innerHTML="Экран: "+TEL.hz+" Гц. Линии — 60 и 120 кадров/с. Зелёный — без просадок, жёлтый — пропущен кадр, красный — пропущено 2 и больше, серый — секунды с открытым экраном отладки (не учитываются).<br>Сейчас <b>"+cur+"</b> · среднее <b>"+(s.length?Math.round(sum/s.length):0)+"</b> · минимум <b>"+(s.length?mn:0)+"</b> · секунд с просадками <b>"+jn+"</b> из "+s.length+" · самый долгий кадр <b>"+mxf+" мс</b>";
   document.getElementById("telev").textContent=TEL.ev.slice(-25).reverse().map(function(e){return new Date(e.t).toTimeString().slice(0,8)+"  "+e.k+"  "+e.ms+" мс  ["+e.c+"] "+e.x}).join("\n")||"Просадок пока нет.";
 }
 function bstat(a){
   if(!a.length)return null;var b=a.slice().sort(function(x,y){return x-y}),n=b.length,sum=0,o20=0,o33=0;
-  a.forEach(function(x){sum+=x;if(x>20)o20++;if(x>33.5)o33++});
+  a.forEach(function(x){sum+=x;if(x>FB()*1.5)o20++;if(x>FB()*2.5)o33++});
   return{n:n,fps:Math.round(1000/(sum/n)),p50:Math.round(b[Math.floor(n*.5)]*10)/10,p95:Math.round(b[Math.floor(n*.95)]*10)/10,p99:Math.round(b[Math.floor(n*.99)]*10)/10,mx:Math.round(b[n-1]),o20:Math.round(o20*100/n),o33:Math.round(o33*100/n)};
 }
 function bapply(i){
@@ -1101,7 +1109,7 @@ async function benchRun(dur){
   note.hidden=true;BENCH.run=false;setStatus(SY.st,SY.tx);if(DBX)DBX.week.get().then(applyWeek).catch(function(){});svOpen();svTab("t");
 }
 function benchText(){
-  function f(x){return x?x.fps+" fps · p50 "+x.p50+" p95 "+x.p95+" p99 "+x.p99+" макс "+x.mx+" мс · >20 мс "+x.o20+"% · >33 мс "+x.o33+"% · кадров "+x.n:"нет данных"}
+  function f(x){return x?x.fps+" fps · p50 "+x.p50+" p95 "+x.p95+" p99 "+x.p99+" макс "+x.mx+" мс · пропуск кадра "+x.o20+"% · пропуск 2+ кадров "+x.o33+"% · кадров "+x.n:"нет данных"}
   return BENCH.res.map(function(r){return r.name+"\n   тишина: "+f(r.idle)+"\n   свайпы: "+f(r.sw)}).join("\n");
 }
 function benchShow(){var el=document.getElementById("telb");if(el)el.textContent=benchText()||"Автотест не запускался."}
@@ -1175,7 +1183,8 @@ if(reduced)setInterval(tick,1000);else requestAnimationFrame(loop);
     document.addEventListener("visibilitychange",function(){if(!document.hidden)chk()});
     setInterval(chk,6*3600000);
   }).catch(function(){});
-  var rl=false;navigator.serviceWorker.addEventListener("controllerchange",function(){if(rl)return;rl=true;location.reload()});
+  var rl=false,had=!!navigator.serviceWorker.controller;   // при самой первой установке не перезагружаемся
+  navigator.serviceWorker.addEventListener("controllerchange",function(){if(!had){had=true;return}if(rl)return;rl=true;location.reload()});   // первая смена — это установка, дальше — обновления
 })();
 </script>
 </body>

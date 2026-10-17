@@ -26,6 +26,7 @@ body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.4 -apple-system,
 main{max-width:480px;margin:0 auto;padding:16px}
 h1{font-size:15px;font-weight:600;color:var(--ink);margin:4px 0 12px;display:flex;justify-content:space-between;align-items:center}
 .sy{font:inherit;font-size:13px;background:none;border:0;color:var(--mute);padding:2px 0 2px 8px;cursor:pointer}.sy[data-st="off"]{color:var(--over)}
+.ev{margin-left:auto;font-size:13px;font-weight:500;color:var(--mute);white-space:nowrap}
 .sytx{font-size:13px;color:var(--mute);margin:-6px 0 10px}
 @keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
 @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(94,234,212,.55)}100%{box-shadow:0 0 0 12px rgba(94,234,212,0)}}
@@ -94,7 +95,8 @@ input[type=time]:focus{outline:none;border-color:var(--ok);box-shadow:0 0 0 3px 
 .fri{padding:18px}
 .fbig{margin:0 0 12px;position:relative}
 .fbig .k{font-size:14px;opacity:.75}
-.fbig .t{font-size:36px;font-weight:700;letter-spacing:-.03em;line-height:1.05}
+.fbig .t{display:inline-block;font-size:36px;font-weight:700;letter-spacing:-.03em;line-height:1.05}
+.sun{display:inline-block;margin-left:8px;font-size:19px;line-height:1;vertical-align:.55em;color:var(--k-mute);transition:opacity .3s}
 .chip{display:inline-block;margin-top:8px;padding:4px 12px;border-radius:99px;font-size:13px;background:var(--k-acc-bg);color:var(--k-acc);transition:background .3s,color .3s}
 .chip.over{background:var(--k-over-bg);color:var(--k-over)}.chip.under{background:var(--k-under-bg);color:var(--k-under)}.chip.err{background:var(--k-err-bg);color:var(--k-err)}.chip.n{background:var(--k-glass);color:var(--k-mute)}
 .day[hidden]{display:none}
@@ -195,10 +197,11 @@ input[type=time]:focus{outline:none;border-color:var(--ok);box-shadow:0 0 0 3px 
 </head>
 <body class="lean">
 <main>
-<h1><span id="wk"></span><button id="sy" class="sy">☁︎ …</button></h1>
+<h1><span id="wk"></span><span class="ev" id="ev"></span><button id="sy" class="sy">☁︎ …</button></h1>
 <div class="sytx" id="sytx" hidden></div>
 <button class="miss" id="miss" hidden></button>
 <a class="miss bkr" id="moved" hidden href="https://heinrichstrochibaldo.github.io/rabuch/" target="_blank" rel="noopener" style="text-decoration:none">Трекер переехал в «РабУч» на экране «Домой». Здесь — только запасная копия, отметки сюда не вносите ›</a>
+<button class="miss bkr" id="empty" hidden>Данных пока нет · Восстановить из копии ›</button>
 <button class="miss bkr" id="bkr" hidden>Давно не было копии данных · Сохранить ›</button>
 <section class="sum rise" id="sum">
   <div class="ring">
@@ -237,7 +240,7 @@ input[type=time]:focus{outline:none;border-color:var(--ok);box-shadow:0 0 0 3px 
   <div id="svb"></div>
 </div></div>
 <script>
-var VER="1.0.3",STANDALONE=!!(window.navigator.standalone||(window.matchMedia&&matchMedia("(display-mode: standalone)").matches));
+var VER="1.1",STANDALONE=!!(window.navigator.standalone||(window.matchMedia&&matchMedia("(display-mode: standalone)").matches));
 var NAMES=["Понедельник","Вторник","Среда","Четверг","Пятница","Суббота","Воскресенье"],START=480,END=990,BRK=30,MINP=270,N=480,C=326.73;   // MINP: минимум присутствия в рабочий день — 4,5 ч от прихода (обед вычитается как обычно)
 var reduced=window.matchMedia&&matchMedia("(prefers-reduced-motion:reduce)").matches;
 var now0=new Date();
@@ -261,7 +264,7 @@ var VW={};
 function markDirty(mk){if(!DIRTY[mk]){DIRTY[mk]=1;saveDirty()}}
 function touchWk(mk){VW[mk]=(VW[mk]||0)+1;markDirty(mk)}
 function cleanDirty(mk){if(DIRTY[mk]){delete DIRTY[mk];saveDirty()}}
-function save(){DV++;try{localStorage.setItem(KEY,JSON.stringify({d:S.d,t:S.t}))}catch(e){}markDirty(iso(mon));schedule("week")}
+function save(){DV++;if($("empty")&&!$("empty").hidden)setTimeout(bkCheck,0);try{localStorage.setItem(KEY,JSON.stringify({d:S.d,t:S.t}))}catch(e){}markDirty(iso(mon));schedule("week")}
 function hasData(d){return Array.isArray(d)&&d.some(function(x){return x&&(x.a||x.b)})}
 var HOL={},SHORT={},WSAT={},EM={vac:"🌴",sick:"🤒",off:"💤"},LBL={vac:"Отпуск",sick:"Больничный",off:"Отгул"};
 // Производственный календарь РФ: 2026 и 2027 утверждены (2027 — постановление № 1187 от 17.09.2026); 2028 — предварительно, по ТК без переносов января; обновить осенью 2027
@@ -333,14 +336,19 @@ function act(n){TEL.ctx=n;TEL.ctxT=performance.now()}
 function ctxNow(){return performance.now()-TEL.ctxT<600?TEL.ctx:"idle"}
 function tlog(kind,ms,x){if(ms<6)return;TEL.ev.push({t:Date.now(),k:kind,ms:Math.round(ms*10)/10,c:ctxNow(),x:x||("live:"+(LS?1:0)+" sv:"+(document.getElementById("sv").classList.contains("open")?1:0)+" age:"+Math.round(performance.now()/1000)+"с")});if(TEL.ev.length>300)TEL.ev.splice(0,TEL.ev.length-300)}
 (function(){
-  var last=0,cnt=0,mx=0,jk=0,sl=0,s0=0;
+  var last=0,cnt=0,mx=0,jk=0,sl=0,s0=0,pd=0,ad=0;
+  // честный учёт: паузы (свернули, шторка, Пункт управления) и ровная экономия частоты в покое не считаются просадками
   function f(ts){
-    if(last){var d=ts-last;if(BENCH.cur)BENCH.cur.push(d);cnt++;if(d>mx)mx=d;if(d>FB()*1.5)jk++;if(d>FB()*2.5)sl++;if(d>25&&d<2000)tlog("frame",d)}
+    if(last){var d=ts-last;
+      if(d>500||document.hidden){s0=ts;cnt=0;mx=0;jk=0;sl=0;ad=0;pd=0}
+      else{if(BENCH.cur)BENCH.cur.push(d);cnt++;
+        var eco=!BENCH.run&&ctxNow()==="idle"&&d>20&&d<45&&Math.abs(d-pd)<4;pd=d;
+        if(eco)ad++;else{if(d>mx)mx=d;if(d>FB()*1.5)jk++;if(d>FB()*2.5)sl++;if(d>25)tlog("frame",d)}}}
     last=ts;if(!s0)s0=ts;
     if(ts-s0>=1000){
       if(ts-s0<3000&&cnt*1000/(ts-s0)>=90)TEL.hz=120;
-      if(ts-s0<3000)TEL.sec.push({t:Date.now(),f:Math.round(cnt*1000/(ts-s0)),mx:Math.round(mx),j:jk,s:sl,c:ctxNow(),d:(performance.now()-(TEL.dbgT||-9e9)<1500?1:0)});
-      if(TEL.sec.length>600)TEL.sec.shift();cnt=0;mx=0;jk=0;sl=0;s0=ts;
+      if(ts-s0<3000)TEL.sec.push({t:Date.now(),f:Math.round(cnt*1000/(ts-s0)),mx:Math.round(mx),j:jk,s:sl,c:ctxNow(),d:(performance.now()-(TEL.dbgT||-9e9)<1500?1:0),a:ad*2>cnt?1:0});
+      if(TEL.sec.length>600)TEL.sec.shift();cnt=0;mx=0;jk=0;sl=0;ad=0;s0=ts;
     }
     if(QUIET){run=false;return}
     requestAnimationFrame(f);
@@ -371,7 +379,7 @@ for(var i=0;i<7;i++){(function(i){
   var c=document.createElement("div");c.className="day off"+(i==todayIdx?" today":"");
   var date=dt.getDate()+'.'+String(dt.getMonth()+1).padStart(2,"0");
   c.innerHTML='<div class="hd"><span><span class="n">'+NAMES[i]+'</span><span class="d">'+date+'<span class="sx"></span></span></span><span class="hr"><button class="tb">⋯</button><i class="dot"></i><span class="tot">—</span></span></div>'+
-  '<div class="fbig"><div class="k">Прогноз ухода</div><div class="t">16:30</div><span class="chip">как обычно</span>'+
+  '<div class="fbig"><div class="k">Прогноз ухода</div><div class="t">16:30</div><span class="sun"></span><br><span class="chip">как обычно</span>'+
   '<div class="marks"><label class="mk ma"><span>пришёл</span><i class="pk" title="вписать время">✎</i><input type="time" class="ai" required></label>'+
   '<label class="mk mb"><span>ушёл</span><i class="pk" title="вписать время">✎</i><input type="time" class="bi" required></label></div></div>'+
   '<div class="dl"><div class="k lab">уход с 16:30</div><div class="dv val">—</div></div>';
@@ -383,7 +391,7 @@ for(var i=0;i<7;i++){(function(i){
   lab.addEventListener("click",function(){var f=INFO[i];if(f&&f.kind==="extra"){setTy(f.k,f.counted?"x":"xn");update()}});
   c.querySelector(".tb").addEventListener("click",function(){openSheet(INFO[i].k)});
   c.querySelector(".chip").addEventListener("click",function(){var f=INFO[i];if(f&&f.kind==="extra"){setTy(f.k,f.counted?"x":"xn");update()}});
-  els.push({c:c,inp:inp,ai:ai,tb:c.querySelector(".tb"),sx:c.querySelector(".sx"),tot:c.querySelector(".tot"),lab:lab,val:c.querySelector(".val"),fk:c.querySelector(".fbig .k"),ft:c.querySelector(".fbig .t"),chip:c.querySelector(".chip"),ma:c.querySelector(".ma"),mb:c.querySelector(".mb"),fl:fl});
+  els.push({c:c,inp:inp,ai:ai,tb:c.querySelector(".tb"),sx:c.querySelector(".sx"),tot:c.querySelector(".tot"),lab:lab,val:c.querySelector(".val"),fk:c.querySelector(".fbig .k"),ft:c.querySelector(".fbig .t"),sun:c.querySelector(".sun"),chip:c.querySelector(".chip"),ma:c.querySelector(".ma"),mb:c.querySelector(".mb"),fl:fl});
 })(i)}
 function clearWeek(){
   var snap=JSON.parse(JSON.stringify(S.d)),tn=Date.now();for(var q=0;q<7;q++){S.d[q]={};S.t[q]={a:tn,b:tn}}
@@ -397,6 +405,25 @@ var BKC={},BKN={};
 // классы состояния меняем только при реальном изменении — лишние записи в DOM заставляют iPhone пересчитывать стили
 function setCls(el,base,c){var v=base+(c?" "+c:"");if(el.className!==v)el.className=v}
 function chipC(ch,c){ch._c=c||""}   // итоговый класс подсказки применяется один раз в конце update()
+// закат для Москвы (формула NOAA, без интернета): минуты от полуночи по московскому времени
+var SSC={};
+function sunset(d){var k=iso(d);if(SSC[k]!=null)return SSC[k];
+  var n=Math.round((new Date(d.getFullYear(),d.getMonth(),d.getDate())-new Date(d.getFullYear(),0,0))/864e5),g=2*Math.PI/365*(n-1),rad=Math.PI/180,lat=55.7558*rad,lon=37.6173;
+  var eq=229.18*(.000075+.001868*Math.cos(g)-.032077*Math.sin(g)-.014615*Math.cos(2*g)-.040849*Math.sin(2*g));
+  var de=.006918-.399912*Math.cos(g)+.070257*Math.sin(g)-.006758*Math.cos(2*g)+.000907*Math.sin(2*g)-.002697*Math.cos(3*g)+.00148*Math.sin(3*g);
+  var c=Math.cos(90.833*rad)/(Math.cos(lat)*Math.cos(de))-Math.tan(lat)*Math.tan(de),ha=Math.acos(Math.max(-1,Math.min(1,c)))/rad;
+  return SSC[k]=720-4*(lon-ha)-eq+180}
+function sunMark(i,t){var e=els[i];if(t==null||i<todayIdx){setT(e.sun,"");return}setT(e.sun,t<sunset(new Date(mon.getFullYear(),mon.getMonth(),mon.getDate()+i))?"☀︎":"☾")}
+// строка у даты: одно ближайшее событие календаря
+function dn(n){var m=n%10,h=n%100;return n+" "+(m===1&&h!==11?"день":m>=2&&m<=4&&(h<12||h>14)?"дня":"дней")}
+function evLine(){
+  var t0=new Date(now0.getFullYear(),now0.getMonth(),now0.getDate()),D=function(n){return new Date(t0.getFullYear(),t0.getMonth(),t0.getDate()+n)};
+  var tm=D(1),tk=iso(tm);if(SHORT[tk]&&!TYPES[tk])return"завтра на час короче";
+  for(var n=1;n<=3;n++)if(WSAT[iso(D(n))])return n===1?"завтра рабочая суббота":"сб рабочая";
+  for(n=1;n<=14;n++)if(HOL[iso(D(n))])return n===1?"🎉 завтра":"🎉 через "+dn(n);
+  if(TYPES[iso(t0)]!=="vac")for(n=1;n<=30;n++)if(TYPES[iso(D(n))]==="vac")return n===1?"🌴 завтра":"🌴 через "+dn(n);
+  return"";
+}
 function bdf(r){return(r.cls==="over"||r.cls==="under"||r.cls==="ok")?r.df:0}
 function monthEnd(d){var x=new Date(d.getFullYear(),d.getMonth(),d.getDate()+1);while(x.getMonth()===d.getMonth()){if(infoDate(x).kind==="work")return false;x.setDate(x.getDate()+1)}return true}
 function bankPrev(mk){   // закрытые дни месяца mk до понедельника текущей недели
@@ -440,20 +467,20 @@ function update(){
     setT(e.sx,(k==="hol"?" · праздник":"")+(f.short?" · сокр.":"")+(k==="extra"?" · доп.":""));
     if(isV){
       setT(t,"");t._v=null;
-      setT(e.fk,k==="hol"?"Праздник":LBL[f.tp]);e.ft._v=null;setT(e.ft,k==="hol"?"🎉":EM[f.tp]);
+      sunMark(i,null);setT(e.fk,k==="hol"?"Праздник":LBL[f.tp]);e.ft._v=null;setT(e.ft,k==="hol"?"🎉":EM[f.tp]);
       setT(e.chip,k==="hol"?"нерабочий день":"день не требует отметок");chipC(e.chip,"n");continue;
     }
 e.lab.classList.toggle("tg",k==="extra");
     if(r&&!r.live)setNum(t,r.w,hm,false);else if(r){t._v=null}else{setT(t,"—");t._v=null}
     if(k==="extra"){
-      setT(e.fk,"Доп. день");e.ft._v=null;setT(e.ft,r?hmm(r.w):"—");
+      sunMark(i,null);setT(e.fk,"Доп. день");e.ft._v=null;setT(e.ft,r?hmm(r.w):"—");
       setT(e.chip,f.counted?"в счёт нормы":"сверх нормы");chipC(e.chip,f.counted?"":"over");
       setT(e.lab,f.counted?"в счёт нормы":"сверх нормы");
       if(r){setNum(e.val,r.w,function(m){return"+"+hmm(m)});setCls(e.val,"dv val","over")}else{e.val._v=null;setT(e.val,"—");setCls(e.val,"dv val","")}
       continue;
     }
     if(!RIS[i]){
-      setT(e.fk,"Цель ухода");setNum(e.ft,T[i],clockT,true);
+      setT(e.fk,"Цель ухода");setNum(e.ft,T[i],clockT,true);sunMark(i,T[i]);
       var closed=r&&!r.live,dd0=closed?r.w-f.norm:0,bn=bnow(MD[i]);
       var lowD=closed&&r.b-stt(i)<MINP;   // день короче минимума: банк его не закрывает
       setT(e.chip,lowD?"меньше 4,5 ч — день не отработан":closed?(dd0>5?"переработка +"+hmm(dd0):dd0<-5?"недоработка −"+hmm(-dd0):"ровно в срок")
@@ -476,9 +503,9 @@ e.lab.classList.toggle("tg",k==="extra");
     var ix=+rk,G=RIS[ix],F=els[ix],chip=F.chip,fr=R[ix],us=stt(ix)+INF[ix].norm+BRK,shut=fr&&!fr.live;
     setT(F.fk,G.end?"Конец месяца":G.known?"Остаток недели":"Прогноз ухода");
     chipC(chip,"");
-    if(G.rem<=0){var mp=stt(ix)+MINP,canGo=ix<todayIdx||(ix===todayIdx&&nm>=mp);F.ft._v=null;setT(F.ft,canGo?"можно":clockT(mp));setT(chip,canGo?"норма набрана — можно домой":"норма набрана — можно с "+clock(mp))}
+    if(G.rem<=0){var mp=stt(ix)+MINP,canGo=ix<todayIdx||(ix===todayIdx&&nm>=mp);F.ft._v=null;setT(F.ft,canGo?"можно":clockT(mp));sunMark(ix,canGo?null:mp);setT(chip,canGo?"норма набрана — можно домой":"норма набрана — можно с "+clock(mp))}
     else{
-      setNum(F.ft,G.fT,clockT,true);
+      setNum(F.ft,G.fT,clockT,true);sunMark(ix,G.fT);
       var dd=us-G.fT;chipC(chip,dd<-5?"under":"");
       setT(chip,dd>5?"на "+hmm(dd)+" раньше, чем в "+clock(us):dd<-5?"на "+hmm(-dd)+" позже, чем в "+clock(us):"как обычно");
     }
@@ -517,7 +544,7 @@ e.lab.classList.toggle("tg",k==="extra");
   if($("dots")._h!==dh){$("dots")._h=dh;$("dots").innerHTML=dh}
   var fsig=INF.map(function(x){return x.kind}).join();if(fsig!==FITSIG){FITSIG=fsig;fitCards()}
   else{var cs=els[SEL]&&els[SEL].c;if(cs&&FIT&&!ANIM&&cs.scrollHeight>FIT+1)fitCards()}
-  goBtn();tick();
+  goBtn();setT($("ev"),evLine());tick();
 }
 function applySel(nm){
   var M=MODEL;if(!M)return;
@@ -902,6 +929,7 @@ function tick(){
     else setT($("ms"),ms3(remain>0?remain:Math.max(0,total-LS.W)));
   }
   var sec=Math.floor(nm*60);if(sec===lastSec)return;lastSec=sec;   // раз в секунду — всё остальное
+  if(over&&!LS.ex&&LS.i===todayIdx){var ck=iso(now0)+"@"+Math.round(LS.tg);if(CHD!==ck){CHD=ck;try{localStorage.setItem("hours:chime",ck)}catch(e){}if(nm-LS.tg<1.5&&!document.hidden)sndChime()}}   // звон в момент ухода, один раз
   if(n.getDate()!==now0.getDate()&&dayCheck())return;               // наступили новые сутки — перезапуск, без «вчерашних» цифр
   var e=els[LS.i];
   if(EMV==="day"){if(DAYI&&DAYI.isToday)DAYI.w=w;dayBig(nm)}
@@ -916,6 +944,14 @@ function tick(){
   if(EMV!=="day")setT($("rl"),remain<=0?(total-LS.W>=1?"сверх нормы недели":"норма недели выполнена"):"осталось до "+(LS.W/60)+" ч");
   showPct(fr2,df2);
 }
+// ---- звуки: генерируются кодом, без файлов; уважают беззвучный режим iPhone ----
+var SND=true,AC=null,CHD="";try{SND=localStorage.getItem("hours:snd")!=="0";CHD=localStorage.getItem("hours:chime")||""}catch(e){}
+try{if(navigator.audioSession)navigator.audioSession.type="ambient"}catch(e){}
+function ac(){try{if(!AC){var C=window.AudioContext||window.webkitAudioContext;if(!C)return null;AC=new C()}if(AC.state!=="running")AC.resume();return AC}catch(e){return null}}
+function tone(a,t,f1,f2,dur,vol,type){var o=a.createOscillator(),g=a.createGain();o.type=type||"sine";o.frequency.setValueAtTime(f1,t);if(f2)o.frequency.exponentialRampToValueAtTime(f2,t+dur*.6);g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(vol,t+.006);g.gain.exponentialRampToValueAtTime(.0001,t+dur);o.connect(g);g.connect(a.destination);o.start(t);o.stop(t+dur+.02)}
+function sndClick(){if(!SND)return;var a=ac();if(!a)return;var t=a.currentTime+.01;tone(a,t,2400,900,.05,.22,"triangle");tone(a,t+.07,1900,700,.06,.16,"triangle")}   // «щелчок замка»
+function sndChime(){if(!SND)return;var a=ac();if(!a)return;var t=a.currentTime+.01;tone(a,t,880,0,1.3,.16);tone(a,t+.18,1318.5,0,1.5,.13)}   // мягкий звон «пора»
+document.addEventListener("pointerdown",function(){if(SND)ac()},{passive:true,capture:true});   // iOS разрешает звук только после касания
 // ---- большая кнопка: пришёл → ушёл; с другого дня — назад к сегодня ----
 var GO=null,GOS="";
 function goBtn(){
@@ -929,7 +965,7 @@ function goBtn(){
 $("go").addEventListener("click",function(){
   if(GOS==="back"){goToday();return}
   var g=GO;if(!g)return;var i=g.i,k=g.k,n=new Date(),v=p2(n.getHours())+":"+p2(n.getMinutes()),prev=S.d[i][k]||"";
-  els[i].fl[k].value=v;setF(i,k,v);haptic();update();
+  els[i].fl[k].value=v;setF(i,k,v);haptic();sndClick();update();
   toast((k==="a"?"Приход ":"Уход ")+v,function(){els[i].fl[k].value=prev;setF(i,k,prev);update()});
 });
 var _sd=selectDay;selectDay=function(a,b,c){_sd(a,b,c);goBtn()};
@@ -951,6 +987,7 @@ function checkMiss(){
   if(b.textContent!==t)b.textContent=t;b.hidden=false;
 }
 $("bkr").addEventListener("click",function(){svOpen();svTab("d");saveFile()});
+$("empty").addEventListener("click",function(){svOpen();svTab("d");var fi=document.getElementById("svfile");if(fi){fi.value="";fi.click()}});
 $("miss").addEventListener("click",function(){
   if(!MISS)return;var d=parseISO(MISS);
   if(iso(mondayOf(d))===iso(mon)){var i=(d.getDay()+6)%7;if(i!==SEL)selectDay(i,i>SEL?1:-1,0)}
@@ -1034,10 +1071,16 @@ async function saveFile(){
 }
 // напоминание раз в неделю — только когда данные живут лишь на телефоне (без облака Claude)
 if(window.claude&&!STANDALONE)$("moved").hidden=false;   // чат-версия после переезда в PWA
+// напоминание: раз в неделю и только если после прошлой копии появились новые отметки (в отпуске — тишина)
 function bkCheck(){
-  var el=$("bkr");if(!el)return;if(SY.st!=="local"){el.hidden=true;return}
-  var has=false;try{for(var q=0;q<localStorage.length;q++){var k=localStorage.key(q);if(/^hours:\d{4}-/.test(k)&&hasData((JSON.parse(localStorage.getItem(k))||{}).d)){has=true;break}}}catch(e){}
-  el.hidden=!(has&&(!BK||Date.now()-Date.parse(BK)>7*864e5));
+  var el=$("bkr"),em=$("empty");if(!el)return;if(SY.st!=="local"){el.hidden=true;em.hidden=true;return}
+  var has=false,lc=0;
+  try{for(var q=0;q<localStorage.length;q++){var k=localStorage.key(q);if(!/^hours:\d{4}-/.test(k))continue;var o=JSON.parse(localStorage.getItem(k))||{};
+    if(hasData(o.d))has=true;(o.t||[]).forEach(function(x){if(x){if(x.a>lc)lc=x.a;if(x.b>lc)lc=x.b}})}}catch(e){}
+  for(var tk in TY)if(TY[tk].t>lc)lc=TY[tk].t;
+  var bt=BK?Date.parse(BK):0;
+  el.hidden=!(has&&(!BK||(Date.now()-bt>7*864e5&&lc>bt)));
+  em.hidden=has||Object.keys(TYPES).length>0;
 }
 function svCopy(text,done){
   function fb(){var ta=document.getElementById("svta");if(!ta){return}ta.style.display="block";ta.value=text;ta.focus();ta.select();try{document.execCommand("copy")}catch(e){}done("Текст выделен в поле: если не скопировался сам, нажмите «Копировать» в меню iOS.")}
@@ -1046,12 +1089,12 @@ function svCopy(text,done){
 }
 function svMsg(t){var m=document.getElementById("svmsg");if(m)m.textContent=t}
 function telReport(){
-  var all=TEL.sec,s=all.filter(function(x){return!x.d}),sum=0,mn=999,jn=0,sl=0,mxf=0;
+  var all=TEL.sec,eco=all.filter(function(x){return!x.d&&x.a}).length,s=all.filter(function(x){return!x.d&&!x.a}),sum=0,mn=999,jn=0,sl=0,mxf=0;
   s.forEach(function(x){sum+=x.f;if(x.f<mn)mn=x.f;if(x.j>0)jn++;sl+=x.s;if(x.mx>mxf)mxf=x.mx});
   var agg={};TEL.ev.forEach(function(e){if(e.c==="debug")return;var k=e.k+" / "+e.c,b=agg[k]||(agg[k]={n:0,sum:0,max:0});b.n++;b.sum+=e.ms;if(e.ms>b.max)b.max=e.ms});
   var top=Object.keys(agg).sort(function(a,b){return agg[b].sum-agg[a].sum}).slice(0,10).map(function(k){return k+": "+agg[k].n+"× · сумма "+Math.round(agg[k].sum)+" мс · макс "+Math.round(agg[k].max)+" мс"});
   var L=["ОТЧЁТ ТЕЛЕМЕТРИИ "+new Date().toISOString(),"UA: "+navigator.userAgent,"экран: "+innerWidth+"×"+innerHeight+" @"+(window.devicePixelRatio||1)+"x · reduced-motion: "+reduced+" · версия: "+VER+" · режим: "+(STANDALONE?"PWA":"чат")+" · облако: "+(DBX?"да":"нет"),
-    "секунд записано без экрана отладки: "+s.length+" (с открытым экраном: "+(all.length-s.length)+", не учтены) · средний fps: "+(s.length?Math.round(sum/s.length):0)+" · мин fps: "+(s.length?mn:0)+" · экран: "+TEL.hz+" Гц · секунд с пропуском кадра: "+jn+" · кадров с пропуском 2+: "+sl+" · самый долгий кадр: "+mxf+" мс",
+    "секунд записано: "+s.length+" (не учтены: с открытым экраном "+(all.length-s.length-eco)+", экономия экрана в покое "+eco+") · средний fps: "+(s.length?Math.round(sum/s.length):0)+" · мин fps: "+(s.length?mn:0)+" · экран: "+TEL.hz+" Гц · секунд с пропуском кадра: "+jn+" · кадров с пропуском 2+: "+sl+" · самый долгий кадр: "+mxf+" мс",
     "","ТОП ПО СУММЕ ПОТЕРЬ:"].concat(top,BENCH.res.length?["","АВТОТЕСТ (на режим по 5 с тишины и 5 с автосвайпов):",benchText()]:[],["","ПОСЛЕДНИЕ СОБЫТИЯ:"],TEL.ev.slice(-40).map(function(e){return new Date(e.t).toTimeString().slice(0,8)+" "+e.k+" "+e.ms+" мс ["+e.c+"] "+e.x}));
   return L.join("\n");
 }
@@ -1063,10 +1106,10 @@ function telRender(){
   var g=cv.getContext("2d");if(!g)return;g.setTransform(dpr,0,0,dpr,0,0);g.clearRect(0,0,w,h);
   var s=TEL.sec.slice(-120),bw=w/120;
   g.strokeStyle="rgba(128,128,128,.45)";g.beginPath();g.moveTo(0,h/2);g.lineTo(w,h/2);g.moveTo(0,1);g.lineTo(w,1);g.stroke();
-  s.forEach(function(x,i){var bh=Math.min(h,h*x.f/120);g.fillStyle=x.d?"#94a3b8":x.s>0?"#ef4444":x.j>0?"#f59e0b":"#34d399";g.fillRect(w-(s.length-i)*bw,h-bh,Math.max(1,bw-1),bh)});
+  s.forEach(function(x,i){var bh=Math.min(h,h*x.f/120);g.fillStyle=(x.d||x.a)?"#94a3b8":x.s>0?"#ef4444":x.j>0?"#f59e0b":"#34d399";g.fillRect(w-(s.length-i)*bw,h-bh,Math.max(1,bw-1),bh)});
   var sum=0,mn=999,jn=0,mxf=0;s.forEach(function(x){sum+=x.f;if(x.f<mn)mn=x.f;if(x.j>0)jn++;if(x.mx>mxf)mxf=x.mx});
   var cur=s.length?s[s.length-1].f:0;
-  document.getElementById("tels").innerHTML="Экран: "+TEL.hz+" Гц. Линии — 60 и 120 кадров/с. Зелёный — без просадок, жёлтый — пропущен кадр, красный — пропущено 2 и больше, серый — секунды с открытым экраном отладки (не учитываются).<br>Сейчас <b>"+cur+"</b> · среднее <b>"+(s.length?Math.round(sum/s.length):0)+"</b> · минимум <b>"+(s.length?mn:0)+"</b> · секунд с просадками <b>"+jn+"</b> из "+s.length+" · самый долгий кадр <b>"+mxf+" мс</b>";
+  document.getElementById("tels").innerHTML="Экран: "+TEL.hz+" Гц. Линии — 60 и 120 кадров/с. Зелёный — без просадок, жёлтый — пропущен кадр, красный — пропущено 2 и больше, серый — экономия экрана в покое и секунды с открытым экраном отладки (не учитываются).<br>Сейчас <b>"+cur+"</b> · среднее <b>"+(s.length?Math.round(sum/s.length):0)+"</b> · минимум <b>"+(s.length?mn:0)+"</b> · секунд с просадками <b>"+jn+"</b> из "+s.length+" · самый долгий кадр <b>"+mxf+" мс</b>";
   document.getElementById("telev").textContent=TEL.ev.slice(-25).reverse().map(function(e){return new Date(e.t).toTimeString().slice(0,8)+"  "+e.k+"  "+e.ms+" мс  ["+e.c+"] "+e.x}).join("\n")||"Просадок пока нет.";
 }
 function bstat(a){
@@ -1118,7 +1161,7 @@ function svTab(t){
   [].forEach.call($("svseg").children,function(b){b.classList.toggle("on",b.dataset.v===t)});
   var h="";
   if(t==="d")h='<div class="tel">Копия — файл со всеми отметками и отпусками. Сохраните его в «Файлы», чтобы ничего не потерять и перенести данные на другой телефон.'+(BK?' Последняя копия: <b>'+fmtR(BK.slice(0,10))+' '+BK.slice(0,4)+'</b>.':' Копий ещё не было.')+'</div>'+(window.claude?'<div class="tel">В чате Claude файлом сохранить нельзя — используйте копию текстом.</div><div id="svmsg" class="tel"></div>':'<div class="sv-row"><button class="svb" data-a="fsave">Сохранить копию файлом</button><button class="svb" data-a="fload">Восстановить из файла</button></div><input type="file" id="svfile" accept=".json,application/json,text/plain" hidden><div id="svmsg" class="tel"></div><div class="tel" style="margin-top:14px">Запасной путь — текстом (для переноса из чата Claude):</div>')+'<div class="sv-row"><button class="svb" data-a="exp">Сделать копию</button><button class="svb" data-a="imp">Восстановить из копии</button></div><textarea id="svta" rows="5"></textarea><div class="sv-row"><button class="svb" data-a="copy">Скопировать</button><button class="svb" data-a="apply">Применить</button></div><div class="sv-row" style="margin-top:14px"><button class="svb" data-a="clrw">Очистить неделю</button></div><div class="tel">Очистку можно отменить в течение 10 секунд.<br>Производственный календарь: 2026 и 2027 — утверждённые, 2028 — предварительный (без переносов января), обновить осенью 2027.<br>Версия '+VER+(STANDALONE?' · приложение на экране «Домой»':'')+'.</div>';
-  else h='<canvas id="telc"></canvas><div class="tel" id="tels"></div><div class="sv-row"><button class="svb" data-a="trep">Скопировать отчёт</button><button class="svb" data-a="tclr">Очистить</button><button class="svb" data-a="hap">Проверить отклик</button></div><div class="sv-row"><button class="svb" data-a="bench">Автотест (80 с)</button></div><div class="tev" id="telb"></div><div class="tev" id="telev"></div><textarea id="svta" rows="5" style="display:none"></textarea><div id="svmsg" class="tel"></div>';
+  else h='<canvas id="telc"></canvas><div class="tel" id="tels"></div><div class="sv-row"><button class="svb" data-a="trep">Скопировать отчёт</button><button class="svb" data-a="tclr">Очистить</button><button class="svb" data-a="hap">Проверить отклик</button><button class="svb" data-a="snd">Звуки: '+(SND?"вкл":"выкл")+'</button></div><div class="sv-row"><button class="svb" data-a="bench">Автотест (80 с)</button></div><div class="tev" id="telb"></div><div class="tev" id="telev"></div><textarea id="svta" rows="5" style="display:none"></textarea><div id="svmsg" class="tel"></div>';
   $("svb").innerHTML=h;
   if(t==="t"){telRender();benchShow();SV.timer=setInterval(telRender,1000)}
 }
@@ -1148,6 +1191,7 @@ $("svb").addEventListener("click",async function(e){
   else if(a==="trep"){svCopy(telReport(),svMsg)}
   else if(a==="tclr"){TEL.ev=[];TEL.sec=[];try{localStorage.removeItem("hours:tel")}catch(x){}telRender();svMsg("Очищено.")}
   else if(a==="bench"){benchRun(BENCH.dur)}
+  else if(a==="snd"){SND=!SND;try{localStorage.setItem("hours:snd",SND?"1":"0")}catch(x){}b.textContent="Звуки: "+(SND?"вкл":"выкл");if(SND){sndClick();setTimeout(sndChime,400)}}
   else if(a==="hap"){haptic();setTimeout(haptic,160);setTimeout(haptic,320);svMsg("Три отклика отправлены. Если ничего не почувствовали: нужен iOS 18+, звук и вибрации включены, режим «Без звука» не мешает не всегда.")}
 });
 try{ensureHL()}catch(e){}

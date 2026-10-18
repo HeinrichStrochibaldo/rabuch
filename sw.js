@@ -1,5 +1,5 @@
 // РабУч: кэш для работы офлайн. Версия кэша меняется при каждой сборке — так телефон узнаёт об обновлении.
-var CACHE="rabuch-1.4-82f6ea53";
+var CACHE="rabuch-1.5-6c32ddca";
 var FILES=["./","index.html","manifest.webmanifest","icon-192.png","icon-512.png","apple-touch-icon.png"];
 self.addEventListener("install",function(e){e.waitUntil(caches.open(CACHE).then(function(c){return c.addAll(FILES.map(function(f){return new Request(f,{cache:"reload"})}))}))});
 self.addEventListener("activate",function(e){e.waitUntil(caches.keys().then(function(k){return Promise.all(k.filter(function(x){return x!==CACHE}).map(function(x){return caches.delete(x)}))}).then(function(){return self.clients.claim()}))});

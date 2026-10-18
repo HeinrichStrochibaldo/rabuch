@@ -233,6 +233,19 @@ h1{position:relative;min-height:24px}
 .sum{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}.sum input{-webkit-user-select:auto;user-select:auto}
 .sum .dhl{position:absolute;left:0;top:0;z-index:1;display:none;border-radius:14px;background:var(--k-glass);box-shadow:inset 0 0 0 1px var(--k-glass-b);pointer-events:none;transition:transform .32s cubic-bezier(.2,.8,.2,1),width .32s}
 .sum.hlm .dhl{display:block}.sum.hlm .dt.on{background:none;box-shadow:none}
+
+/* 1.4: заставка, закрытие недели, снег и салют */
+.spl{position:fixed;inset:0;z-index:40;background:var(--bg);pointer-events:none;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px}
+.spl .sr{width:150px;height:150px;will-change:transform}
+.spl .sr svg{width:100%;height:100%;transform:rotate(-90deg);overflow:visible}
+.spl .sr circle{fill:none;stroke-linecap:round}
+.spl .sl{font-size:26px;font-weight:700;letter-spacing:-.01em;color:var(--ink)}
+body.splon .sum.rise{animation:none;opacity:1}
+body.splon .ring svg{visibility:hidden}
+body.splon .prg{stroke-dashoffset:326.73!important;transition:none!important}
+body.splon .prg2{stroke-dashoffset:251.33!important;transition:none!important}
+.toast{max-width:calc(100vw - 24px)}#ttx{min-width:0;overflow:hidden;text-overflow:ellipsis}
+.fx{position:absolute;inset:0;z-index:0;width:100%;height:100%;border-radius:inherit;pointer-events:none}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.rise{opacity:1}}
 </style>
 </head>
@@ -290,7 +303,7 @@ h1{position:relative;min-height:24px}
 function dynType(){var ts=1;try{if(window.CSS&&CSS.supports("font","-apple-system-body")){var e=document.createElement("div");e.style.cssText="font:-apple-system-body;position:absolute;visibility:hidden";document.body.appendChild(e);var f=parseFloat(getComputedStyle(e).fontSize)||17;e.remove();ts=Math.max(.9,Math.min(1.35,f/17))}}catch(x){}
   if(document.documentElement.style.getPropertyValue("--ts")!==String(ts)){document.documentElement.style.setProperty("--ts",ts);return true}return false}
 dynType();
-var VER="1.3",STANDALONE=!!(window.navigator.standalone||(window.matchMedia&&matchMedia("(display-mode: standalone)").matches));
+var VER="1.4",STANDALONE=!!(window.navigator.standalone||(window.matchMedia&&matchMedia("(display-mode: standalone)").matches));
 var NAMES=["Понедельник","Вторник","Среда","Четверг","Пятница","Суббота","Воскресенье"],START=480,END=990,BRK=30,MINP=270,N=480,C=326.73;   // MINP: минимум присутствия в рабочий день — 4,5 ч от прихода (обед вычитается как обычно)
 var reduced=window.matchMedia&&matchMedia("(prefers-reduced-motion:reduce)").matches;
 var now0=new Date();
@@ -600,6 +613,7 @@ e.lab.classList.toggle("tg",k==="extra");
   setWeekRing(frac);
   $("sum").classList.toggle("done",remain<=0);$("sum").classList.toggle("ovr",counted-W>5&&W>0);
   MODEL={W:W,counted:counted,INF:INF,R:R,T:T,frac:frac,live:live,totalAll:totalAll,remain:remain,RIS:RIS};applySel(nm);
+  if(W>0&&remain<=0&&window.wcCheck)wcCheck();
   // баланс месяца и прошлая неделя
   var mT=iso(now0).slice(0,7),bm=bnow(mT),nd=(BKN[mT]||0)+(wkn[mT]||0),b=$("bal"),bkl="Баланс месяца";
   if(!nd){var pm0=new Date(now0.getFullYear(),now0.getMonth()-1,1),dd1=new Date(pm0),ps=0,pc=0;
@@ -1036,7 +1050,7 @@ function tick(){
   }
   var fr2=LS.W>0?Math.max(0,Math.min(1,total/LS.W)):0,df2=LS.ex?null:sl?Math.min(1,Math.max(0,(nm-LS.st)/Math.max(1,LS.tg-LS.st))):LASTD;
   setWeekRing(fr2);if(sl&&!LS.ex)setDayRing(df2,nm>LS.tg);
-  $("sum").classList.toggle("done",remain<=0);$("sum").classList.toggle("ovr",total-LS.W>5);
+  $("sum").classList.toggle("done",remain<=0);$("sum").classList.toggle("ovr",total-LS.W>5);if(remain<=0&&LS.W>0&&window.wcCheck)wcCheck();
   if(EMV!=="day")setT($("rl"),remain<=0?(total-LS.W>=1?"сверх нормы недели":"норма недели выполнена"):"осталось до "+(LS.W/60)+" ч");
   showPct(fr2,df2);atmos(nm);
 }
@@ -1066,7 +1080,7 @@ function goBtn(){
 }
 function goAct(){
   var g=GO;if(!g)return;var i=g.i,k=g.k,n=new Date(),v=p2(n.getHours())+":"+p2(n.getMinutes()),prev=S.d[i][k]||"";
-  var run=function(){els[i].fl[k].value=v;setF(i,k,v);haptic();sndClick();update();if(k==="a")chargeRing();
+  var run=function(){els[i].fl[k].value=v;setF(i,k,v);haptic();sndClick();update();if(k==="a")chargeRing();if(k==="b"&&i===todayIdx&&longRest())setTimeout(fireworks,420);
     toast((k==="a"?"Приход ":"Уход ")+v,function(){els[i].fl[k].value=prev;setF(i,k,prev);update()})};
   if(k==="b"&&!reduced)leaveScene(run);else run();
 }
@@ -1378,14 +1392,115 @@ function ntWiggle(){if(document.hidden||QUIET||reduced)return;if(!NTA.some(funct
 setInterval(ntWiggle,10000);setTimeout(ntWiggle,2600);
 document.addEventListener("visibilitychange",function(){if(document.hidden){if(NPOP)evPopDone(false);ncClose()}else{NTS="";ntRefresh();evPopSchedule(1600);setTimeout(ntWiggle,2600)}});
 window.ntRefresh=ntRefresh;window.ntNow=function(){return{acts:NTA.map(function(x){return x.id}),ev:NTE,pop:!!NPOP,seen:NT.seen,h:NT.h.length}};
-ntRefresh();evPopSchedule(1800);navApply();
+ntRefresh();evPopSchedule(2400);navApply();
+// ---- заставка: кольца по центру → уплывают на место колец в окне ----
+function splash(){
+  if(reduced||document.hidden)return;var t=$("ring");if(!t)return;
+  var ns="http://www.w3.org/2000/svg",o=document.createElement("div");o.className="spl";
+  o.innerHTML='<div class="sr"><svg viewBox="0 0 120 120"><circle cx="60" cy="60" r="52" stroke-width="9" style="stroke:var(--k-faint)"/><circle cx="60" cy="60" r="40" stroke-width="4" style="stroke:var(--k-faint)"/><circle class="s2" cx="60" cy="60" r="40" stroke-width="4" stroke-dasharray="251.33" stroke-dashoffset="0" style="stroke:var(--k-ring2);opacity:.4"/><circle class="s1" cx="60" cy="60" r="52" stroke-width="9" stroke-dasharray="326.73" stroke-dashoffset="0" style="stroke:var(--k-ring)"/></svg></div><div class="sl">РабУч</div>';
+  document.body.appendChild(o);document.body.classList.add("splon");
+  var sr=o.querySelector(".sr"),sl=o.querySelector(".sl");
+  setTimeout(function(){
+    var a=sr.getBoundingClientRect(),b=document.querySelector(".ring").getBoundingClientRect();
+    var dx=b.left+b.width/2-(a.left+a.width/2),dy=b.top+b.height/2-(a.top+a.height/2),k=b.width/a.width,E="cubic-bezier(.5,0,.15,1)",D=760;
+    try{
+      sr.animate([{transform:"none"},{transform:"translate("+dx+"px,"+dy+"px) scale("+k+")"}],{duration:D,easing:E,fill:"forwards"});
+      o.querySelector(".s1").animate([{strokeDashoffset:0},{strokeDashoffset:326.73}],{duration:D,easing:"ease-in",fill:"forwards"});
+      o.querySelector(".s2").animate([{strokeDashoffset:0},{strokeDashoffset:251.33}],{duration:D,easing:"ease-in",fill:"forwards"});
+      sl.animate([{opacity:1,transform:"none"},{opacity:0,transform:"translateY(8px)"}],{duration:260,easing:"ease-in",fill:"forwards"});
+      o.animate([{backgroundColor:getComputedStyle(o).backgroundColor},{backgroundColor:"rgba(0,0,0,0)"}],{duration:D*.75,delay:D*.2,easing:"ease-out",fill:"forwards"}).onfinish=function(){
+        document.body.classList.remove("splon");RQ=-1;setTimeout(function(){o.remove()},40);
+      };
+    }catch(e){document.body.classList.remove("splon");o.remove()}
+  },380);
+  setTimeout(function(){if(o.isConnected){document.body.classList.remove("splon");o.remove()}},2500);   // страховка
+}
+// ---- закрытие недели: свечение + вибрация + «Неделя закрыта · N-я подряд в норме» + картинка ----
+var WCK="";try{WCK=localStorage.getItem("hours:wc")||""}catch(e){}
+function wkStreak(){
+  scanLocal();var n=1,m=new Date(mon);
+  for(var q=0;q<260;q++){
+    m=new Date(m.getFullYear(),m.getMonth(),m.getDate()-7);var mk=iso(m);if(!HW[mk])break;
+    var sum=0,cnt=0,work=0;for(var i=0;i<7;i++){var r=rec(new Date(m.getFullYear(),m.getMonth(),m.getDate()+i));if(r.f.kind==="work")work++;if(counted(r)){sum+=r.df;cnt++}}
+    if(!work)continue;if(!cnt||sum<-5)break;n++;
+  }
+  return n;
+}
+function wcCheck(){
+  var k=iso(mon);if(WCK===k||!MODEL||MODEL.W<=0||mondayOf(new Date())-mon!==0)return;
+  WCK=k;try{localStorage.setItem("hours:wc",k)}catch(e){}
+  var n=wkStreak(),tx="Неделя закрыта"+(n>1?" · "+n+"-я подряд":" 🎉");
+  try{if(!reduced)$("ring").animate([{filter:"drop-shadow(0 0 0 rgba(94,234,212,0))"},{filter:"drop-shadow(0 0 16px rgba(94,234,212,1))"},{filter:"drop-shadow(0 0 0 rgba(94,234,212,0))"}],{duration:1400,easing:"ease-in-out"})}catch(e){}
+  haptic();setTimeout(haptic,140);if(window.ntLog)ntLog("wc:"+k,tx);
+  var tries=0;(function show(){if($("toast").classList.contains("show")&&tries++<40){setTimeout(show,500);return}toast(tx,function(){shareWeek(n)},9000,"Поделиться")})();
+}
+function shareWeek(n){
+  var M=MODEL,c=document.createElement("canvas"),W=1080,H=1350;c.width=W;c.height=H;var g=c.getContext("2d");
+  var bg=g.createLinearGradient(0,0,W,H);bg.addColorStop(0,"#11302a");bg.addColorStop(1,"#0a1d18");g.fillStyle=bg;g.fillRect(0,0,W,H);
+  var gl=g.createRadialGradient(W/2,560,60,W/2,560,520);gl.addColorStop(0,"rgba(94,234,212,.18)");gl.addColorStop(1,"rgba(94,234,212,0)");g.fillStyle=gl;g.fillRect(0,0,W,H);
+  g.lineCap="round";
+  g.lineWidth=58;g.strokeStyle="#5eead4";g.shadowColor="rgba(94,234,212,.7)";g.shadowBlur=40;g.beginPath();g.arc(W/2,560,330,0,Math.PI*2);g.stroke();
+  g.shadowBlur=0;g.lineWidth=24;g.strokeStyle="rgba(234,246,242,.45)";g.beginPath();g.arc(W/2,560,250,0,Math.PI*2);g.stroke();
+  var f='-apple-system,"SF Pro Display",system-ui,sans-serif',tot=M?M.counted:0;
+  g.fillStyle="#eaf6f2";g.textAlign="center";g.font="700 132px "+f;g.fillText(Math.floor(tot/60)+":"+p2(Math.round(tot%60)),W/2,600);
+  g.font="500 42px "+f;g.fillStyle="rgba(234,246,242,.7)";g.fillText("за неделю",W/2,665);
+  var e=new Date(mon.getFullYear(),mon.getMonth(),mon.getDate()+4);
+  g.font="700 74px "+f;g.fillStyle="#eaf6f2";g.fillText("Неделя закрыта",W/2,1060);
+  g.font="500 44px "+f;g.fillStyle="rgba(234,246,242,.72)";g.fillText(mon.getDate()+(mon.getMonth()!==e.getMonth()?" "+MG[mon.getMonth()]:"")+"–"+e.getDate()+" "+MG[e.getMonth()]+(n>1?" · "+n+"-я подряд в норме":""),W/2,1130);
+  g.font="600 36px "+f;g.fillStyle="rgba(94,234,212,.8)";g.fillText("РабУч",W/2,1270);
+  c.toBlob(async function(b){if(!b)return;var name="rabuch-"+iso(mon)+".png",file=new File([b],name,{type:"image/png"});
+    try{if(navigator.canShare&&navigator.canShare({files:[file]})){await navigator.share({files:[file]});return}}catch(x){if(x&&x.name==="AbortError")return}
+    try{var u=URL.createObjectURL(b),a=document.createElement("a");a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(u)},4000)}catch(x){}
+  },"image/png");
+}
+// ---- праздники: снег на Новый год, салют на «Ушёл» перед длинными выходными ----
+var FX={on:false,cv:null,g:null,fl:[],pt:[],t:0,w:0,h:0,dpr:1};
+function fxCanvas(){if(FX.cv&&FX.cv.isConnected)return true;var c=document.createElement("canvas");c.className="fx";sumEl.insertBefore(c,sumEl.firstChild);FX.cv=c;FX.g=c.getContext("2d");fxSize();return true}
+function fxSize(){if(!FX.cv)return;var r=sumEl.getBoundingClientRect(),d=Math.min(2,window.devicePixelRatio||1);FX.w=r.width;FX.h=r.height;FX.dpr=d;FX.cv.width=Math.round(r.width*d);FX.cv.height=Math.round(r.height*d)}
+window.addEventListener("resize",fxSize);
+function snowSeason(d){
+  d=d||new Date();var y=d.getMonth()===11?d.getFullYear():d.getFullYear()-1,last=new Date(y,11,31);
+  for(var q=0;q<14&&infoDate(last).kind!=="work";q++)last.setDate(last.getDate()-1);
+  var from=mondayOf(last),to=new Date(y+1,0,1);
+  for(q=0;q<20&&infoDate(to).kind!=="work";q++)to.setDate(to.getDate()+1);
+  return d>=from&&d<to;
+}
+function snowOn(on){
+  if(on&&reduced)on=false;
+  if(on){fxCanvas();if(!FX.fl.length)for(var q=0;q<34;q++)FX.fl.push({x:Math.random(),y:Math.random(),r:1+Math.random()*1.8,v:10+Math.random()*18,ph:Math.random()*6.28,a:.35+Math.random()*.5})}
+  else FX.fl=[];
+  FX.snow=on;FX.on=on||FX.pt.length>0;if(!FX.on&&FX.g)FX.g.clearRect(0,0,FX.cv.width,FX.cv.height);
+}
+function fxStep(){
+  var now=performance.now(),dt=Math.min(.05,(now-(FX.t||now))/1000);FX.t=now;
+  if(document.hidden)return;var g=FX.g,d=FX.dpr;if(!g)return;
+  if(!FX.w)fxSize();g.setTransform(d,0,0,d,0,0);g.clearRect(0,0,FX.w,FX.h);
+  if(FX.snow){var dark=matchMedia("(prefers-color-scheme:dark)").matches&&document.documentElement.dataset.theme!=="light",col=dark?"234,246,242":"120,150,170";
+    FX.fl.forEach(function(f){f.y+=f.v*dt/FX.h;f.ph+=dt*.8;if(f.y>1.02){f.y=-.02;f.x=Math.random()}
+      g.fillStyle="rgba("+col+","+f.a+")";g.beginPath();g.arc(f.x*FX.w+Math.sin(f.ph)*8,f.y*FX.h,f.r,0,6.283);g.fill()})}
+  if(FX.pt.length){
+    FX.pt=FX.pt.filter(function(p){p.l-=dt;if(p.l<=0)return false;p.vy+=160*dt;p.vx*=.985;p.vy*=.985;p.x+=p.vx*dt;p.y+=p.vy*dt;
+      g.globalAlpha=Math.max(0,Math.min(1,p.l/p.l0*1.4));g.fillStyle=p.c;g.beginPath();g.arc(p.x,p.y,p.r,0,6.283);g.fill();return true});
+    g.globalAlpha=1;if(!FX.pt.length&&!FX.snow)FX.on=false;
+  }
+}
+function longRest(){var d=new Date(now0.getFullYear(),now0.getMonth(),now0.getDate()+1),n=0;while(n<12&&infoDate(d).kind!=="work"&&infoDate(d).kind!=="extra"){n++;d.setDate(d.getDate()+1)}return n>=3}
+function fireworks(){
+  if(reduced)return;fxCanvas();fxSize();var cs=["#5eead4","#fbbf24","#f472b6","#93c5fd","#eaf6f2"],W=FX.w,H=FX.h;
+  [0,350,700,1050].forEach(function(t,j){setTimeout(function(){var x=W*(.2+Math.random()*.6),y=H*(.15+Math.random()*.3),c=cs[j%cs.length];
+    for(var q=0;q<46;q++){var a=Math.random()*6.283,v=60+Math.random()*150;FX.pt.push({x:x,y:y,vx:Math.cos(a)*v,vy:Math.sin(a)*v,r:1.4+Math.random()*1.6,c:Math.random()<.25?"#fff":c,l:1.1+Math.random()*.6,l0:1.7})}
+    FX.on=true;FX.t=performance.now();if(j===0)haptic()},t)});
+}
+window.fxTest={snow:snowOn,fireworks:fireworks,splash:splash,wc:function(){WCK="";wcCheck()},share:shareWeek,season:snowSeason};
+snowOn(snowSeason());splash();
+
 
 var h1c=[],h1=document.querySelector("h1");
 h1.addEventListener("click",function(e){
   if(e.target.closest("#sy,#nb,#np"))return;var t=Date.now();h1c=h1c.filter(function(x){return t-x<700});h1c.push(t);
   if(h1c.length>=3){h1c=[];svOpen()}
 });
-function loop(){quietCheck();tick();if(QUIET){loopT=setTimeout(loop,1000-Date.now()%1000+8);return}requestAnimationFrame(loop)}
+function loop(){quietCheck();tick();if(FX.on)fxStep();if(QUIET){loopT=setTimeout(loop,1000-Date.now()%1000+8);return}requestAnimationFrame(loop)}
 var _upd=update;update=function(){var t=performance.now();act("update");_upd();tlog("update",performance.now()-t)};
 var _fit=fitCards;fitCards=function(){var t=performance.now();_fit();tlog("fitCards",performance.now()-t)};
 var _hr=hRender;hRender=function(k){var t=performance.now();act("history");_hr(k);tlog("hRender",performance.now()-t)};

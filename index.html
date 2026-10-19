@@ -240,11 +240,12 @@ h1{position:relative;min-height:24px}
 .spl .sr svg{width:100%;height:100%;transform:rotate(-90deg);overflow:visible}
 .spl .sr circle{fill:none;stroke-linecap:round}
 .spl .sl{font-size:26px;font-weight:700;letter-spacing:-.01em;color:var(--ink)}
-body.splon .sum.rise{animation:none;opacity:1}
+body.splon .rise{animation:none;opacity:1}
+body.splnt .prg,body.splnt .prg2,body.splnt .ring .trk{transition:none!important}
 body.splon .ring svg{visibility:hidden}
 body.splon .prg{stroke-dashoffset:326.73!important;transition:none!important}
 body.splon .prg2{stroke-dashoffset:251.33!important;transition:none!important}
-html,body{overflow-x:clip}.toast{max-width:calc(100vw - 24px)}#ttx{min-width:0;overflow:hidden;text-overflow:ellipsis}
+html,body{overflow-x:clip}.toast{width:max-content;max-width:calc(100vw - 24px);white-space:normal}#ttx{min-width:0;line-height:1.3}
 .fx{position:absolute;inset:0;z-index:0;width:100%;height:100%;border-radius:inherit;pointer-events:none}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.rise{opacity:1}}
 </style>
@@ -303,7 +304,8 @@ html,body{overflow-x:clip}.toast{max-width:calc(100vw - 24px)}#ttx{min-width:0;o
 function dynType(){var ts=1;try{if(window.CSS&&CSS.supports("font","-apple-system-body")){var e=document.createElement("div");e.style.cssText="font:-apple-system-body;position:absolute;visibility:hidden";document.body.appendChild(e);var f=parseFloat(getComputedStyle(e).fontSize)||17;e.remove();ts=Math.max(.9,Math.min(1.35,f/17))}}catch(x){}
   if(document.documentElement.style.getPropertyValue("--ts")!==String(ts)){document.documentElement.style.setProperty("--ts",ts);return true}return false}
 dynType();
-var VER="1.5",STANDALONE=!!(window.navigator.standalone||(window.matchMedia&&matchMedia("(display-mode: standalone)").matches));
+var SPLON=!(window.matchMedia&&matchMedia("(prefers-reduced-motion:reduce)").matches)&&!document.hidden;if(SPLON)document.body.classList.add("splon");
+var VER="1.7",STANDALONE=!!(window.navigator.standalone||(window.matchMedia&&matchMedia("(display-mode: standalone)").matches));
 var NAMES=["Понедельник","Вторник","Среда","Четверг","Пятница","Суббота","Воскресенье"],START=480,END=990,BRK=30,MINP=270,N=480,C=326.73;   // MINP: минимум присутствия в рабочий день — 4,5 ч от прихода (обед вычитается как обычно)
 var reduced=window.matchMedia&&matchMedia("(prefers-reduced-motion:reduce)").matches;
 var now0=new Date();
@@ -432,7 +434,7 @@ function setNum(el,to,fmt,quiet){
   if(el._v===to)return;
   if(el._v!=null&&!quiet){el.classList.remove("bump");void el.offsetWidth;el.classList.add("bump")}
   el._v=to;cancelAnimationFrame(el._r);
-  var t0=performance.now(),dur=reduced?0:Math.min(1100,350+Math.abs(to-from)*2.5);
+  var t0=performance.now(),dur=(reduced||SPLON)?0:Math.min(1100,350+Math.abs(to-from)*2.5);
   (function step(t){var p=dur?Math.min(1,(t-t0)/dur):1,e=1-Math.pow(1-p,3);
     el.textContent=fmt(from+(to-from)*e);if(p<1)el._r=requestAnimationFrame(step)})(t0);
 }
@@ -461,7 +463,7 @@ function clearWeek(){
   toast("Неделя очищена",function(){var t2=Date.now();for(var q=0;q<7;q++){S.d[q]=snap[q]||{};S.t[q]={a:t2,b:t2}}refreshInputs();save();update()},10000);
 }
 var fd=new Date(mon.getFullYear(),mon.getMonth(),mon.getDate()+4);
-$("wk").textContent=NAMES[todayIdx]+", "+now0.getDate()+" "+["января","февраля","марта","апреля","мая","июня","июля","августа","сентября","октября","ноября","декабря"][now0.getMonth()];
+$("wk").textContent=["Пн","Вт","Ср","Чт","Пт","Сб","Вс"][todayIdx]+", "+now0.getDate()+" "+["января","февраля","марта","апреля","мая","июня","июля","августа","сентября","октября","ноября","декабря"][now0.getMonth()];
 // ---- банк месяца: переработки/недоработки закрытых дней переносятся в пределах месяца ----
 var BKC={},BKN={};
 // классы состояния меняем только при реальном изменении — лишние записи в DOM заставляют iPhone пересчитывать стили
@@ -663,6 +665,14 @@ function openType(tp){SH.mode=tp;SH.a=SH.b=null;SH.fresh=true;SH.y=now0.getFullY
 function openSheet(k){SH.mode=null;SH.a=SH.b=k;SH.fresh=true;var d=parseISO(k);SH.y=d.getFullYear();SH.m=d.getMonth();drawSheet();$("sh").classList.add("open")}
 function isMode(k){var t=TYPES[k];return SH.mode==="x"?(t==="x"||t==="xn"):t===SH.mode}
 function closeSheet(){$("sh").classList.remove("open")}
+// предупреждение заранее: что в выбранном периоде останется, а что заменится (отгул → отпуск → больничный)
+function prioNote(){
+  var RK={off:1,vac:2,sick:3},tp=SH.mode;if(!RK[tp]||!SH.a)return"";var kp={},rp={},d=parseISO(SH.a),n=0;
+  while(iso(d)<=SH.b&&n++<400){var k=iso(d),o=TYPES[k];if(RK[o]&&o!==tp&&calKind(k,d.getDay())!=="hol"){if(RK[o]>RK[tp])kp[o]=(kp[o]||0)+1;else rp[o]=(rp[o]||0)+1}d.setDate(d.getDate()+1)}
+  var one=function(n){return n%10===1&&n%100!==11};
+  var a=Object.keys(kp).map(function(t){return EM[t]+" "+dn(kp[t])+(one(kp[t])?" не изменится":" не изменятся")+" — "+LBL[t].toLowerCase()+" главнее"}).concat(Object.keys(rp).map(function(t){return EM[t]+" "+dn(rp[t])+(one(rp[t])?" заменится":" заменятся")}));
+  return a.length?" · "+a.join(" · "):"";
+}
 function drawSheet(){
   $("mt").textContent=MN[SH.m]+" "+SH.y;
   var off=(new Date(SH.y,SH.m,1).getDay()+6)%7,dim=new Date(SH.y,SH.m+1,0).getDate(),h="",q,d,td=iso(now0);
@@ -674,7 +684,7 @@ function drawSheet(){
   }
   $("gr").innerHTML=h;
   if(SH.mode){var nm0=TYN[SH.mode];
-    $("sl").textContent=!SH.a?nm0+" — выберите день или начало периода · тап по отмеченному дню снимает":fmtR(SH.a)+(SH.a===SH.b?" · второй тап — конец периода":" – "+fmtR(SH.b));
+    $("sl").textContent=!SH.a?nm0+" — выберите день или начало периода · тап по отмеченному дню снимает":fmtR(SH.a)+(SH.a===SH.b?" · второй тап — конец периода":" – "+fmtR(SH.b))+prioNote();
     $("emok").hidden=!SH.a;$("em").hidden=true;if(SH.a)$("okb").textContent="Отметить: "+nm0;}
   else{$("emok").hidden=true;$("em").hidden=false;
   $("sl").textContent=fmtR(SH.a)+(SH.a===SH.b?(SH.fresh?"":" · второй тап — конец периода"):" – "+fmtR(SH.b));}
@@ -694,21 +704,26 @@ $("shbd").addEventListener("click",closeSheet);
 document.addEventListener("keydown",function(e){if(e.key==="Escape"){closeSheet();$("hs").classList.remove("open")}});
 $("em").addEventListener("click",function(e){var b=e.target.closest("button");if(b)applyT(b.dataset.t)});
 function applyT(tp){
-  var d=parseISO(SH.a),n=0,prev=[],tk=iso(now0),liveHit=false;
+  // приоритет: отгул → отпуск → больничный; старший тип младшим не перезаписывается
+  var d=parseISO(SH.a),n=0,prev=[],tk=iso(now0),liveHit=false,RK={off:1,vac:2,sick:3},kept={},repl={};
   while(iso(d)<=SH.b&&n++<400){
     var k=iso(d),ck=calKind(k,d.getDay()),old=TY[k]?TY[k].v:"",nv=null;
     if(tp==="")nv="";
     else if(tp==="x"){if(ck==="hol"||ck==="rest")nv=TYPES[k]==="xn"?"xn":"x"}
-    else if(ck==="work"||ck==="short")nv=tp;
+    else if(ck==="work"||ck==="short"){
+      if(RK[old]&&RK[tp]&&RK[old]>RK[tp])kept[old]=(kept[old]||0)+1;
+      else{nv=tp;if(RK[old]&&old!==tp)repl[old]=(repl[old]||0)+1}
+    }
     if(nv!==null&&nv!==old){prev.push([k,old]);setTy(k,nv);if(k===tk&&(nv==="vac"||nv==="sick"||nv==="off")){var ti=(now0.getDay()+6)%7;if(S.d[ti].a)liveHit=true}}
     d.setDate(d.getDate()+1);
   }
   closeSheet();update();
   if(SH.a===SH.b&&tp){var sd=parseISO(SH.a);if(iso(mondayOf(sd))===iso(mon)){var ix=(sd.getDay()+6)%7;if(ix!==SEL&&INFO[ix]&&INFO[ix].kind!=="rest")selectDay(ix,ix>SEL?1:-1,0)}}
+  var note=Object.keys(kept).map(function(t){return EM[t]+" "+dn(kept[t])+" оставлен"+(kept[t]%10===1&&kept[t]%100!==11?"":"ы")}).concat(Object.keys(repl).map(function(t){return (repl[t]%10===1&&repl[t]%100!==11?"заменён ":"заменены ")+EM[t]+" "+dn(repl[t])})).join(" · ");
   if(prev.length){
     var nmT={vac:"Отпуск",sick:"Больничный",off:"Отгул",x:"Доп. день",xn:"Доп. день","":"Отметка снята"}[tp]||"Готово";
-    toast(liveHit?nmT+": часы сегодня не в учёте":nmT+" · "+fmtR(SH.a)+(SH.a===SH.b?"":"–"+fmtR(SH.b)),function(){prev.forEach(function(p){setTy(p[0],p[1])});update()},liveHit?9000:6000);
-  }
+    toast(liveHit?nmT+": часы сегодня не в учёте":nmT+" · "+fmtR(SH.a)+(SH.a===SH.b?"":"–"+fmtR(SH.b))+(note?" · "+note:""),function(){prev.forEach(function(p){setTy(p[0],p[1])});update()},liveHit||note?9000:6000);
+  }else if(note)toast(({sick:"Больничный",vac:"Отпуск"})[Object.keys(kept)[0]]+" главнее — дни не изменены",null,5000);
 }
 [].forEach.call(document.querySelectorAll(".tyb"),function(b){b.addEventListener("click",function(){openType(b.dataset.t)})});
 $("okb").addEventListener("click",function(){if(SH.mode&&SH.a)applyT(SH.mode)});
@@ -1404,25 +1419,42 @@ window.ntRefresh=ntRefresh;window.ntNow=function(){return{acts:NTA.map(function(
 ntRefresh();evPopSchedule(1400);navApply();
 // ---- заставка: кольца по центру → уплывают на место колец в окне ----
 function splash(){
-  if(reduced||document.hidden)return;var t=$("ring");if(!t)return;
-  var ns="http://www.w3.org/2000/svg",o=document.createElement("div");o.className="spl";
-  o.innerHTML='<div class="sr"><svg viewBox="0 0 120 120"><circle cx="60" cy="60" r="52" stroke-width="9" style="stroke:var(--k-faint)"/><circle cx="60" cy="60" r="40" stroke-width="4" style="stroke:var(--k-faint)"/><circle class="s2" cx="60" cy="60" r="40" stroke-width="4" stroke-dasharray="251.33" stroke-dashoffset="0" style="stroke:var(--k-ring2);opacity:.4"/><circle class="s1" cx="60" cy="60" r="52" stroke-width="9" stroke-dasharray="326.73" stroke-dashoffset="0" style="stroke:var(--k-ring)"/></svg></div><div class="sl">РабУч</div>';
-  document.body.appendChild(o);document.body.classList.add("splon");
-  var sr=o.querySelector(".sr"),sl=o.querySelector(".sl");
+  if(!SPLON)return;var t=$("ring");if(!t){SPLON=false;return}
+  // кольца заставки получают цвета, толщину и значения настоящих колец — посадка без подмены и без перерисовки
+  var o=document.createElement("div");o.className="spl";
+  o.innerHTML='<div class="sr"><svg viewBox="0 0 120 120"><circle class="t1" cx="60" cy="60" r="52"/><circle class="t2" cx="60" cy="60" r="40"/>'+
+    '<circle class="s2" cx="60" cy="60" r="40" stroke-dasharray="251.33" style="stroke-dashoffset:251.33px"/><circle class="s1" cx="60" cy="60" r="52" stroke-dasharray="326.73" style="stroke-dashoffset:326.73px"/></svg></div><div class="sl">РабУч</div>';
+  document.body.appendChild(o);
+  var sr=o.querySelector(".sr"),sl=o.querySelector(".sl"),HOLD=380,D=760,done=false;
+  function look(){   // снять с настоящих колец всё, как они выглядят сейчас
+    var r1=t,r2=$("ring2"),tk=document.querySelectorAll(".ring .trk"),c1=getComputedStyle(r1),c2=getComputedStyle(r2),k1=getComputedStyle(tk[0]),k2=getComputedStyle(tk[1]);
+    var o1=parseFloat(r1.style.strokeDashoffset),o2=parseFloat(r2.style.strokeDashoffset);if(isNaN(o1))o1=C;if(isNaN(o2))o2=C2;
+    var q=function(sel,st){var e=o.querySelector(sel);for(var k in st)e.style[k]=st[k]};
+    q(".t1",{stroke:k1.stroke,strokeWidth:k1.strokeWidth});q(".t2",{stroke:k2.stroke,strokeWidth:k2.strokeWidth});
+    q(".s1",{stroke:c1.stroke,strokeWidth:c1.strokeWidth,opacity:c1.opacity});q(".s2",{stroke:c2.stroke,strokeWidth:c2.strokeWidth,opacity:r2.style.opacity==="0"?0:c2.opacity});
+    return[o1,o2];
+  }
+  look();
+  function finish(){
+    if(done)return;done=true;
+    sumEl.classList.remove("rise");                        // карточка уже на месте — не проявлять её второй раз
+    document.body.classList.add("splnt");                  // настоящие кольца встают сразу в то же положение, без анимации
+    document.body.classList.remove("splon");SPLON=false;RQ=-1;
+    requestAnimationFrame(function(){requestAnimationFrame(function(){o.remove();document.body.classList.remove("splnt")})});
+  }
   setTimeout(function(){
-    var a=sr.getBoundingClientRect(),b=document.querySelector(".ring").getBoundingClientRect();
-    var dx=b.left+b.width/2-(a.left+a.width/2),dy=b.top+b.height/2-(a.top+a.height/2),k=b.width/a.width,E="cubic-bezier(.5,0,.15,1)",D=760;
+    var v=look(),a=sr.getBoundingClientRect(),b=document.querySelector(".ring svg").getBoundingClientRect();
+    var dx=b.left+b.width/2-(a.left+a.width/2),dy=b.top+b.height/2-(a.top+a.height/2),k=b.width/a.width,E="cubic-bezier(.5,0,.15,1)";
     try{
-      sr.animate([{transform:"none"},{transform:"translate("+dx+"px,"+dy+"px) scale("+k+")"}],{duration:D,easing:E,fill:"forwards"});
-      o.querySelector(".s1").animate([{strokeDashoffset:0},{strokeDashoffset:326.73}],{duration:D,easing:"ease-in",fill:"forwards"});
-      o.querySelector(".s2").animate([{strokeDashoffset:0},{strokeDashoffset:251.33}],{duration:D,easing:"ease-in",fill:"forwards"});
+      // в полёте кольца заряжаются до своих значений и приземляются ровно такими, как настоящие
+      o.querySelector(".s1").animate([{strokeDashoffset:C+"px"},{strokeDashoffset:v[0]+"px"}],{duration:D,easing:"cubic-bezier(.3,.7,.2,1)",fill:"forwards"});
+      o.querySelector(".s2").animate([{strokeDashoffset:C2+"px"},{strokeDashoffset:v[1]+"px"}],{duration:D,easing:"cubic-bezier(.3,.7,.2,1)",fill:"forwards"});
+      sr.animate([{transform:"none"},{transform:"translate("+dx+"px,"+dy+"px) scale("+k+")"}],{duration:D,easing:E,fill:"forwards"}).onfinish=function(){look();finish()};
       sl.animate([{opacity:1,transform:"none"},{opacity:0,transform:"translateY(8px)"}],{duration:260,easing:"ease-in",fill:"forwards"});
-      o.animate([{backgroundColor:getComputedStyle(o).backgroundColor},{backgroundColor:"rgba(0,0,0,0)"}],{duration:D*.75,delay:D*.2,easing:"ease-out",fill:"forwards"}).onfinish=function(){
-        document.body.classList.remove("splon");RQ=-1;setTimeout(function(){o.remove()},40);
-      };
-    }catch(e){document.body.classList.remove("splon");o.remove()}
-  },380);
-  setTimeout(function(){if(o.isConnected){document.body.classList.remove("splon");o.remove()}},2500);   // страховка
+      o.animate([{backgroundColor:getComputedStyle(o).backgroundColor},{backgroundColor:"rgba(0,0,0,0)"}],{duration:D*.8,delay:D*.15,easing:"ease-out",fill:"forwards"});
+    }catch(e){finish()}
+  },HOLD);
+  setTimeout(finish,2600);   // страховка
 }
 // ---- закрытие недели: свечение + вибрация + «Неделя закрыта · N-я подряд в норме» + картинка ----
 var WCK="";try{WCK=localStorage.getItem("hours:wc")||""}catch(e){}
@@ -1441,7 +1473,7 @@ function wcCheck(){
   var n=wkStreak(),tx="Неделя закрыта"+(n>1?" · "+n+"-я подряд":" 🎉");
   try{if(!reduced)$("ring").animate([{filter:"drop-shadow(0 0 0 rgba(94,234,212,0))"},{filter:"drop-shadow(0 0 16px rgba(94,234,212,1))"},{filter:"drop-shadow(0 0 0 rgba(94,234,212,0))"}],{duration:1400,easing:"ease-in-out"})}catch(e){}
   haptic();setTimeout(haptic,140);if(window.ntLog)ntLog("wc:"+k,tx);
-  var tries=0;(function show(){if($("toast").classList.contains("show")&&tries++<40){setTimeout(show,500);return}toast(tx,function(){shareWeek(n)},9000,"Поделиться")})();
+  var tries=0;(function show(){if((SPLON||$("toast").classList.contains("show"))&&tries++<40){setTimeout(show,500);return}toast(tx,function(){shareWeek(n)},9000,"Поделиться")})();
 }
 function shareWeek(n){
   var M=MODEL,c=document.createElement("canvas"),W=1080,H=1350;c.width=W;c.height=H;var g=c.getContext("2d");
@@ -1502,6 +1534,7 @@ function fireworks(){
 }
 window.fxTest={snow:snowOn,fireworks:fireworks,splash:splash,wc:function(){WCK="";wcCheck()},share:shareWeek,season:snowSeason};
 snowOn(snowSeason());splash();
+if(!SPLON)document.body.classList.remove("splon");
 
 
 var h1c=[],h1=document.querySelector("h1");
@@ -1528,7 +1561,7 @@ if(reduced)setInterval(tick,1000);else requestAnimationFrame(loop);
 (function(){
   if(!("serviceWorker" in navigator))return;
   var asked=false,lastChk=0;
-  function offer(w){if(asked)return;asked=true;window.UPDF=function(){w.postMessage("skip")};window.UPDID=Date.now();if(window.ntRefresh)ntRefresh();toast("Есть обновление",function(){w.postMessage("skip")},600000,"Обновить")}
+  function offer(w){if(asked)return;asked=true;window.UPDF=function(){w.postMessage("skip")};window.UPDID=Date.now();if(window.ntRefresh)ntRefresh()}   // обновление — только плашкой в колокольчике
   navigator.serviceWorker.register("sw.js").then(function(reg){
     if(reg.waiting&&navigator.serviceWorker.controller)offer(reg.waiting);
     reg.addEventListener("updatefound",function(){var w=reg.installing;if(!w)return;w.addEventListener("statechange",function(){if(w.state==="installed"&&navigator.serviceWorker.controller)offer(w)})});

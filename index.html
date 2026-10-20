@@ -131,7 +131,7 @@ input[type=time]:focus{outline:none;border-color:var(--ok);box-shadow:0 0 0 3px 
 .sh .pn{will-change:transform;contain:layout paint}
 .shh{display:flex;justify-content:space-between;align-items:center;font-weight:700;margin-bottom:6px}
 .shh button{font:inherit;font-size:22px;background:none;border:0;color:var(--ink);padding:4px 14px;cursor:pointer}
-.wd,#gr{display:grid;grid-template-columns:repeat(7,1fr);gap:3px}
+.wd,#gr,#pgr{display:grid;grid-template-columns:repeat(7,1fr);gap:3px}
 .wd{font-size:calc(12px*var(--ts,1));color:var(--mute);text-align:center;margin-bottom:4px}
 .wd span{display:block}
 .c{font:inherit;border:0;background:none;color:var(--ink);border-radius:12px;padding:3px 0;min-height:46px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;transition:background .15s}
@@ -247,6 +247,31 @@ body.splon .prg{stroke-dashoffset:326.73!important;transition:none!important}
 body.splon .prg2{stroke-dashoffset:251.33!important;transition:none!important}
 html,body{overflow-x:clip}.toast{width:max-content;max-width:calc(100vw - 24px);white-space:normal}#ttx{min-width:0;line-height:1.3}
 .fx{position:absolute;inset:0;z-index:0;width:100%;height:100%;border-radius:inherit;pointer-events:none}
+
+/* 1.8: 💰 зарплата — отметка поступлений в календаре */
+.set{grid-template-columns:repeat(6,1fr)}
+#pgr .c i{font-size:calc(10px*var(--ts,1));font-weight:600;color:var(--ok);min-height:12px;white-space:nowrap}
+#pgr .c.pd{box-shadow:inset 0 0 0 1.5px var(--line)}#pgr .c.pd i{color:var(--mute);font-weight:500}
+#pgr .c.has{background:var(--tint)}#pgr .c.sel{background:var(--tint);box-shadow:inset 0 0 0 1.5px var(--ok)}
+.psum{text-align:center;color:var(--mute);font-size:calc(14px*var(--ts,1));margin-top:10px;line-height:1.5}.psum b{color:var(--ink);font-weight:600}
+.pin{margin-top:12px;border-top:1px solid var(--line);padding-top:12px}.pin[hidden]{display:none}
+.pinl{font-size:calc(14px*var(--ts,1));color:var(--mute);margin-bottom:8px}
+.pin input{display:block;width:100%;box-sizing:border-box;font:inherit;font-size:28px;font-weight:700;letter-spacing:-.01em;padding:10px 14px;border:1px solid var(--line);border-radius:14px;background:var(--bg);color:var(--ink);text-align:center;-webkit-appearance:none}
+.pin input:focus{outline:none;border-color:var(--ok);box-shadow:0 0 0 3px var(--tint)}
+.pinb{display:grid;grid-template-columns:1fr 2fr;gap:10px;margin-top:10px}
+.pinb button{height:48px;border-radius:14px;border:0;font:inherit;font-size:calc(16px*var(--ts,1));font-weight:600;cursor:pointer}
+.pch{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+.pch button{font:inherit;font-size:calc(13px*var(--ts,1));padding:7px 11px;border-radius:99px;border:1px solid var(--line);background:var(--bg);color:var(--ink);cursor:pointer}
+.pch button.on{background:var(--tint);border-color:var(--ok);color:var(--ok);font-weight:600}.pch button.f::after{content:" ✓";color:var(--ok)}
+#ptot{margin-top:6px}.pt-h{font-size:calc(13px*var(--ts,1));color:var(--mute);margin:14px 0 6px}
+.pt-c{background:var(--bg);border-radius:16px;padding:12px 14px}
+.pt-r{display:flex;justify-content:space-between;align-items:baseline;gap:10px;padding:5px 0;font-size:calc(15px*var(--ts,1))}.pt-r span:first-child{color:var(--mute)}
+.pt-r.tt{border-top:1px solid var(--line);margin-top:4px;padding-top:9px;font-weight:700;font-size:calc(17px*var(--ts,1))}.pt-r.tt span:first-child{color:var(--ink)}
+.pt-d{font-size:calc(13px*var(--ts,1));color:var(--mute);margin-top:6px}.pt-d .up{color:var(--ok)}.pt-d .dn{color:var(--over)}
+.pt-w{font-size:calc(13px*var(--ts,1));color:var(--mute);margin-top:6px;line-height:1.5}
+.pt-m{display:flex;justify-content:space-between;gap:8px;padding:9px 2px;border-top:1px solid var(--line);font-size:calc(14px*var(--ts,1));cursor:pointer}.pt-m:first-child{border-top:0}.pt-m b{font-weight:600}.pt-m small{color:var(--mute);font-size:calc(12px*var(--ts,1));display:block}
+#pdel{background:var(--bg);color:var(--mute);box-shadow:inset 0 0 0 1px var(--line)}#pdel[disabled]{opacity:.35}
+#pok{background:var(--go-bg);color:var(--go-ink)}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.rise{opacity:1}}
 </style>
 </head>
@@ -274,6 +299,7 @@ html,body{overflow-x:clip}.toast{width:max-content;max-width:calc(100vw - 24px);
 <button class="go" id="go" hidden></button>
 <div class="set">
   <button class="rst" id="hist" style="margin-left:0" title="История">🗓</button>
+  <button class="rst" id="payb" style="margin-left:0" title="Зарплата">💰</button>
   <button class="rst tyb" data-t="vac" style="margin-left:0" title="Отпуск">🌴</button>
   <button class="rst tyb" data-t="sick" style="margin-left:0" title="Больничный">🤒</button>
   <button class="rst tyb" data-t="off" style="margin-left:0" title="Отгул">💤</button>
@@ -288,6 +314,14 @@ html,body{overflow-x:clip}.toast{width:max-content;max-width:calc(100vw - 24px);
   <div id="gr"></div><div id="sl"></div>
   <div class="emok" id="emok" hidden><button id="okb"></button></div>
   <div class="em" id="em" hidden><button data-t="vac">🌴</button><button data-t="sick">🤒</button><button data-t="off">💤</button><button data-t="x">➕</button><button data-t="">✖️</button></div>
+</div></div>
+<div class="sh" id="ps"><div class="bd" id="psbd"></div><div class="pn hp">
+  <div class="shh"><button id="ppm">‹</button><span id="pmt"></span><button id="pnm">›</button></div>
+  <div class="seg" id="pseg"><button data-v="c" class="on">Календарь</button><button data-v="t">Итоги</button></div>
+  <div id="pcal"><div class="wd"><span>пн</span><span>вт</span><span>ср</span><span>чт</span><span>пт</span><span>сб</span><span>вс</span></div>
+  <div id="pgr"></div><div class="psum" id="psum"></div>
+  <div class="pin" id="pin" hidden><div class="pinl" id="pinl"></div><div class="pch" id="pch"></div><input id="pamt" inputmode="numeric" autocomplete="off" placeholder="Сумма, ₽"><div class="pinb"><button id="pdel">Удалить</button><button id="pok">Сохранить</button></div></div></div>
+  <div id="ptot" hidden></div>
 </div></div>
 <div class="sh" id="hs"><div class="bd" id="hsbd"></div><div class="pn hp">
   <div class="shh"><button id="hpv">‹</button><span id="ht"></span><button id="hnx">›</button></div>
@@ -305,7 +339,7 @@ function dynType(){var ts=1;try{if(window.CSS&&CSS.supports("font","-apple-syste
   if(document.documentElement.style.getPropertyValue("--ts")!==String(ts)){document.documentElement.style.setProperty("--ts",ts);return true}return false}
 dynType();
 var SPLON=!(window.matchMedia&&matchMedia("(prefers-reduced-motion:reduce)").matches)&&!document.hidden;if(SPLON)document.body.classList.add("splon");
-var VER="1.7",STANDALONE=!!(window.navigator.standalone||(window.matchMedia&&matchMedia("(display-mode: standalone)").matches));
+var VER="1.8",STANDALONE=!!(window.navigator.standalone||(window.matchMedia&&matchMedia("(display-mode: standalone)").matches));
 var NAMES=["Понедельник","Вторник","Среда","Четверг","Пятница","Суббота","Воскресенье"],START=480,END=990,BRK=30,MINP=270,N=480,C=326.73;   // MINP: минимум присутствия в рабочий день — 4,5 ч от прихода (обед вычитается как обычно)
 var reduced=window.matchMedia&&matchMedia("(prefers-reduced-motion:reduce)").matches;
 var now0=new Date();
@@ -701,7 +735,7 @@ $("gr").addEventListener("click",function(e){
 $("pm").addEventListener("click",function(){SH.m--;if(SH.m<0){SH.m=11;SH.y--}drawSheet()});
 $("nm2").addEventListener("click",function(){SH.m++;if(SH.m>11){SH.m=0;SH.y++}drawSheet()});
 $("shbd").addEventListener("click",closeSheet);
-document.addEventListener("keydown",function(e){if(e.key==="Escape"){closeSheet();$("hs").classList.remove("open")}});
+document.addEventListener("keydown",function(e){if(e.key==="Escape"){closeSheet();$("hs").classList.remove("open");if(window.payClose)payClose()}});
 $("em").addEventListener("click",function(e){var b=e.target.closest("button");if(b)applyT(b.dataset.t)});
 function applyT(tp){
   // приоритет: отгул → отпуск → больничный; старший тип младшим не перезаписывается
@@ -1194,6 +1228,7 @@ function importData(o){
       else if(!l||v.t>l.t){if(!l||l.v!==v.v)ch++;TY[k]=v}}
     if(ch){setTYall(TY);schedule("types")}f+=ch;
   }
+  if(o.pay&&typeof o.pay==="object"){var ip=payNorm(o.pay),pc=0;for(var pk in ip){var L2=PAY[pk]||(PAY[pk]={e:{}});for(var pw in ip[pk].e){var iv=ip[pk].e[pw],lv=L2.e[pw];if(!lv||(iv.t||0)>(lv.t||0)){if(!lv||lv.s!==iv.s)pc++;L2.e[pw]={s:iv.s,t:iv.t||now}}}}if(pc){paySave();f+=pc}}
   update();setTimeout(bkCheck,0);return{n:n,f:f};
 }
 var BK="";try{BK=localStorage.getItem("hours:bk")||""}catch(e){}
@@ -1201,7 +1236,7 @@ function bkMark(){BK=new Date().toISOString();try{localStorage.setItem("hours:bk
 async function backupText(){
   await loadWeeks();var weeks={};weeks[iso(mon)]={d:S.d,t:S.t};
   Object.keys(HW).forEach(function(k){if(k!==iso(mon)&&hasData(HW[k].d))weeks[k]={d:HW[k].d,t:HW[k].t}});
-  return{txt:JSON.stringify({app:"hours",v:1,saved:new Date().toISOString(),weeks:weeks,types:TY}),n:Object.keys(weeks).length};
+  return{txt:JSON.stringify({app:"hours",v:1,saved:new Date().toISOString(),weeks:weeks,types:TY,pay:PAY}),n:Object.keys(weeks).length};
 }
 // копия файлом: меню «Поделиться» (→ Сохранить в Файлы); если нельзя — обычное скачивание
 async function saveFile(){
@@ -1223,6 +1258,7 @@ function bkCheck(){
   try{for(var q=0;q<localStorage.length;q++){var k=localStorage.key(q);if(!/^hours:\d{4}-/.test(k))continue;var o=JSON.parse(localStorage.getItem(k))||{};
     if(hasData(o.d))has=true;(o.t||[]).forEach(function(x){if(x){if(x.a>lc)lc=x.a;if(x.b>lc)lc=x.b}})}}catch(e){}
   for(var tk in TY)if(TY[tk].t>lc)lc=TY[tk].t;
+  try{for(var pk2 in PAY)for(var pw2 in PAY[pk2].e)if(PAY[pk2].e[pw2].t>lc)lc=PAY[pk2].e[pw2].t}catch(e){}
   var bt=BK?Date.parse(BK):0;
   el.hidden=!(has&&(!BK||(Date.now()-bt>7*864e5&&lc>bt)));
   em.hidden=has||Object.keys(TYPES).length>0;
@@ -1328,7 +1364,7 @@ $("svb").addEventListener("click",async function(e){
     svMsg("собираю…");await loadWeeks();
     var weeks={};weeks[iso(mon)]={d:S.d,t:S.t};
     Object.keys(HW).forEach(function(k){if(k!==iso(mon)&&hasData(HW[k].d))weeks[k]={d:HW[k].d,t:HW[k].t}});
-    ta.value=JSON.stringify({app:"hours",v:1,saved:new Date().toISOString(),weeks:weeks,types:TY});
+    ta.value=JSON.stringify({app:"hours",v:1,saved:new Date().toISOString(),weeks:weeks,types:TY,pay:PAY});
     svMsg("Копия готова: недель "+Object.keys(weeks).length+", типов дней "+Object.keys(TY).length+". Нажмите «Скопировать».");
   }else if(a==="imp"){ta.value="";ta.focus();svMsg("Вставьте текст копии в поле и нажмите «Применить».")}
   else if(a==="copy"){if(!ta.value){svMsg("Сначала сделайте копию.");return}svCopy(ta.value,function(t){svMsg(t);bkMark()})}
@@ -1342,6 +1378,94 @@ $("svb").addEventListener("click",async function(e){
   else if(a==="hap"){haptic();setTimeout(haptic,160);setTimeout(haptic,320);svMsg("Три отклика отправлены. Если ничего не почувствовали: нужен iOS 18+, звук и вибрации включены, режим «Без звука» не мешает не всегда.")}
 });
 try{ensureHL()}catch(e){}
+
+// ---- 💰 деньги: две работы, по аванс и зарплате; отметка поступлений и итоги ----
+// формат: hours:pay = { "ГГГГ-ММ-ДД": { e: { a1|s1|a2|s2|o: {s:сумма,t:время} } } }; старый формат {s,t} читается как «Другое»
+var PK={a1:{n:"Аванс",w:1,d:30},s1:{n:"Зарплата",w:1,d:15},a2:{n:"Аванс",w:2,d:25},s2:{n:"Зарплата",w:2,d:10},o:{n:"Другое",w:0}},PKO=["a1","s1","a2","s2","o"];
+function pkName(w){return w==="o"?"Другое":PK[w].n+" · Работа № "+PK[w].w}
+function pkShort(w){return w==="o"?"Другое":PK[w].n+" № "+PK[w].w}
+function payNorm(o){var r={};if(!o||typeof o!=="object")return r;for(var k in o){if(!/^\d{4}-\d{2}-\d{2}$/.test(k))continue;var x=o[k];if(!x)continue;
+  if(x.e&&typeof x.e==="object"){var e={};for(var w in x.e)if(PK[w]&&x.e[w]&&typeof x.e[w].s==="number")e[w]={s:x.e[w].s,t:x.e[w].t||0};r[k]={e:e}}
+  else if(typeof x.s==="number")r[k]={e:x.s>0?{o:{s:x.s,t:x.t||0}}:{}}}return r}
+var PAY={};try{PAY=payNorm(JSON.parse(localStorage.getItem("hours:pay")||"{}"))}catch(e){PAY={}}
+var PS={y:0,m:0,k:null,w:null,v:"c"};
+function paySave(){try{localStorage.setItem("hours:pay",JSON.stringify(PAY))}catch(e){}}
+function payE(k,w){var x=PAY[k];return x&&x.e[w]&&x.e[w].s>0?x.e[w].s:0}
+function payDayTot(k){var x=PAY[k],t=0;if(x)for(var w in x.e)t+=x.e[w].s>0?x.e[w].s:0;return t}
+function rub(v){return Math.round(v).toLocaleString("ru-RU").replace(/[   ]/g," ")+" ₽"}
+function rubK(v){return v>=1e6?(v/1e6).toFixed(1).replace(".",",")+"м":v>=1e4?Math.round(v/1e3)+"к":v>=1e3?(v/1e3).toFixed(1).replace(".",",")+"к":String(Math.round(v))}
+function payDay(y,m,d){var dim=new Date(y,m+1,0).getDate(),dt=new Date(y,m,Math.min(d,dim));for(var q=0;q<10;q++){var k=iso(dt),ck=calKind(k,dt.getDay());if(ck==="work"||ck==="short")break;dt.setDate(dt.getDate()-1)}return iso(dt)}
+function payKinds(y,m){var o={};["a1","s1","a2","s2"].forEach(function(w){var k=payDay(y,m,PK[w].d);(o[k]=o[k]||[]).push(w)});return o}   // день → какие выплаты ожидаются
+function payGot(k,w){for(var a=-4;a<=7;a++){var d=parseISO(k);d.setDate(d.getDate()+a);if(payE(iso(d),w))return true}return false}
+function payDues(){   // выплаты, которые уже пришли по графику (до 7 дней назад), а сумма не отмечена
+  var t=iso(now0),out=[];
+  [-1,0].forEach(function(dm){var b=new Date(now0.getFullYear(),now0.getMonth()+dm,1),ks=payKinds(b.getFullYear(),b.getMonth());
+    for(var k in ks){if(k>t)continue;var age=(parseISO(t)-parseISO(k))/864e5;if(age>7)continue;ks[k].forEach(function(w){if(!payGot(k,w))out.push({k:k,w:w})})}});
+  return out.sort(function(a,b){return a.k<b.k?1:-1});
+}
+function payMonth(y,m){var r={1:0,2:0,0:0,t:0},p=y+"-"+p2(m+1);for(var k in PAY)if(k.slice(0,7)===p)for(var w in PAY[k].e){var v=PAY[k].e[w].s;if(v>0){r[PK[w].w]+=v;r.t+=v}}return r}
+function payDraw(){
+  $("pmt").textContent=MN[PS.m]+" "+PS.y;
+  [].forEach.call($("pseg").children,function(b){b.classList.toggle("on",b.dataset.v===PS.v)});
+  $("pcal").hidden=PS.v!=="c";$("ptot").hidden=PS.v!=="t";
+  if(PS.v==="t"){payTotals();return}
+  var off=(new Date(PS.y,PS.m,1).getDay()+6)%7,dim=new Date(PS.y,PS.m+1,0).getDate(),h="",q,ks=payKinds(PS.y,PS.m),td=iso(now0);
+  for(q=0;q<off;q++)h+="<span></span>";
+  for(var d=1;d<=dim;d++){var dd=new Date(PS.y,PS.m,d),k=iso(dd),ck=calKind(k,dd.getDay()),a=payDayTot(k),ex=ks[k];
+    var lab=a?rubK(a):ex?ex.map(function(w){return(w[0]==="a"?"ав":"зп")+PK[w].w}).join(" "):"";
+    h+='<button class="c'+(a?" has":ex?" pd":"")+(k===PS.k?" sel":"")+(ck==="hol"||ck==="rest"?" nw":"")+(k===td?" tdy":"")+'" data-k="'+k+'"><b>'+d+'</b><i>'+lab+'</i></button>'}
+  $("pgr").innerHTML=h;
+  var r=payMonth(PS.y,PS.m);
+  $("psum").innerHTML=r.t?"Получено: <b>"+rub(r.t)+"</b>"+(r[1]&&r[2]?" · № 1 "+rub(r[1])+" · № 2 "+rub(r[2]):""):"Тап по дню — вписать поступление";
+}
+function payTotals(){
+  var y=PS.y,m=PS.m,r=payMonth(y,m),pm=new Date(y,m-1,1),pr=payMonth(pm.getFullYear(),pm.getMonth()),h="",MI=["январь","февраль","март","апрель","май","июнь","июль","август","сентябрь","октябрь","ноябрь","декабрь"],MP=["январю","февралю","марту","апрелю","маю","июню","июлю","августу","сентябрю","октябрю","ноябрю","декабрю"];
+  h+='<div class="pt-c"><div class="pt-r"><span>Работа № 1</span><span>'+rub(r[1])+'</span></div><div class="pt-r"><span>Работа № 2</span><span>'+rub(r[2])+'</span></div>'+(r[0]?'<div class="pt-r"><span>Другое</span><span>'+rub(r[0])+'</span></div>':'')+'<div class="pt-r tt"><span>Всего</span><span>'+rub(r.t)+'</span></div>';
+  if(pr.t&&r.t){var df=r.t-pr.t;h+='<div class="pt-d">'+(df===0?"Как в "+MI[pm.getMonth()].replace(/ь$/,"е").replace(/й$/,"е")+"":'<span class="'+(df>0?"up":"dn")+'">'+(df>0?"+":"−")+rub(Math.abs(df))+"</span> к "+MP[pm.getMonth()])+'</div>'}
+  var ks=payKinds(y,m),wait=[];for(var k in ks)ks[k].forEach(function(w){if(!payGot(k,w))wait.push(k+"|"+w)});wait.sort();
+  if(wait.length)h+='<div class="pt-w">Ожидается: '+wait.map(function(x){var p=x.split("|"),d=parseISO(p[0]);return pkShort(p[1])+" — "+d.getDate()+" "+MS[d.getMonth()]}).join(" · ")+'</div>';
+  h+='</div>';
+  var rows="",Y={1:0,2:0,0:0,t:0};
+  for(var mm=11;mm>=0;mm--){var x=payMonth(y,mm);if(!x.t)continue;Y[1]+=x[1];Y[2]+=x[2];Y[0]+=x[0];Y.t+=x.t;
+    rows+='<div class="pt-m" data-m="'+mm+'"><span><b>'+MN[mm]+'</b><small>'+[x[1]?"№ 1 "+rub(x[1]):"",x[2]?"№ 2 "+rub(x[2]):"",x[0]?"другое "+rub(x[0]):""].filter(Boolean).join(" · ")+'</small></span><b>'+rub(x.t)+'</b></div>'}
+  if(rows)h+='<div class="pt-h">'+y+' по месяцам</div><div class="pt-c">'+rows+'</div><div class="pt-h">Итого за '+y+'</div><div class="pt-c"><div class="pt-r"><span>Работа № 1</span><span>'+rub(Y[1])+'</span></div><div class="pt-r"><span>Работа № 2</span><span>'+rub(Y[2])+'</span></div>'+(Y[0]?'<div class="pt-r"><span>Другое</span><span>'+rub(Y[0])+'</span></div>':'')+'<div class="pt-r tt"><span>Всего</span><span>'+rub(Y.t)+'</span></div></div>';
+  $("ptot").innerHTML=h;
+}
+function payPick(k,w){
+  PS.k=k;var d=parseISO(k),ks=payKinds(d.getFullYear(),d.getMonth())[k]||[];
+  if(!w){w=ks.filter(function(x){return!payE(k,x)})[0]||ks[0]||PKO.filter(function(x){return payE(k,x)})[0]||"o"}
+  PS.w=w;
+  $("pch").innerHTML=PKO.map(function(x){return'<button data-w="'+x+'" class="'+(x===w?"on":"")+(payE(k,x)?" f":"")+'">'+pkShort(x)+'</button>'}).join("");
+  var a=payE(k,w);$("pinl").textContent=d.getDate()+" "+MG[d.getMonth()]+" · "+pkName(w)+(a?" · сейчас "+rub(a):"");
+  var prev=0;Object.keys(PAY).sort().forEach(function(x){if(x<k&&payE(x,w))prev=payE(x,w)});
+  var inp=$("pamt");inp.value=a?String(a).replace(/\B(?=(\d{3})+(?!\d))/g," "):"";inp.placeholder=prev?"как в прошлый раз: "+rub(prev):"Сумма, ₽";
+  $("pdel").disabled=!a;$("pin").hidden=false;payDraw();setTimeout(function(){try{inp.focus()}catch(e){}},60);
+}
+function payOpen(k,w){var d=k?parseISO(k):now0;PS.y=d.getFullYear();PS.m=d.getMonth();PS.k=null;PS.v="c";$("pin").hidden=true;payDraw();$("ps").classList.add("open");if(k)payPick(k,w)}
+function payClose(){$("ps").classList.remove("open");try{$("pamt").blur()}catch(e){}}
+function paySet(k,w,v){var x=PAY[k]||(PAY[k]={e:{}}),old=x.e[w]?{s:x.e[w].s,t:x.e[w].t}:null;if(v>0)x.e[w]={s:v,t:Date.now()};else x.e[w]={s:0,t:Date.now()};paySave();NTS="";ntRefresh();setTimeout(bkCheck,0);return old}
+function payUndo(k,w,old){var x=PAY[k]||(PAY[k]={e:{}});if(old)x.e[w]=old;else delete x.e[w];paySave();NTS="";ntRefresh()}
+$("payb").addEventListener("click",function(){payOpen(null)});
+$("psbd").addEventListener("click",payClose);
+$("pseg").addEventListener("click",function(e){var b=e.target.closest("button");if(!b)return;PS.v=b.dataset.v;PS.k=null;$("pin").hidden=true;payDraw()});
+$("ppm").addEventListener("click",function(){PS.m--;if(PS.m<0){PS.m=11;PS.y--}PS.k=null;$("pin").hidden=true;payDraw()});
+$("pnm").addEventListener("click",function(){PS.m++;if(PS.m>11){PS.m=0;PS.y++}PS.k=null;$("pin").hidden=true;payDraw()});
+$("pgr").addEventListener("click",function(e){var b=e.target.closest(".c");if(b)payPick(b.dataset.k)});
+$("pch").addEventListener("click",function(e){var b=e.target.closest("button");if(b&&PS.k)payPick(PS.k,b.dataset.w)});
+$("ptot").addEventListener("click",function(e){var r=e.target.closest(".pt-m");if(r){PS.m=+r.dataset.m;payDraw()}});
+$("pamt").addEventListener("input",function(){var el=this,v=el.value.replace(/\D/g,"").slice(0,9);el.value=v?v.replace(/\B(?=(\d{3})+(?!\d))/g," "):""});
+$("pamt").addEventListener("keydown",function(e){if(e.key==="Enter")$("pok").click()});
+$("pok").addEventListener("click",function(){
+  var k=PS.k,w=PS.w;if(!k||!w)return;var inp=$("pamt"),v=parseInt(inp.value.replace(/\D/g,""),10);
+  if(!v&&!inp.value&&/прошлый/.test(inp.placeholder)){var m=/(\d[\d  ]*)/.exec(inp.placeholder);if(m)v=parseInt(m[1].replace(/\D/g,""),10)}
+  if(!v){inp.focus();return}
+  var old=paySet(k,w,v),d=parseISO(k);haptic();payClose();
+  toast("💰 "+pkShort(w)+" · "+d.getDate()+" "+MG[d.getMonth()]+" · "+rub(v),function(){payUndo(k,w,old)},7000);
+});
+$("pdel").addEventListener("click",function(){
+  var k=PS.k,w=PS.w;if(!k||!payE(k,w))return;var old={s:PAY[k].e[w].s,t:PAY[k].e[w].t},d=parseISO(k);paySet(k,w,0);payClose();
+  toast("Удалено · "+pkShort(w)+" "+d.getDate()+" "+MG[d.getMonth()],function(){payUndo(k,w,old)},7000);
+});
 // ---- центр уведомлений: колокольчик справа на строке с датой ----
 var NT={h:[],seen:{},ack:{},bi:{n:0,t:0}},NTL=[],NTA=[],NTE=null,NTS="",NPOP=null,EPT=0;
 try{var nt0=JSON.parse(localStorage.getItem("hours:ntf")||"null");if(nt0){NT.h=nt0.h||[];NT.seen=nt0.seen||{};NT.ack=nt0.ack||{};NT.bi=nt0.bi||{n:0,t:0}}}catch(e){}
@@ -1350,6 +1474,7 @@ function ntLog(id,x){for(var q=0;q<NT.h.length;q++)if(NT.h[q].id===id)return;NT.
 function ntActs(){
   var a=[];
   if(MISS){var md=parseISO(MISS),dd=DN[(md.getDay()+6)%7];a.push({id:"miss:"+MISS,err:1,s:"⚠︎ Уход за "+dd,c:"⚠︎ Уход",x:"Не отмечен уход: "+dd+", "+md.getDate()+"."+p2(md.getMonth()+1),b:"Отметить уход",run:function(){$("miss").click()}})}
+  payDues().forEach(function(p){var d0=parseISO(p.k),today=p.k===iso(now0);a.push({id:"pay:"+p.w+":"+p.k,s:"💰 "+pkShort(p.w),x:(today?"Сегодня ":"")+pkName(p.w)+(today?"":" — "+d0.getDate()+" "+MG[d0.getMonth()])+". Отметьте, сколько пришло",b:"Отметить сумму",run:function(){payOpen(p.k,p.w)}})});
   if(window.UPDF)a.push({id:"upd:"+(window.UPDID||0),s:"Обновление",x:"Вышла новая версия РабУч",b:"Обновить",run:function(){window.UPDF()}});
   if(!$("bkr").hidden)a.push({id:"bk:"+(BK||"0"),s:"Копия данных",c:"Копия",x:"Давно не было копии данных — сохраните файл, чтобы ничего не потерять",b:"Сохранить копию",run:function(){$("bkr").click()}});
   if(!$("moved").hidden)a.push({id:"moved",s:"Переехали",x:"Трекер переехал в «РабУч» на экране «Домой». Здесь — только запасная копия, отметки сюда не вносите",b:"Открыть РабУч",run:function(){window.open($("moved").href,"_blank")}});
@@ -1473,7 +1598,7 @@ function wcCheck(){
   var n=wkStreak(),tx="Неделя закрыта"+(n>1?" · "+n+"-я подряд":" 🎉");
   try{if(!reduced)$("ring").animate([{filter:"drop-shadow(0 0 0 rgba(94,234,212,0))"},{filter:"drop-shadow(0 0 16px rgba(94,234,212,1))"},{filter:"drop-shadow(0 0 0 rgba(94,234,212,0))"}],{duration:1400,easing:"ease-in-out"})}catch(e){}
   haptic();setTimeout(haptic,140);if(window.ntLog)ntLog("wc:"+k,tx);
-  var tries=0;(function show(){if((SPLON||$("toast").classList.contains("show"))&&tries++<40){setTimeout(show,500);return}toast(tx,function(){shareWeek(n)},9000,"Поделиться")})();
+  var tries=0;(function show(){if((SPLON||$("toast").classList.contains("show")||document.querySelector(".sh.open"))&&tries++<240){setTimeout(show,500);return}toast(tx,function(){shareWeek(n)},9000,"Поделиться")})();
 }
 function shareWeek(n){
   var M=MODEL,c=document.createElement("canvas"),W=1080,H=1350;c.width=W;c.height=H;var g=c.getContext("2d");

@@ -26,7 +26,6 @@ body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.4 -apple-system,
 main{max-width:480px;margin:0 auto;padding:16px}
 h1{font-size:calc(15px*var(--ts,1));font-weight:600;color:var(--ink);margin:4px 0 12px;display:flex;justify-content:space-between;align-items:center}
 .sy{font:inherit;font-size:calc(13px*var(--ts,1));background:none;border:0;color:var(--mute);padding:2px 0 2px 8px;cursor:pointer}.sy[data-st="off"]{color:var(--over)}
-.ev{margin-left:auto;font-size:calc(13px*var(--ts,1));font-weight:500;color:var(--mute);white-space:nowrap}
 .sytx{font-size:calc(13px*var(--ts,1));color:var(--mute);margin:-6px 0 10px}
 @keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
 @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(94,234,212,.55)}100%{box-shadow:0 0 0 12px rgba(94,234,212,0)}}
@@ -85,8 +84,6 @@ input[type=time]:focus{outline:none;border-color:var(--ok);box-shadow:0 0 0 3px 
 .toast{position:fixed;left:50%;bottom:calc(22px + env(safe-area-inset-bottom,0px));z-index:30;display:flex;align-items:center;gap:6px;padding:6px 6px 6px 16px;border-radius:14px;background:#14201b;color:#eaf6f2;font-size:calc(15px*var(--ts,1));box-shadow:0 8px 28px rgba(0,0,0,.28);opacity:0;transform:translate(-50%,16px);pointer-events:none;transition:opacity .25s,transform .3s cubic-bezier(.2,.8,.2,1);white-space:nowrap}
 .toast.show{opacity:1;transform:translate(-50%,0);pointer-events:auto}
 .toast button{font:inherit;font-size:calc(15px*var(--ts,1));font-weight:500;color:#5eead4;background:none;border:0;padding:8px 10px;cursor:pointer}
-.miss{display:block;width:100%;text-align:left;font:inherit;font-size:calc(14px*var(--ts,1));color:var(--k-err);background:var(--k-err-bg);border:0;border-radius:12px;padding:10px 14px;margin:0 0 10px;cursor:pointer}.miss[hidden]{display:none}
-.miss.bkr{color:var(--ink);background:var(--card);border:1px solid var(--line)}
 .sum .day input.need{border-color:var(--k-err);box-shadow:0 0 0 1px var(--k-err)}
 .dl{display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin-top:12px;padding-top:10px;border-top:1px solid var(--line)}.fri .dl{border-color:rgba(255,255,255,.16)}
 .dl .k{font-size:calc(13px*var(--ts,1));color:var(--mute)}
@@ -101,7 +98,7 @@ input[type=time]:focus{outline:none;border-color:var(--ok);box-shadow:0 0 0 3px 
 .chip.over{background:var(--k-over-bg);color:var(--k-over)}.chip.under{background:var(--k-under-bg);color:var(--k-under)}.chip.err{background:var(--k-err-bg);color:var(--k-err)}.chip.n{background:var(--k-glass);color:var(--k-mute)}
 .day[hidden]{display:none}
 .hr{display:flex;align-items:baseline;gap:8px}
-.tb{pointer-events:none;font:inherit;font-size:calc(16px*var(--ts,1));line-height:1;background:none;border:0;color:var(--mute);opacity:.6;padding:2px 4px;cursor:pointer}
+.demj{font-size:calc(16px*var(--ts,1));line-height:1;padding:2px 4px;opacity:.85}.demj:empty{display:none}
 .day.void .row,.day.void .dl{display:none}
 .day.void .hd{margin-bottom:0}
 .marks{position:absolute;right:0;top:0;display:flex;flex-direction:column;align-items:flex-end;gap:4px}
@@ -139,9 +136,6 @@ input[type=time]:focus{outline:none;border-color:var(--ok);box-shadow:0 0 0 3px 
 .c.nw b{color:var(--mute)}.c.tdy b{color:var(--ok);font-weight:700}
 .c.sel{background:var(--tint);box-shadow:inset 0 0 0 1.5px var(--ok)}
 .emok{margin-top:12px}.emok[hidden]{display:none}.emok button{width:100%;height:50px;font:inherit;font-size:calc(17px*var(--ts,1));font-weight:600;color:var(--go-ink);background:var(--go-bg);border:0;border-radius:14px;cursor:pointer}
-.em[hidden]{display:none}.em{display:flex;justify-content:space-between;gap:8px;margin-top:12px}
-.em button{flex:1;font-size:26px;background:var(--bg);border:1px solid var(--line);border-radius:14px;padding:8px 0;cursor:pointer;transition:transform .15s}
-.em button:active{transform:scale(.9)}
 #sl{text-align:center;color:var(--mute);font-size:calc(14px*var(--ts,1));margin-top:10px}
 .pn.hp{max-height:92vh;overflow:auto}
 .seg{display:flex;gap:6px;margin:4px 0 10px}
@@ -152,6 +146,7 @@ input[type=time]:focus{outline:none;border-color:var(--ok);box-shadow:0 0 0 3px 
 .ym span{font-size:calc(12px*var(--ts,1));color:var(--mute);display:block;margin-bottom:3px}
 .yg{display:grid;grid-template-columns:repeat(7,1fr);gap:2px}
 .yg i{aspect-ratio:1;border-radius:2px}
+.c.pre,.hc.v-pre{opacity:.28;pointer-events:none}.yg i.v-pre{opacity:.25}
 .v-over{background:rgba(245,158,11,.85)}.v-ok{background:rgba(45,212,191,.8)}.v-under{background:rgba(148,163,184,.75)}.v-type{background:rgba(129,140,248,.35)}.v-hol{background:rgba(148,163,184,.2)}.v-none{box-shadow:inset 0 0 0 1px var(--mute);opacity:.75}.v-fut{background:rgba(148,163,184,.1)}
 .hg{display:grid;grid-template-columns:repeat(7,1fr);gap:3px}
 .hc.v-over b,.hc.v-ok b{color:#0b1f1a}.c.sel2{box-shadow:0 0 0 2px var(--ok)}
@@ -177,7 +172,7 @@ input[type=time]:focus{outline:none;border-color:var(--ok);box-shadow:0 0 0 3px 
 .sum .day .d,.sum .day .lr,.sum .day .dl .k{color:var(--k-mute)}
 .sum .day input[type=time]{background:var(--k-glass);border-color:var(--k-glass-b);color:var(--k-ink)}
 .sum .day input[type=time]:focus{border-color:var(--k-acc);box-shadow:0 0 0 3px var(--k-acc-bg)}
-.sum .day .tb{color:var(--k-ink)}
+
 .sum .day .dl{border-color:var(--k-faint)}
 .sum .day .dv.over{color:var(--k-over)}.sum .day .dv.under{color:var(--k-under)}.sum .day .dv.ok{color:var(--k-acc)}
 .strip{grid-column:1/-1;display:flex;justify-content:center;gap:4px;margin-top:4px}
@@ -204,7 +199,6 @@ input[type=time]:focus{outline:none;border-color:var(--ok);box-shadow:0 0 0 3px 
 .rst{margin-left:auto;font:inherit;font-size:calc(14px*var(--ts,1));color:var(--mute);background:none;border:1px solid var(--line);border-radius:10px;padding:8px 12px;transition:transform .15s,opacity .15s}
 
 /* 1.3: ничего не прыгает — место под кнопку, ровный ряд, центр уведомлений */
-#miss,#bkr,#moved,.ev{display:none!important}
 .go[hidden]{display:block!important;visibility:hidden;pointer-events:none}
 .set{display:grid;grid-template-columns:repeat(5,1fr);justify-items:center;gap:0}.set .rst{min-width:48px;min-height:44px;display:flex;align-items:center;justify-content:center}
 h1{position:relative;min-height:24px}
@@ -250,37 +244,46 @@ html,body{overflow-x:clip}.toast{width:max-content;max-width:calc(100vw - 24px);
 
 /* 1.8: 💰 зарплата — отметка поступлений в календаре */
 .set{grid-template-columns:repeat(6,1fr)}
-.psum{text-align:center;color:var(--mute);font-size:calc(14px*var(--ts,1));margin-top:10px;line-height:1.5}.psum b{color:var(--ink);font-weight:600}
-.pin{margin-top:12px;border-top:1px solid var(--line);padding-top:12px}.pin[hidden]{display:none}
-.pinl{font-size:calc(14px*var(--ts,1));color:var(--mute);margin-bottom:8px}
+
+/* 1.9: попапы — фон замирает, вся площадь ловит свайпы, закрытие свайпом (нижние — вниз, колокольчик — вверх) */
+html,body{overscroll-behavior:none}
+.sh .pn{max-height:92vh;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+.sh .pn::before{content:"";display:block;width:38px;height:5px;border-radius:3px;background:var(--line);margin:-6px auto 10px}
+.ncp{overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+.ncp::after{content:"";display:block;width:38px;height:5px;border-radius:3px;background:var(--line);margin:8px auto 8px}
+.pn.drag,.ncp.drag{transition:none!important}
+
+/* 1.9: 💰 — карточка как на главном, сетка 2×2, одно поле ввода, карандаш */
+.phc{background:var(--k-bg);color:var(--k-ink);box-shadow:var(--k-sh);border-radius:24px;padding:16px 18px 18px;text-align:center;cursor:pointer;-webkit-tap-highlight-color:transparent;margin-top:2px}
+.phc .l{font-size:calc(13px*var(--ts,1));opacity:.7}
+.phc .v{font-size:44px;font-weight:700;letter-spacing:-.02em;line-height:1.1;margin:4px 0 2px}
+.phc .d{font-size:calc(13px*var(--ts,1));opacity:.75;min-height:1.3em}.phc .d .up{color:var(--k-acc);opacity:1}.phc .d .dn{color:var(--k-over);opacity:1}
+.pgh{display:grid;grid-template-columns:1fr 1fr auto;align-items:center;gap:8px;margin:16px 2px 6px;font-size:calc(13px*var(--ts,1));color:var(--mute)}
+.pgh span{text-align:center}
+.ped{font:inherit;font-size:17px;width:36px;height:30px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--mute);cursor:pointer;padding:0}.ped.on{background:var(--tint);border-color:var(--ok);color:var(--ok)}
+.pgr{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.pq{position:relative;border:1px solid var(--line);background:var(--bg);border-radius:16px;padding:10px 12px 12px;min-height:84px;box-sizing:border-box;text-align:left;transition:background .3s,border-color .3s}
+.pq .t{font-size:calc(13px*var(--ts,1));color:var(--mute)}.pq .a{font-size:calc(20px*var(--ts,1));font-weight:700;letter-spacing:-.01em;margin-top:6px}
+.pq .a.w{font-size:calc(14px*var(--ts,1));font-weight:500;color:var(--mute)}.pq .a.m{font-size:calc(14px*var(--ts,1));font-weight:600;color:var(--over)}.pq .a.n{font-size:calc(14px*var(--ts,1));font-weight:500;color:var(--mute)}
+.pq.f{background:var(--tint);border-color:transparent}.pq.f::after{content:"✓";position:absolute;right:11px;top:9px;font-size:13px;color:var(--ok);font-weight:700}
+.pq.x{opacity:.45}.pq.tg{border-color:var(--ok);box-shadow:0 0 0 1px var(--ok)}
+.pq.vac{grid-column:1/-1;min-height:0}
+.pq input{display:block;width:100%;box-sizing:border-box;margin-top:6px;font:inherit;font-size:18px;font-weight:600;padding:7px 9px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--ink);-webkit-appearance:none}
+.pq input:focus{outline:none;border-color:var(--ok)}
+.pin{margin-top:14px;border-top:1px solid var(--line);padding-top:12px}.pin[hidden]{display:none}
+.pinl{font-size:calc(14px*var(--ts,1));color:var(--mute);margin-bottom:8px;text-align:center;line-height:1.4}
 .pin input{display:block;width:100%;box-sizing:border-box;font:inherit;font-size:28px;font-weight:700;letter-spacing:-.01em;padding:10px 14px;border:1px solid var(--line);border-radius:14px;background:var(--bg);color:var(--ink);text-align:center;-webkit-appearance:none}
+.pin input[hidden],.pin button[hidden]{display:none}
 .pin input:focus{outline:none;border-color:var(--ok);box-shadow:0 0 0 3px var(--tint)}
-.pinb{display:grid;grid-template-columns:1fr 2fr;gap:10px;margin-top:10px}
-.pinb button{height:48px;border-radius:14px;border:0;font:inherit;font-size:calc(16px*var(--ts,1));font-weight:600;cursor:pointer}
-.ph{text-align:center;padding:6px 0 14px;cursor:pointer;-webkit-tap-highlight-color:transparent}
-.ph-l{font-size:calc(14px*var(--ts,1));color:var(--mute)}
-.ph-v{font-size:40px;font-weight:700;letter-spacing:-.02em;line-height:1.15;margin:2px 0}
-.ph-d{font-size:calc(13px*var(--ts,1));color:var(--mute);min-height:1.2em}.ph-d .up{color:var(--ok)}.ph-d .dn{color:var(--over)}
-.pcd{display:flex;justify-content:space-between;align-items:center;gap:12px;width:100%;box-sizing:border-box;text-align:left;font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:16px;padding:12px 14px;margin-top:8px;cursor:pointer;transition:transform .15s}
-.pcd:active{transform:scale(.98)}.pcd.sel{border-color:var(--ok);box-shadow:0 0 0 1px var(--ok)}
-.pcd .t{font-size:calc(15px*var(--ts,1));font-weight:600}.pcd .d{font-size:calc(13px*var(--ts,1));color:var(--mute);margin-top:2px}
-.pcd .a{font-size:calc(17px*var(--ts,1));font-weight:700;white-space:nowrap}.pcd .a.w{font-weight:500;color:var(--mute);font-size:calc(14px*var(--ts,1))}.pcd .a.m{font-weight:500;color:var(--over);font-size:calc(14px*var(--ts,1))}
-.pcd.wait{opacity:.7}
-.padd[hidden]{display:none}.padd{display:block;margin:12px auto 2px;font:inherit;font-size:calc(15px*var(--ts,1));color:var(--ok);background:none;border:0;padding:8px 12px;cursor:pointer}
-#pdate{display:block;width:100%;box-sizing:border-box;margin-bottom:8px;font:inherit;font-size:17px;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:var(--bg);color:var(--ink);-webkit-appearance:none}#pdate[hidden]{display:none}
-#pdel{background:var(--bg);color:var(--mute);box-shadow:inset 0 0 0 1px var(--line)}#pdel[disabled]{opacity:.35}
-#pok{background:var(--go-bg);color:var(--go-ink)}
+.pbt{display:block;width:100%;height:48px;margin-top:10px;border-radius:14px;border:0;font:inherit;font-size:calc(16px*var(--ts,1));font-weight:600;background:var(--go-bg);color:var(--go-ink);cursor:pointer}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.rise{opacity:1}}
 </style>
 </head>
 <body class="lean">
 <main>
-<h1><span id="wk"></span><span class="ev" id="ev"></span><button id="sy" class="sy">☁︎ …</button><button class="nb" id="nb" aria-label="Уведомления"><svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 16.5V11a6 6 0 0 1 12 0v5.5l1.6 2H4.4z"/><path d="M10 21a2.1 2.1 0 0 0 4 0"/></svg><i></i></button><button class="np" id="np"></button></h1>
+<h1><span id="wk"></span><button id="sy" class="sy">☁︎ …</button><button class="nb" id="nb" aria-label="Уведомления"><svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 16.5V11a6 6 0 0 1 12 0v5.5l1.6 2H4.4z"/><path d="M10 21a2.1 2.1 0 0 0 4 0"/></svg><i></i></button><button class="np" id="np"></button></h1>
 <div class="sytx" id="sytx" hidden></div>
-<button class="miss" id="miss" hidden></button>
-<a class="miss bkr" id="moved" hidden href="https://heinrichstrochibaldo.github.io/rabuch/" target="_blank" rel="noopener" style="text-decoration:none">Трекер переехал в «РабУч» на экране «Домой». Здесь — только запасная копия, отметки сюда не вносите ›</a>
 <button class="miss bkr" id="empty" hidden>Данных пока нет · Восстановить из копии ›</button>
-<button class="miss bkr" id="bkr" hidden>Давно не было копии данных · Сохранить ›</button>
 <section class="sum rise" id="sum">
   <div class="ring">
     <svg viewBox="0 0 120 120"><circle class="trk" cx="60" cy="60" r="52"/><circle class="trk trk2" cx="60" cy="60" r="40"/><circle class="prg2" id="ring2" cx="60" cy="60" r="40"/><circle class="prg" id="ring" cx="60" cy="60" r="52"/></svg>
@@ -311,14 +314,13 @@ html,body{overflow-x:clip}.toast{width:max-content;max-width:calc(100vw - 24px);
   <div class="wd"><span>пн</span><span>вт</span><span>ср</span><span>чт</span><span>пт</span><span>сб</span><span>вс</span></div>
   <div id="gr"></div><div id="sl"></div>
   <div class="emok" id="emok" hidden><button id="okb"></button></div>
-  <div class="em" id="em" hidden><button data-t="vac">🌴</button><button data-t="sick">🤒</button><button data-t="off">💤</button><button data-t="x">➕</button><button data-t="">✖️</button></div>
 </div></div>
 <div class="sh" id="ps"><div class="bd" id="psbd"></div><div class="pn hp">
   <div class="shh"><button id="ppm">‹</button><span id="pmt"></span><button id="pnm">›</button></div>
-  <div class="ph" id="ph"><div class="ph-l" id="phl"></div><div class="ph-v" id="phv"></div><div class="ph-d" id="phd"></div></div>
-  <div id="plist"></div>
-  <button class="padd" id="padd">+ Другое поступление</button>
-  <div class="pin" id="pin" hidden><div class="pinl" id="pinl"></div><input type="date" id="pdate" hidden><input id="pamt" inputmode="numeric" autocomplete="off" placeholder="Сумма, ₽"><div class="pinb"><button id="pdel">Удалить</button><button id="pok">Сохранить</button></div></div>
+  <div class="phc" id="ph"><div class="l" id="phl"></div><div class="v" id="phv"></div><div class="d" id="phd"></div></div>
+  <div class="pgh"><span>Работа № 1</span><span>Работа № 2</span><button class="ped" id="ped" title="Править">✎</button></div>
+  <div class="pgr" id="pgrid"></div>
+  <div class="pin" id="pin"><div class="pinl" id="pinl"></div><input id="pamt" inputmode="numeric" autocomplete="off" placeholder="Сумма, ₽"><button class="pbt" id="pok">Внести</button></div>
 </div></div>
 <div class="sh" id="hs"><div class="bd" id="hsbd"></div><div class="pn hp">
   <div class="shh"><button id="hpv">‹</button><span id="ht"></span><button id="hnx">›</button></div>
@@ -336,7 +338,7 @@ function dynType(){var ts=1;try{if(window.CSS&&CSS.supports("font","-apple-syste
   if(document.documentElement.style.getPropertyValue("--ts")!==String(ts)){document.documentElement.style.setProperty("--ts",ts);return true}return false}
 dynType();
 var SPLON=!(window.matchMedia&&matchMedia("(prefers-reduced-motion:reduce)").matches)&&!document.hidden;if(SPLON)document.body.classList.add("splon");
-var VER="1.8",STANDALONE=!!(window.navigator.standalone||(window.matchMedia&&matchMedia("(display-mode: standalone)").matches));
+var VER="1.9",STANDALONE=!!(window.navigator.standalone||(window.matchMedia&&matchMedia("(display-mode: standalone)").matches));
 var NAMES=["Понедельник","Вторник","Среда","Четверг","Пятница","Суббота","Воскресенье"],START=480,END=990,BRK=30,MINP=270,N=480,C=326.73;   // MINP: минимум присутствия в рабочий день — 4,5 ч от прихода (обед вычитается как обычно)
 var reduced=window.matchMedia&&matchMedia("(prefers-reduced-motion:reduce)").matches;
 var now0=new Date();
@@ -349,7 +351,16 @@ normS();
 var TY={},TYPES={},INFO=[];
 function normTY(m){var r={};for(var k in (m||{})){var v=m[k];r[k]=(v&&typeof v==="object")?{v:v.v||"",t:v.t||0}:{v:v||"",t:0}}return r}
 function rebuildTypes(){TYPES={};for(var k in TY)if(TY[k].v)TYPES[k]=TY[k].v}
-try{TY=normTY(JSON.parse(localStorage.getItem("hours:types2")||localStorage.getItem("hours:types")||"{}"))}catch(e){TY={}}
+// начало учёта: всё до этой даты не существует (стёрто при обновлении 1.9)
+var EP="2026-09-21",EPY=2026,EPM=8;
+function epPurge(){try{if(localStorage.getItem("hours:ep")===EP)return;var del=[];
+  for(var q=0;q<localStorage.length;q++){var k=localStorage.key(q),m=/^hours:(\d{4}-\d{2}-\d{2})$/.exec(k);if(m&&m[1]<EP)del.push(k)}
+  del.forEach(function(k){localStorage.removeItem(k)});
+  var ty=JSON.parse(localStorage.getItem("hours:types2")||"{}"),tc=0;for(var tk in ty)if(tk<EP){delete ty[tk];tc++}if(tc)localStorage.setItem("hours:types2",JSON.stringify(ty));
+  var py=JSON.parse(localStorage.getItem("hours:pay")||"{}");for(var pk in py)if(pk<EP)delete py[pk];localStorage.setItem("hours:pay",JSON.stringify(py));
+  localStorage.setItem("hours:ep",EP)}catch(e){}}
+epPurge();
+try{TY=normTY(JSON.parse(localStorage.getItem("hours:types2")||"{}"))}catch(e){TY={}}
 rebuildTypes();
 function setTy(k,v){TY[k]={v:v||"",t:Date.now()};rebuildTypes();try{localStorage.setItem("hours:types2",JSON.stringify(TY))}catch(e){}schedule("types")}
 function setF(i,key,val){S.d[i][key]=val;S.t[i][key]=Date.now();save()}
@@ -370,7 +381,8 @@ WSAT["2027-02-20"]=1;
 function calKind(k,dow){if(HOL[k])return"hol";if((dow===0||dow===6)&&!WSAT[k])return"rest";return SHORT[k]?"short":"work"}
 function infoOf(i){return infoDate(new Date(mon.getFullYear(),mon.getMonth(),mon.getDate()+i))}
 function infoDate(d){
-  var k=iso(d),ck=calKind(k,d.getDay()),tp=TYPES[k];
+  var k=iso(d);if(k<EP)return{kind:"pre",k:k,norm:0};
+  var ck=calKind(k,d.getDay()),tp=TYPES[k];
   if(tp==="x"||tp==="xn")return{kind:"extra",counted:tp==="xn",k:k,tp:tp,norm:0};
   if(ck==="work"||ck==="short"){
     if(tp==="vac"||tp==="sick"||tp==="off")return{kind:"type",tp:tp,k:k,norm:0};
@@ -474,7 +486,7 @@ for(var i=0;i<7;i++){(function(i){
   var dt=new Date(mon.getFullYear(),mon.getMonth(),mon.getDate()+i);
   var c=document.createElement("div");c.className="day off"+(i==todayIdx?" today":"");
   var date=dt.getDate()+'.'+String(dt.getMonth()+1).padStart(2,"0");
-  c.innerHTML='<div class="hd"><span><span class="n">'+NAMES[i]+'</span><span class="d">'+date+'<span class="sx"></span></span></span><span class="hr"><button class="tb">⋯</button><i class="dot"></i><span class="tot">—</span></span></div>'+
+  c.innerHTML='<div class="hd"><span><span class="n">'+NAMES[i]+'</span><span class="d">'+date+'<span class="sx"></span></span></span><span class="hr"><span class="demj"></span><i class="dot"></i><span class="tot">—</span></span></div>'+
   '<div class="fbig"><div class="k">Прогноз ухода</div><div class="t">16:30</div><span class="sun"></span><br><span class="chip">как обычно</span>'+
   '<div class="marks"><label class="mk ma"><span>пришёл</span><i class="pk" title="вписать время">✎</i><input type="time" class="ai" required></label>'+
   '<label class="mk mb"><span>ушёл</span><i class="pk" title="вписать время">✎</i><input type="time" class="bi" required></label></div></div>'+
@@ -486,7 +498,7 @@ for(var i=0;i<7;i++){(function(i){
   var lab=c.querySelector(".lab");
   lab.addEventListener("click",function(){var f=INFO[i];if(f&&f.kind==="extra"){setTy(f.k,f.counted?"x":"xn");update()}});
   c.querySelector(".chip").addEventListener("click",function(){var f=INFO[i];if(f&&f.kind==="extra"){setTy(f.k,f.counted?"x":"xn");update()}});
-  els.push({c:c,inp:inp,ai:ai,tb:c.querySelector(".tb"),sx:c.querySelector(".sx"),tot:c.querySelector(".tot"),lab:lab,val:c.querySelector(".val"),fk:c.querySelector(".fbig .k"),ft:c.querySelector(".fbig .t"),sun:c.querySelector(".sun"),chip:c.querySelector(".chip"),ma:c.querySelector(".ma"),mb:c.querySelector(".mb"),fl:fl});
+  els.push({c:c,inp:inp,ai:ai,demj:c.querySelector(".demj"),sx:c.querySelector(".sx"),tot:c.querySelector(".tot"),lab:lab,val:c.querySelector(".val"),fk:c.querySelector(".fbig .k"),ft:c.querySelector(".fbig .t"),sun:c.querySelector(".sun"),chip:c.querySelector(".chip"),ma:c.querySelector(".ma"),mb:c.querySelector(".mb"),fl:fl});
 })(i)}
 function clearWeek(){
   var snap=JSON.parse(JSON.stringify(S.d)),tn=Date.now();for(var q=0;q<7;q++){S.d[q]={};S.t[q]={a:tn,b:tn}}
@@ -519,7 +531,6 @@ function evInfo(){
   if(TYPES[iso(t0)]!=="vac")for(n=1;n<=30;n++)if(TYPES[iso(D(n))]==="vac")return R("vac:"+iso(D(n)),n,n===1?"🌴 Завтра отпуск":"🌴 До отпуска "+dn(n));
   return null;
 }
-function evLine(){var e=evInfo();return e?e.t:""}
 // атмосфера: оттенок окна по ходу рабочего дня; после ухода — вечерний вид
 var ATM={w:-1,c:-1,e:null},ATMK=1;
 function atmos(nm){
@@ -541,7 +552,6 @@ function vacScreen(){
   for(var q=1;q<=120;q++){var d=new Date(t0.getFullYear(),t0.getMonth(),t0.getDate()+q),f=infoDate(d);if(f.kind==="work"){var m=Math.max(0,Math.round((new Date(d.getFullYear(),d.getMonth(),d.getDate(),START/60)-n)/60000)),dd=Math.floor(m/1440),r=$("rem");
     cancelAnimationFrame(r._r);r._v=null;setT(r,(dd?dd+" дн ":"")+hmm(m%1440));$("ms").style.display="none";setT($("rl"),"🌴 до выхода на работу");return}}
 }
-function bdf(r){return(r.cls==="over"||r.cls==="under"||r.cls==="ok")?r.df:0}
 function monthEnd(d){var x=new Date(d.getFullYear(),d.getMonth(),d.getDate()+1);while(x.getMonth()===d.getMonth()){if(infoDate(x).kind==="work")return false;x.setDate(x.getDate()+1)}return true}
 function bankPrev(mk){   // закрытые дни месяца mk до понедельника текущей недели
   if(BKC[mk]!=null)return BKC[mk];var p=mk.split("-"),mo=+p[1]-1,d=new Date(+p[0],mo,1),s=0,n=0;
@@ -580,7 +590,7 @@ function update(){
     e.ma.classList.toggle("emp",!ha);e.mb.classList.toggle("emp",!hb);var fu2=i>todayIdx;e.ma.classList.toggle("gone",fu2&&!ha);e.mb.classList.toggle("gone",(!nt&&!ha&&!hb)||(fu2&&!hb)||(!ha&&!hb&&!nt));e.c.classList.toggle("xd",k==="extra");
     var isV=(k==="type"||k==="hol");
     e.c.classList.toggle("void",isV);e.c.classList.toggle("fri",!!RIS[i]);e.c.classList.toggle("live",!!(r&&r.live));
-    setT(e.tb,k==="type"?EM[f.tp]:k==="extra"?"➕":"");
+    setT(e.demj,k==="type"?EM[f.tp]:k==="extra"?"➕":"");
     setT(e.sx,(k==="hol"?" · праздник":"")+(f.short?" · сокр.":"")+(k==="extra"?" · доп.":""));
     if(isV){
       setT(t,"");t._v=null;
@@ -693,7 +703,6 @@ function fmtR(k){var d=parseISO(k);return d.getDate()+" "+MS[d.getMonth()]}
 var TYN={vac:"🌴 Отпуск",sick:"🤒 Больничный",off:"💤 Отгул",x:"➕ Доп. день"};
 // выбор типа → календарь: тап — начало, второй тап — конец периода; тап по уже отмеченному этим типом дню — снять
 function openType(tp){SH.mode=tp;SH.a=SH.b=null;SH.fresh=true;SH.y=now0.getFullYear();SH.m=now0.getMonth();drawSheet();$("sh").classList.add("open")}
-function openSheet(k){SH.mode=null;SH.a=SH.b=k;SH.fresh=true;var d=parseISO(k);SH.y=d.getFullYear();SH.m=d.getMonth();drawSheet();$("sh").classList.add("open")}
 function isMode(k){var t=TYPES[k];return SH.mode==="x"?(t==="x"||t==="xn"):t===SH.mode}
 function closeSheet(){$("sh").classList.remove("open")}
 // предупреждение заранее: что в выбранном периоде останется, а что заменится (отгул → отпуск → больничный)
@@ -711,17 +720,15 @@ function drawSheet(){
   for(d=1;d<=dim;d++){
     var dd=new Date(SH.y,SH.m,d),k=iso(dd),ck=calKind(k,dd.getDay()),tp=TYPES[k];
     var em=(tp==="x"||tp==="xn")?"➕":tp?EM[tp]:ck==="hol"?"🎉":"";
-    h+='<button class="c'+(SH.a&&k>=SH.a&&k<=SH.b?" sel":"")+(ck==="hol"||ck==="rest"?" nw":"")+(k===td?" tdy":"")+'" data-k="'+k+'"><b>'+d+'</b><i>'+em+'</i></button>';
+    h+='<button class="c'+(k<EP?" pre":"")+(SH.a&&k>=SH.a&&k<=SH.b?" sel":"")+(ck==="hol"||ck==="rest"?" nw":"")+(k===td?" tdy":"")+'" data-k="'+k+'"><b>'+d+'</b><i>'+em+'</i></button>';
   }
   $("gr").innerHTML=h;
   if(SH.mode){var nm0=TYN[SH.mode];
     $("sl").textContent=!SH.a?nm0+" — выберите день или начало периода · тап по отмеченному дню снимает":fmtR(SH.a)+(SH.a===SH.b?" · второй тап — конец периода":" – "+fmtR(SH.b))+prioNote();
-    $("emok").hidden=!SH.a;$("em").hidden=true;if(SH.a)$("okb").textContent="Отметить: "+nm0;}
-  else{$("emok").hidden=true;$("em").hidden=false;
-  $("sl").textContent=fmtR(SH.a)+(SH.a===SH.b?(SH.fresh?"":" · второй тап — конец периода"):" – "+fmtR(SH.b));}
+    $("emok").hidden=!SH.a;if(SH.a)$("okb").textContent="Отметить: "+nm0;}
 }
 $("gr").addEventListener("click",function(e){
-  var b=e.target.closest(".c");if(!b)return;var k=b.dataset.k;
+  var b=e.target.closest(".c");if(!b||b.dataset.k<EP)return;var k=b.dataset.k;
   if(SH.mode&&(!SH.a||SH.a!==SH.b||SH.fresh)&&isMode(k)){var old=TY[k]?TY[k].v:"";setTy(k,"");SH.a=SH.b=null;SH.fresh=true;drawSheet();update();
     toast("Отметка снята · "+fmtR(k),function(){setTy(k,old);drawSheet();update()},6000);return}
   if(SH.mode&&!SH.a){SH.fresh=false;SH.a=SH.b=k}
@@ -729,11 +736,10 @@ $("gr").addEventListener("click",function(e){
   else if(SH.a===SH.b&&k!==SH.a){var a=SH.a;SH.a=a<k?a:k;SH.b=a<k?k:a}else{SH.a=SH.b=k}
   drawSheet();
 });
-$("pm").addEventListener("click",function(){SH.m--;if(SH.m<0){SH.m=11;SH.y--}drawSheet()});
+$("pm").addEventListener("click",function(){if(SH.y*12+SH.m<=EPY*12+EPM)return;SH.m--;if(SH.m<0){SH.m=11;SH.y--}drawSheet()});
 $("nm2").addEventListener("click",function(){SH.m++;if(SH.m>11){SH.m=0;SH.y++}drawSheet()});
 $("shbd").addEventListener("click",closeSheet);
 document.addEventListener("keydown",function(e){if(e.key==="Escape"){closeSheet();$("hs").classList.remove("open");if(window.payClose)payClose()}});
-$("em").addEventListener("click",function(e){var b=e.target.closest("button");if(b)applyT(b.dataset.t)});
 function applyT(tp){
   // приоритет: отгул → отпуск → больничный; старший тип младшим не перезаписывается
   var d=parseISO(SH.a),n=0,prev=[],tk=iso(now0),liveHit=false,RK={off:1,vac:2,sick:3},kept={},repl={};
@@ -857,6 +863,7 @@ function rec(d){
   var k=iso(d),idx=(d.getDay()+6)%7,mk=iso(mondayOf(d)),w=mk===iso(mon)?S:HW[mk],r=(w&&w.d&&w.d[idx])||{},f=infoDate(d);
   var o={k:k,f:f,a:r.a||"",b:r.b||"",cls:"",w:0,df:0,em:""};
   if(f.kind==="rest"){o.cls="rest";return o}
+  if(f.kind==="pre"){o.cls="pre";return o}
   if(f.kind==="hol"){o.cls="hol";o.em="🎉";return o}
   if(f.kind==="type"){o.cls="type";o.em=EM[f.tp];return o}
   var b=mins(r.b);
@@ -915,11 +922,12 @@ function hRender(keep){
     $("hb").innerHTML='<div class="wd">'+DN.map(function(x){return"<span>"+x+"</span>"}).join("")+'</div><div class="hg">'+h+'</div>';
     det=HS.sel&&HS.sel.slice(0,7)===HS.y+"-"+p2(HS.m+1)?hDetail(HS.sel):'<div class="hs">Отработано: <b>'+hm(sum)+'</b> · баланс <b>'+sg(bal)+'</b></div>';
   }else{
+    if(iso(HS.w)<EP)HS.w=parseISO(EP);
     var w0=HS.w,w6=new Date(w0.getFullYear(),w0.getMonth(),w0.getDate()+6);
     $("ht").textContent=fmtR(iso(w0))+" – "+fmtR(iso(w6));
     for(i=0;i<7;i++){
       d=new Date(w0.getFullYear(),w0.getMonth(),w0.getDate()+i);r=rec(d);sum+=r.w;if(counted(r))bal+=r.df;
-      if(r.cls==="rest"&&!r.b)continue;
+      if((r.cls==="rest"&&!r.b)||r.cls==="pre")continue;
       var mid=r.cls==="hol"?"🎉 праздник":r.cls==="type"?r.em+" "+LBL[r.f.tp]:r.b?(r.a||"08:00")+" – "+r.b:"—";
       var rt=r.inv?"⚠︎ проверьте":counted(r)?hm(r.w)+"<small>"+sg(r.df)+"</small>":"";
       h+='<button class="wr v-'+r.cls+'" data-k="'+r.k+'"><span><b>'+DN[i]+'</b> '+d.getDate()+'.'+p2(d.getMonth()+1)+'</span><span>'+mid+'</span><span>'+rt+'</span></button>';
@@ -932,9 +940,9 @@ function hRender(keep){
   else $("hd").innerHTML=det;
 }
 function hShift(n){
-  if(HS.v==="y")HS.y+=n;
-  else if(HS.v==="m"){HS.m+=n;if(HS.m<0){HS.m=11;HS.y--}if(HS.m>11){HS.m=0;HS.y++}}
-  else HS.w=new Date(HS.w.getFullYear(),HS.w.getMonth(),HS.w.getDate()+7*n);
+  if(HS.v==="y"){if(HS.y+n<EPY)return;HS.y+=n}
+  else if(HS.v==="m"){if(n<0&&HS.y*12+HS.m<=EPY*12+EPM)return;HS.m+=n;if(HS.m<0){HS.m=11;HS.y--}if(HS.m>11){HS.m=0;HS.y++}}
+  else{var nw=new Date(HS.w.getFullYear(),HS.w.getMonth(),HS.w.getDate()+7*n);if(iso(nw)<EP)return;HS.w=nw}
   HS.sel=null;hRender();
 }
 var PT={};
@@ -984,8 +992,8 @@ $("hseg").addEventListener("click",function(e){
   HS.v=nv;hRender();
 });
 $("hb").addEventListener("click",function(e){
-  var m=e.target.closest(".ym");if(m){HS.m=+m.dataset.m;HS.v="m";HS.sel=null;hRender();return}
-  var c=e.target.closest("[data-k]");if(c){HS.sel=HS.sel===c.dataset.k?null:c.dataset.k;hRender()}
+  var m=e.target.closest(".ym");if(m){if(HS.y*12+ +m.dataset.m<EPY*12+EPM)return;HS.m=+m.dataset.m;HS.v="m";HS.sel=null;hRender();return}
+  var c=e.target.closest("[data-k]");if(c&&c.dataset.k>=EP){HS.sel=HS.sel===c.dataset.k?null:c.dataset.k;hRender()}
 });
 function hEdit(e){var t=e.target;if(t.classList&&t.classList.contains("hin")){editDay(t.dataset.k,t.dataset.f,t.value);hRender(true)}}
 $("hd").addEventListener("input",hEdit);$("hd").addEventListener("change",hEdit);
@@ -996,7 +1004,7 @@ function defSel(){
   if(INFO[todayIdx]&&INFO[todayIdx].kind!=="rest")return todayIdx;
   var w=vis().filter(function(i){return i<5&&(INFO[i].kind==="work"||INFO[i].kind==="extra")});if(!w.length)w=vis().filter(function(i){return i<5});return w.length?w[w.length-1]:(vis()[0]||0);
 }
-var NAV={h:0,w:1};try{var nv0=JSON.parse(localStorage.getItem("hours:nav")||"null");if(nv0){NAV.h=nv0.h?1:0;NAV.w=nv0.w===0?0:1}}catch(e){}
+var NAV={h:1,w:0};try{localStorage.removeItem("hours:nav")}catch(e){}   // листание дней: влево-вправо, без перехода по кругу
 function navStep(from,dir){if(NAV.w)return cyc(from,dir);var v=vis(),p=v.indexOf(from);if(p<0)return from;var q=p+dir;return q<0||q>=v.length?from:v[q]}
 function cyc(from,dir){var v=vis(),p=v.indexOf(from);if(p<0||!v.length)return from;return v[((p+dir)%v.length+v.length)%v.length]}
 var FIT=0,FITSIG="";
@@ -1145,7 +1153,6 @@ $("go").addEventListener("click",function(){if(GOS==="back")goToday()});
   b.addEventListener("pointerup",end);b.addEventListener("pointercancel",end);
 })();
 var _sd=selectDay;selectDay=function(a,b,c){_sd(a,b,c);goBtn()};
-try{localStorage.removeItem("hours:theme")}catch(e){}   // тема всегда как в системе
 // тихий режим: через минуту без касаний тысячные и пульсация замирают, кадры не рисуются; касание — всё оживает
 var QUIET=false,lastAct=performance.now(),loopT=0;
 function wake(){lastAct=performance.now();if(!QUIET)return;QUIET=false;document.body.classList.remove("quiet");clearTimeout(loopT);if(!reduced)requestAnimationFrame(loop);telStart()}
@@ -1157,18 +1164,16 @@ var MISS=null,TU=null,TT=0;
 function checkMiss(){
   var m=null,q,d,r;
   for(q=1;q<=60&&!m;q++){d=new Date(now0.getFullYear(),now0.getMonth(),now0.getDate()-q);r=rec(d);if((r.f.kind==="work"||r.f.kind==="extra")&&r.a&&!r.b)m=r.k}
-  MISS=m;var b=$("miss");
-  if(!m){if(!b.hidden)b.hidden=true;return}
-  var md=parseISO(m),t="Не отмечен уход: "+DN[(md.getDay()+6)%7]+", "+md.getDate()+"."+p2(md.getMonth()+1)+" ›";
-  if(b.textContent!==t)b.textContent=t;b.hidden=false;
+  MISS=m;
 }
-$("bkr").addEventListener("click",function(){svOpen();svTab("d");saveFile()});
+var BKNEED=false,MOVED=!!(window.claude&&!STANDALONE);   // напоминание о копии; чат-версия после переезда в PWA
+function bkGo(){svOpen();svTab("d");saveFile()}
 $("empty").addEventListener("click",function(){svOpen();svTab("d");var fi=document.getElementById("svfile");if(fi){fi.value="";fi.click()}});
-$("miss").addEventListener("click",function(){
+function missGo(){
   if(!MISS)return;var d=parseISO(MISS);
   if(iso(mondayOf(d))===iso(mon)){var i=(d.getDay()+6)%7;if(i!==SEL)selectDay(i,i>SEL?1:-1,0)}
   else{HS.v="w";HS.w=mondayOf(d);HS.sel=MISS;HS.y=d.getFullYear();HS.m=d.getMonth();$("hs").classList.add("open");hRender();hLoad()}
-});
+}
 function toast(txt,undo,ms,lbl){TU=undo;$("tun").hidden=!undo;$("tun").textContent=lbl||"Отменить";$("ttx").textContent=txt;$("toast").classList.add("show");clearTimeout(TT);TT=setTimeout(function(){$("toast").classList.remove("show");TU=null},ms||5000)}
 $("tun").addEventListener("click",function(){var u=TU;TU=null;clearTimeout(TT);$("toast").classList.remove("show");if(u)u()});
 // ---- служебный экран: данные, вид, отладка ----
@@ -1247,17 +1252,16 @@ async function saveFile(){
   catch(e){svMsg("Файлом не получилось — используйте копию текстом ниже.")}
 }
 // напоминание раз в неделю — только когда данные живут лишь на телефоне (без облака Claude)
-if(window.claude&&!STANDALONE)$("moved").hidden=false;   // чат-версия после переезда в PWA
 // напоминание: раз в неделю и только если после прошлой копии появились новые отметки (в отпуске — тишина)
 function bkCheck(){
-  var el=$("bkr"),em=$("empty");if(!el)return;if(SY.st!=="local"){el.hidden=true;em.hidden=true;return}
+  var em=$("empty");if(!em)return;if(SY.st!=="local"){BKNEED=false;em.hidden=true;return}
   var has=false,lc=0;
   try{for(var q=0;q<localStorage.length;q++){var k=localStorage.key(q);if(!/^hours:\d{4}-/.test(k))continue;var o=JSON.parse(localStorage.getItem(k))||{};
     if(hasData(o.d))has=true;(o.t||[]).forEach(function(x){if(x){if(x.a>lc)lc=x.a;if(x.b>lc)lc=x.b}})}}catch(e){}
   for(var tk in TY)if(TY[tk].t>lc)lc=TY[tk].t;
   try{for(var pk2 in PAY)for(var pw2 in PAY[pk2].e)if(PAY[pk2].e[pw2].t>lc)lc=PAY[pk2].e[pw2].t}catch(e){}
   var bt=BK?Date.parse(BK):0;
-  el.hidden=!(has&&(!BK||(Date.now()-bt>7*864e5&&lc>bt)));
+  BKNEED=!!(has&&(!BK||(Date.now()-bt>7*864e5&&lc>bt)));
   em.hidden=has||Object.keys(TYPES).length>0;
   if(window.ntRefresh)ntRefresh();
 }
@@ -1340,7 +1344,7 @@ function svTab(t){
   [].forEach.call($("svseg").children,function(b){b.classList.toggle("on",b.dataset.v===t)});
   var h="";
   if(t==="d")h='<div class="tel">Копия — файл со всеми отметками и отпусками. Сохраните его в «Файлы», чтобы ничего не потерять и перенести данные на другой телефон.'+(BK?' Последняя копия: <b>'+fmtR(BK.slice(0,10))+' '+BK.slice(0,4)+'</b>.':' Копий ещё не было.')+'</div>'+(window.claude?'<div class="tel">В чате Claude файлом сохранить нельзя — используйте копию текстом.</div><div id="svmsg" class="tel"></div>':'<div class="sv-row"><button class="svb" data-a="fsave">Сохранить копию файлом</button><button class="svb" data-a="fload">Восстановить из файла</button></div><input type="file" id="svfile" accept=".json,application/json,text/plain" hidden><div id="svmsg" class="tel"></div><div class="tel" style="margin-top:14px">Запасной путь — текстом (для переноса из чата Claude):</div>')+'<div class="sv-row"><button class="svb" data-a="exp">Сделать копию</button><button class="svb" data-a="imp">Восстановить из копии</button></div><textarea id="svta" rows="5"></textarea><div class="sv-row"><button class="svb" data-a="copy">Скопировать</button><button class="svb" data-a="apply">Применить</button></div><div class="sv-row" style="margin-top:14px"><button class="svb" data-a="clrw">Очистить неделю</button></div><div class="tel">Очистку можно отменить в течение 10 секунд.<br>Производственный календарь: 2026 и 2027 — утверждённые, 2028 — предварительный (без переносов января), обновить осенью 2027.<br>Версия '+VER+(STANDALONE?' · приложение на экране «Домой»':'')+'.</div>';
-  else h='<canvas id="telc"></canvas><div class="tel" id="tels"></div><div class="sv-row"><button class="svb" data-a="trep">Скопировать отчёт</button><button class="svb" data-a="tclr">Очистить</button><button class="svb" data-a="hap">Проверить отклик</button><button class="svb" data-a="snd">Звуки: '+(SND?"вкл":"выкл")+'</button></div><div class="sv-row"><button class="svb" data-a="navh">Листание: '+(NAV.h?"влево-вправо":"вверх-вниз")+'</button><button class="svb" data-a="navw">Кольцом: '+(NAV.w?"вкл":"выкл")+'</button></div><div class="sv-row"><button class="svb" data-a="bench">Автотест (80 с)</button></div><div class="tev" id="telb"></div><div class="tev" id="telev"></div><textarea id="svta" rows="5" style="display:none"></textarea><div id="svmsg" class="tel"></div>';
+  else h='<canvas id="telc"></canvas><div class="tel" id="tels"></div><div class="sv-row"><button class="svb" data-a="trep">Скопировать отчёт</button><button class="svb" data-a="tclr">Очистить</button><button class="svb" data-a="hap">Проверить отклик</button><button class="svb" data-a="snd">Звуки: '+(SND?"вкл":"выкл")+'</button></div><div class="sv-row"><button class="svb" data-a="bench">Автотест (80 с)</button></div><div class="tev" id="telb"></div><div class="tev" id="telev"></div><textarea id="svta" rows="5" style="display:none"></textarea><div id="svmsg" class="tel"></div>';
   $("svb").innerHTML=h;
   if(t==="t"){telRender();benchShow();SV.timer=setInterval(telRender,1000)}
 }
@@ -1371,94 +1375,154 @@ $("svb").addEventListener("click",async function(e){
   else if(a==="tclr"){TEL.ev=[];TEL.sec=[];try{localStorage.removeItem("hours:tel")}catch(x){}telRender();svMsg("Очищено.")}
   else if(a==="bench"){benchRun(BENCH.dur)}
   else if(a==="snd"){SND=!SND;try{localStorage.setItem("hours:snd",SND?"1":"0")}catch(x){}b.textContent="Звуки: "+(SND?"вкл":"выкл");if(SND){sndClick();setTimeout(sndChime,400)}}
-  else if(a==="navh"||a==="navw"){if(a==="navh")NAV.h=NAV.h?0:1;else NAV.w=NAV.w?0:1;try{localStorage.setItem("hours:nav",JSON.stringify(NAV))}catch(x){}b.textContent=a==="navh"?"Листание: "+(NAV.h?"влево-вправо":"вверх-вниз"):"Кольцом: "+(NAV.w?"вкл":"выкл");navApply()}
   else if(a==="hap"){haptic();setTimeout(haptic,160);setTimeout(haptic,320);svMsg("Три отклика отправлены. Если ничего не почувствовали: нужен iOS 18+, звук и вибрации включены, режим «Без звука» не мешает не всегда.")}
 });
 try{ensureHL()}catch(e){}
 
-// ---- 💰 деньги: две работы, по аванс и зарплате; отметка поступлений и итоги ----
-// формат: hours:pay = { "ГГГГ-ММ-ДД": { e: { a1|s1|a2|s2|o: {s:сумма,t:время} } } }; старый формат {s,t} читается как «Другое»
-var PK={a1:{n:"Аванс",w:1,d:30},s1:{n:"Зарплата",w:1,d:15},a2:{n:"Аванс",w:2,d:25},s2:{n:"Зарплата",w:2,d:10},o:{n:"Другое",w:0}},PKO=["a1","s1","a2","s2","o"];
-function pkName(w){return w==="o"?"Другое":PK[w].n+" · Работа № "+PK[w].w}
-function pkShort(w){return w==="o"?"Другое":PK[w].n+" № "+PK[w].w}
+// ---- 💰 деньги: две работы, аванс и зарплата, отпускные; одно поле ввода по очереди дат, карандаш для правки ----
+// hours:pay = { "ГГГГ-ММ-ДД": { e: { a1|s1|a2|s2|v|o: {s:сумма,t:время} } } }; v — отпускные (ключ — первый день отпуска)
+var PK={a1:{n:"Аванс",w:1,d:30},s1:{n:"Зарплата",w:1,d:15},a2:{n:"Аванс",w:2,d:25},s2:{n:"Зарплата",w:2,d:10},v:{n:"Отпускные",w:0},o:{n:"Другое",w:0}};
+var JST={1:"2026-09-30",2:"2026-10-09"};   // первые учитываемые выплаты: аванс № 1 30.09, зарплата № 2 10.10 (суббота → 9.10)
+function pkName(w){return w==="v"?"Отпускные":w==="o"?"Другое":PK[w].n+" · Работа № "+PK[w].w}
 function payNorm(o){var r={};if(!o||typeof o!=="object")return r;for(var k in o){if(!/^\d{4}-\d{2}-\d{2}$/.test(k))continue;var x=o[k];if(!x)continue;
   if(x.e&&typeof x.e==="object"){var e={};for(var w in x.e)if(PK[w]&&x.e[w]&&typeof x.e[w].s==="number")e[w]={s:x.e[w].s,t:x.e[w].t||0};r[k]={e:e}}
   else if(typeof x.s==="number")r[k]={e:x.s>0?{o:{s:x.s,t:x.t||0}}:{}}}return r}
 var PAY={};try{PAY=payNorm(JSON.parse(localStorage.getItem("hours:pay")||"{}"))}catch(e){PAY={}}
-var PS={y:0,m:0,k:null,w:null,v:"c"};
+(function(){var ch=false;for(var k in PAY)for(var w in PAY[k].e){var j=PK[w].w;if(j&&k<JST[j].replace(/\d\d$/,function(d){return p2(Math.max(1,+d-4))})){delete PAY[k].e[w];ch=true}}if(ch)try{localStorage.setItem("hours:pay",JSON.stringify(PAY))}catch(e){}})();   // всё до начала учёта — стереть
+var PS={y:0,m:0,md:"m",ed:false};
 function paySave(){try{localStorage.setItem("hours:pay",JSON.stringify(PAY))}catch(e){}}
-function payE(k,w){var x=PAY[k];return x&&x.e[w]&&x.e[w].s>0?x.e[w].s:0}
-function payDayTot(k){var x=PAY[k],t=0;if(x)for(var w in x.e)t+=x.e[w].s>0?x.e[w].s:0;return t}
+function payHas(k,w){var x=PAY[k];return!!(x&&x.e[w])}
+function payE(k,w){var x=PAY[k];return x&&x.e[w]?x.e[w].s:0}
 function rub(v){return Math.round(v).toLocaleString("ru-RU").replace(/[   ]/g," ")+" ₽"}
-function rubK(v){return v>=1e6?(v/1e6).toFixed(1).replace(".",",")+"м":v>=1e4?Math.round(v/1e3)+"к":v>=1e3?(v/1e3).toFixed(1).replace(".",",")+"к":String(Math.round(v))}
 function payDay(y,m,d){var dim=new Date(y,m+1,0).getDate(),dt=new Date(y,m,Math.min(d,dim));for(var q=0;q<10;q++){var k=iso(dt),ck=calKind(k,dt.getDay());if(ck==="work"||ck==="short")break;dt.setDate(dt.getDate()-1)}return iso(dt)}
-function payKinds(y,m){var o={};["a1","s1","a2","s2"].forEach(function(w){var k=payDay(y,m,PK[w].d);(o[k]=o[k]||[]).push(w)});return o}   // день → какие выплаты ожидаются
-function payGot(k,w){for(var a=-4;a<=7;a++){var d=parseISO(k);d.setDate(d.getDate()+a);if(payE(iso(d),w))return true}return false}
-function payDues(){   // выплаты, которые уже пришли по графику (до 7 дней назад), а сумма не отмечена
+function payDue(y,m,w){var k=payDay(y,m,PK[w].d);return k>=JST[PK[w].w]?k:null}   // дата выплаты в месяце или null, если раньше начала учёта
+function payFind(due,w){for(var a=-4;a<=7;a++){var d=parseISO(due);d.setDate(d.getDate()+a);var k=iso(d);if(payHas(k,w))return k}return null}   // где лежит отметка (в том числе старые записи из 1.8)
+function payChain(){   // все обычные выплаты с начала учёта по порядку дат, до следующего месяца включительно
+  var out=[],y=EPY,m=EPM,end=now0.getFullYear()*12+now0.getMonth()+1;
+  for(;y*12+m<=end;m++){if(m>11){m=0;y++}["s2","s1","a2","a1"].forEach(function(w){var k=payDue(y,m,w);if(k)out.push({k:k,w:w})})}
+  return out.sort(function(a,b){return a.k<b.k?-1:a.k>b.k?1:0});
+}
+function vacBlocks(){   // отпуска по отметкам 🌴: первый день и последний
+  var ks=Object.keys(TYPES).filter(function(k){return TYPES[k]==="vac"&&k>=EP}).sort(),out=[],cur=null;
+  ks.forEach(function(k){if(cur){var d=parseISO(cur.b),gap=0;d.setDate(d.getDate()+1);while(iso(d)<k&&gap<6){var f=infoDate(d);if(f.kind==="work")break;d.setDate(d.getDate()+1);gap++}if(iso(d)===k){cur.b=k;return}}cur={a:k,b:k};out.push(cur)});
+  return out;
+}
+function vacDue(a){var d=parseISO(a);d.setDate(d.getDate()-3);return iso(d)}   // не позднее чем за 3 дня до отпуска (ст. 136 ТК)
+function payItems(){   // всё, что ждёт ввода: голова очереди обычных выплат + отпускные в своём окне
+  var t=iso(now0),out=[],ch=payChain();
+  for(var q=0;q<ch.length;q++){var c=ch[q];if(!payFind(c.k,c.w)){out.push({k:c.k,w:c.w,open:(parseISO(c.k)-parseISO(t))/864e5<=3,chain:1});break}}
+  vacBlocks().forEach(function(b){if(payHas(b.a,"v"))return;var d0=(parseISO(b.a)-parseISO(t))/864e5;if(d0<=14&&d0>=-31)out.push({k:b.a,w:"v",open:true,vac:b})});
+  return out.sort(function(a,b){return(a.w==="v"?vacDue(a.k):a.k)<(b.w==="v"?vacDue(b.k):b.k)?-1:1});
+}
+function payTarget(){var it=payItems(),o=it.filter(function(x){return x.open});return o[0]||it[0]||null}
+function payDues(){   // для колокольчика: пора отметить
   var t=iso(now0),out=[];
-  [-1,0].forEach(function(dm){var b=new Date(now0.getFullYear(),now0.getMonth()+dm,1),ks=payKinds(b.getFullYear(),b.getMonth());
-    for(var k in ks){if(k>t)continue;var age=(parseISO(t)-parseISO(k))/864e5;if(age>7)continue;ks[k].forEach(function(w){if(!payGot(k,w))out.push({k:k,w:w})})}});
-  return out.sort(function(a,b){return a.k<b.k?1:-1});
+  payItems().forEach(function(x){
+    if(x.w==="v"){var dd=vacDue(x.k);if(dd<=t)out.push({k:x.k,w:"v",due:dd})}
+    else{var age=(parseISO(t)-parseISO(x.k))/864e5;if(age>=0)out.push({k:x.k,w:x.w,due:x.k})}
+  });
+  return out;
 }
 function payMonth(y,m){var r={1:0,2:0,0:0,t:0},p=y+"-"+p2(m+1);for(var k in PAY)if(k.slice(0,7)===p)for(var w in PAY[k].e){var v=PAY[k].e[w].s;if(v>0){r[PK[w].w]+=v;r.t+=v}}return r}
+function paySpan(f){var r={1:0,2:0,0:0,t:0};for(var k in PAY)if(f(k))for(var w in PAY[k].e){var v=PAY[k].e[w].s;if(v>0){r[PK[w].w]+=v;r.t+=v}}return r}
 var MPR=["январе","феврале","марте","апреле","мае","июне","июле","августе","сентябре","октябре","ноябре","декабре"],MDT=["январю","февралю","марту","апрелю","маю","июню","июлю","августу","сентябрю","октябрю","ноябрю","декабрю"];
-function payFind(due,w){for(var a=-4;a<=7;a++){var d=parseISO(due);d.setDate(d.getDate()+a);var k=iso(d);if(payE(k,w))return k}return null}   // где лежит отметка этой выплаты
+function dlt(df,to){return df?'<span class="'+(df>0?"up":"dn")+'">'+(df>0?"+":"−")+rub(Math.abs(df))+"</span> к "+to:"столько же, сколько в "+to}
+function payHero(){
+  var y=PS.y,m=PS.m,h="",l="",v=0;
+  if(PS.md==="m"){var r=payMonth(y,m);l="Получено в "+MPR[m];v=r.t;var parts=[];
+    var pm=new Date(y,m-1,1);if(pm.getFullYear()*12+pm.getMonth()>=EPY*12+EPM){var pr=payMonth(pm.getFullYear(),pm.getMonth());if(pr.t&&r.t)parts.push(dlt(r.t-pr.t,MDT[pm.getMonth()]))}
+    var ly=payMonth(y-1,m);if(ly.t&&r.t)parts.push(dlt(r.t-ly.t,MDT[m]+" "+(y-1)));h=parts.join(" · ");}
+  else if(PS.md==="y"){var Y=paySpan(function(k){return k.slice(0,4)===String(y)});l="Получено за "+y+" год";v=Y.t;
+    var P=paySpan(function(k){return k.slice(0,4)===String(y-1)});h=P.t&&Y.t?dlt(Y.t-P.t,String(y-1)):Y.t?"Работа № 1 — "+rub(Y[1])+" · Работа № 2 — "+rub(Y[2]):"";}
+  else{var A=paySpan(function(){return true});l="Получено за всё время";v=A.t;h="с 21 сентября 2026"+(A.t?" · № 1 — "+rub(A[1])+" · № 2 — "+rub(A[2]):"");}
+  $("phl").textContent=l;$("phv").textContent=rub(v);$("phd").innerHTML=h||"&nbsp;";
+}
+function payCell(k,w,tg){   // одна карточка: заголовок, дата, сумма или состояние
+  var t=iso(now0),d=k?parseISO(k):null,at=k?payFind(k,w):null,cls="pq",st="";
+  if(!k){cls+=" x";st='<div class="a n">—</div>'}
+  else if(at){var v=payE(at,w);cls+=" f";st='<div class="a'+(v?"":" n")+'">'+(v?rub(v):"не было")+'</div>'}
+  else if(k<=t){st='<div class="a m">не отмечено</div>'}
+  else st='<div class="a w">ожидается</div>';
+  if(tg&&k&&tg.k===k&&tg.w===w)cls+=" tg";
+  var head=(w==="v"?"Отпускные":PK[w].n)+(d?" · "+d.getDate()+" "+MS[d.getMonth()]:"");
+  if(PS.ed&&k){var cur=at?payE(at,w):"";st='<input data-k="'+(at||k)+'" data-w="'+w+'" inputmode="numeric" value="'+(at?String(cur).replace(/\B(?=(\d{3})+(?!\d))/g," "):"")+'" placeholder="—">'}
+  return'<div class="'+cls+(w==="v"?" vac":"")+'" data-k="'+(k||"")+'" data-w="'+w+'"><div class="t">'+head+'</div>'+st+'</div>';
+}
 function payDraw(){
-  $("pmt").textContent=MN[PS.m]+" "+PS.y;
-  var r=payMonth(PS.y,PS.m);
-  if(PS.yr){var Y={1:0,2:0,0:0,t:0};for(var mm=0;mm<12;mm++){var x=payMonth(PS.y,mm);Y[1]+=x[1];Y[2]+=x[2];Y[0]+=x[0];Y.t+=x.t}
-    $("phl").textContent="Получено за "+PS.y+" год";$("phv").textContent=rub(Y.t);
-    $("phd").textContent=Y.t?["Работа № 1 — "+rub(Y[1]),"Работа № 2 — "+rub(Y[2])].concat(Y[0]?["другое — "+rub(Y[0])]:[]).join(" · "):"";}
-  else{$("phl").textContent="Получено в "+MPR[PS.m];$("phv").textContent=rub(r.t);
-    var pm=new Date(PS.y,PS.m-1,1),pr=payMonth(pm.getFullYear(),pm.getMonth()),df=r.t-pr.t;
-    $("phd").innerHTML=pr.t&&r.t&&df?'<span class="'+(df>0?"up":"dn")+'">'+(df>0?"+":"−")+rub(Math.abs(df))+"</span> к "+MDT[pm.getMonth()]:"&nbsp;";}
-  // карточки: 4 выплаты месяца по датам + «другое»
-  var ks=payKinds(PS.y,PS.m),items=[],td=iso(now0),h="";
-  for(var k in ks)ks[k].forEach(function(w){var at=payFind(k,w);items.push({k:at||k,due:k,w:w,a:at?payE(at,w):0})});
-  var pfx=PS.y+"-"+p2(PS.m+1);for(var k2 in PAY)if(k2.slice(0,7)===pfx&&payE(k2,"o"))items.push({k:k2,due:k2,w:"o",a:payE(k2,"o")});
-  items.sort(function(a,b){return a.due<b.due?-1:a.due>b.due?1:0});
-  items.forEach(function(it){var d=parseISO(it.k),st=it.a?'<span class="a">'+rub(it.a)+'</span>':it.due<=td?'<span class="a m">не отмечено</span>':'<span class="a w">ожидается</span>';
-    h+='<button class="pcd'+(it.a?"":" wait")+(PS.k===it.k&&PS.w===it.w?" sel":"")+'" data-k="'+it.k+'" data-w="'+it.w+'"><span><div class="t">'+(it.w==="o"?"Другое поступление":pkName(it.w))+'</div><div class="d">'+WDN[d.getDay()]+", "+d.getDate()+" "+MG[d.getMonth()]+'</div></span>'+st+'</button>'});
-  $("plist").innerHTML=h;
+  $("pmt").textContent=MN[PS.m]+" "+PS.y;payHero();
+  var y=PS.y,m=PS.m,tg=payTarget(),h="";
+  h+=payCell(payDue(y,m,"a1"),"a1",tg)+payCell(payDue(y,m,"a2"),"a2",tg)+payCell(payDue(y,m,"s1"),"s1",tg)+payCell(payDue(y,m,"s2"),"s2",tg);
+  vacBlocks().forEach(function(b){var d=parseISO(b.a);if(d.getFullYear()===y&&d.getMonth()===m){var e=parseISO(b.b),dd=parseISO(vacDue(b.a));
+    var c=payCell(b.a,"v",tg).replace('<div class="t">Отпускные · '+d.getDate()+" "+MS[d.getMonth()]+'</div>','<div class="t">Отпускные · отпуск '+d.getDate()+(d.getMonth()!==e.getMonth()?" "+MS[d.getMonth()]:"")+"–"+e.getDate()+" "+MS[e.getMonth()]+" · не позднее "+dd.getDate()+" "+MS[dd.getMonth()]+'</div>');h+=c}});
+  $("pgrid").innerHTML=h;$("ped").classList.toggle("on",PS.ed);
+  var inp=$("pamt"),ok=$("pok"),lab=$("pinl");
+  if(PS.ed){lab.textContent="Правка: пустое поле — без отметки, 0 — выплаты не было";inp.hidden=true;ok.hidden=false;ok.textContent="Готово";return}
+  ok.textContent="Внести";
+  if(!tg){lab.textContent="Все выплаты отмечены";inp.hidden=true;ok.hidden=true;return}
+  var td=parseISO(tg.k),nm=tg.w==="v"?"Отпускные · отпуск с "+td.getDate()+" "+MG[td.getMonth()]:pkName(tg.w)+" · "+td.getDate()+" "+MG[td.getMonth()];
+  if(!tg.open){var op=new Date(td);op.setDate(op.getDate()-3);lab.innerHTML="Следующая: <b>"+nm+"</b><br>внести можно с "+op.getDate()+" "+MG[op.getMonth()];inp.hidden=true;ok.hidden=true;return}
+  lab.innerHTML="<b>"+nm+"</b>";inp.hidden=false;ok.hidden=false;
+  var prev=0;Object.keys(PAY).sort().forEach(function(x){if(x<tg.k&&payE(x,tg.w))prev=payE(x,tg.w)});
+  inp.placeholder=prev?"как в прошлый раз: "+rub(prev):"Сумма, ₽";
 }
-var WDN=["воскресенье","понедельник","вторник","среда","четверг","пятница","суббота"];
-function payPick(k,w){
-  PS.k=k;PS.w=w||"o";var d=parseISO(k),a=payE(k,PS.w);
-  $("pinl").textContent=(PS.w==="o"?"Другое поступление":pkName(PS.w))+(PS.w==="o"?"":" · "+d.getDate()+" "+MG[d.getMonth()]);
-  var dt=$("pdate");dt.hidden=PS.w!=="o";dt.value=k;
-  var prev=0;Object.keys(PAY).sort().forEach(function(x){if(x<k&&payE(x,PS.w))prev=payE(x,PS.w)});
-  var inp=$("pamt");inp.value=a?String(a).replace(/\B(?=(\d{3})+(?!\d))/g," "):"";inp.placeholder=prev&&PS.w!=="o"?"как в прошлый раз: "+rub(prev):"Сумма, ₽";
-  $("pdel").disabled=!a;$("pin").hidden=false;$("padd").hidden=true;payDraw();
-  setTimeout(function(){try{inp.focus()}catch(e){};try{$("pin").scrollIntoView({block:"nearest",behavior:"smooth"})}catch(e){}},60);
-}
-function payOpen(k,w){var d=k?parseISO(k):now0;PS.y=d.getFullYear();PS.m=d.getMonth();PS.k=null;PS.w=null;PS.yr=false;$("pin").hidden=true;$("padd").hidden=false;payDraw();$("ps").classList.add("open");if(k)payPick(k,w)}
-function payClose(){$("ps").classList.remove("open");try{$("pamt").blur()}catch(e){}}
-function payReset(){PS.k=null;PS.w=null;$("pin").hidden=true;$("padd").hidden=false;payDraw()}
-function paySet(k,w,v){var x=PAY[k]||(PAY[k]={e:{}}),old=x.e[w]?{s:x.e[w].s,t:x.e[w].t}:null;x.e[w]={s:v>0?v:0,t:Date.now()};paySave();NTS="";ntRefresh();setTimeout(bkCheck,0);return old}
-function payUndo(k,w,old){var x=PAY[k]||(PAY[k]={e:{}});if(old)x.e[w]=old;else delete x.e[w];paySave();NTS="";ntRefresh()}
+function payOpen(k,w){var d=k?parseISO(k):now0;PS.y=d.getFullYear();PS.m=d.getMonth();if(PS.y*12+PS.m<EPY*12+EPM){PS.y=EPY;PS.m=EPM}PS.md="m";PS.ed=false;$("pamt").value="";payDraw();$("ps").classList.add("open");
+  if(k&&!$("pamt").hidden)setTimeout(function(){try{$("pamt").focus()}catch(e){}},300)}
+function payClose(){$("ps").classList.remove("open");PS.ed=false;try{$("pamt").blur()}catch(e){}}
+function paySet(k,w,v){var x=PAY[k]||(PAY[k]={e:{}}),old=x.e[w]?{s:x.e[w].s,t:x.e[w].t}:null;if(v===null)delete x.e[w];else x.e[w]={s:v,t:Date.now()};paySave();return old}
+function payDone(){NTS="";ntRefresh();setTimeout(bkCheck,0);payDraw()}
 $("payb").addEventListener("click",function(){payOpen(null)});
 $("psbd").addEventListener("click",payClose);
-$("ph").addEventListener("click",function(){PS.yr=!PS.yr;payDraw()});
-$("ppm").addEventListener("click",function(){PS.m--;if(PS.m<0){PS.m=11;PS.y--}payReset()});
-$("pnm").addEventListener("click",function(){PS.m++;if(PS.m>11){PS.m=0;PS.y++}payReset()});
-$("plist").addEventListener("click",function(e){var b=e.target.closest(".pcd");if(!b)return;if(PS.k===b.dataset.k&&PS.w===b.dataset.w){payReset();return}payPick(b.dataset.k,b.dataset.w)});
-$("padd").addEventListener("click",function(){var t=iso(now0),k=t.slice(0,7)===PS.y+"-"+p2(PS.m+1)?t:iso(new Date(PS.y,PS.m,1));payPick(k,"o")});
-$("pamt").addEventListener("input",function(){var el=this,v=el.value.replace(/\D/g,"").slice(0,9);el.value=v?v.replace(/\B(?=(\d{3})+(?!\d))/g," "):""});
+$("ph").addEventListener("click",function(){PS.md=PS.md==="m"?"y":PS.md==="y"?"a":"m";payHero()});
+$("ppm").addEventListener("click",function(){if(PS.y*12+PS.m<=EPY*12+EPM)return;PS.m--;if(PS.m<0){PS.m=11;PS.y--}PS.ed=false;payDraw()});
+$("pnm").addEventListener("click",function(){PS.m++;if(PS.m>11){PS.m=0;PS.y++}PS.ed=false;payDraw()});
+$("ped").addEventListener("click",function(){PS.ed=!PS.ed;payDraw()});   // повторный тап — выйти без сохранения
+$("pgrid").addEventListener("input",function(e){var el=e.target;if(el.tagName!=="INPUT")return;var v=el.value.replace(/\D/g,"").slice(0,9);el.value=v?v.replace(/^0+(?=\d)/,"").replace(/\B(?=(\d{3})+(?!\d))/g," "):""});
+$("pamt").addEventListener("input",function(){var el=this,v=el.value.replace(/\D/g,"").slice(0,9);el.value=v?v.replace(/^0+(?=\d)/,"").replace(/\B(?=(\d{3})+(?!\d))/g," "):""});
 $("pamt").addEventListener("keydown",function(e){if(e.key==="Enter")$("pok").click()});
 $("pok").addEventListener("click",function(){
-  var k=PS.k,w=PS.w;if(!k||!w)return;if(w==="o"&&/^\d{4}-\d{2}-\d{2}$/.test($("pdate").value))k=$("pdate").value;
-  var inp=$("pamt"),v=parseInt(inp.value.replace(/\D/g,""),10);
-  if(!v&&!inp.value&&/прошлый/.test(inp.placeholder)){var m=/(\d[\d  ]*)/.exec(inp.placeholder);if(m)v=parseInt(m[1].replace(/\D/g,""),10)}
-  if(!v){inp.focus();return}
-  if(w==="o"&&k!==PS.k&&payE(PS.k,"o")){payUndo(PS.k,"o",null)}   // «другое» перенесли на другую дату
-  var old=paySet(k,w,v),d=parseISO(k);haptic();
-  var dk=parseISO(k);PS.y=dk.getFullYear();PS.m=dk.getMonth();payReset();
-  toast("💰 "+(w==="o"?"Другое":pkShort(w))+" · "+d.getDate()+" "+MG[d.getMonth()]+" · "+rub(v),function(){payUndo(k,w,old);if($("ps").classList.contains("open"))payDraw()},7000);
+  if(PS.ed){   // «Готово»: сохранить все поля
+    var ch=[];[].forEach.call($("pgrid").querySelectorAll("input"),function(el){var k=el.dataset.k,w=el.dataset.w,raw=el.value.replace(/\D/g,""),v=raw===""?null:parseInt(raw,10),cur=payHas(k,w)?payE(k,w):null;
+      if(v!==cur)ch.push([k,w,paySet(k,w,v)])});
+    PS.ed=false;payDone();if(ch.length){haptic();toast("💰 Исправлено: "+ch.length,function(){ch.forEach(function(c){var x=PAY[c[0]]||(PAY[c[0]]={e:{}});if(c[2])x.e[c[1]]=c[2];else delete x.e[c[1]]});paySave();payDone()},7000)}
+    return}
+  var tg=payTarget();if(!tg||!tg.open)return;var inp=$("pamt"),raw=inp.value.replace(/\D/g,""),v=raw===""?NaN:parseInt(raw,10);
+  if(isNaN(v)&&/прошлый/.test(inp.placeholder)){var mm=/(\d[\d  ]*)/.exec(inp.placeholder);if(mm)v=parseInt(mm[1].replace(/\D/g,""),10)}
+  if(isNaN(v)){inp.focus();return}
+  var old=paySet(tg.k,tg.w,v),d=parseISO(tg.k);haptic();inp.value="";
+  PS.y=d.getFullYear();PS.m=d.getMonth();payDone();
+  toast("💰 "+(tg.w==="v"?"Отпускные":PK[tg.w].n+" № "+PK[tg.w].w)+" · "+(v?rub(v):"не было"),function(){var x=PAY[tg.k];if(old)x.e[tg.w]=old;else delete x.e[tg.w];paySave();payDone()},7000);
 });
-$("pdel").addEventListener("click",function(){
-  var k=PS.k,w=PS.w;if(!k||!payE(k,w))return;var old={s:PAY[k].e[w].s,t:PAY[k].e[w].t},d=parseISO(k);paySet(k,w,0);payReset();
-  toast("Удалено · "+(w==="o"?"Другое":pkShort(w))+" "+d.getDate()+" "+MG[d.getMonth()],function(){payUndo(k,w,old);if($("ps").classList.contains("open"))payDraw()},7000);
-});
+// ---- попапы: пока открыт любой, главный экран не листается; свайп по краю закрывает ----
+(function(){
+  var B=document.body;
+  function anyOpen(){return!!document.querySelector(".sh.open,.nc.open")}
+  new MutationObserver(function(){B.classList.toggle("lock",anyOpen())}).observe(document.body,{subtree:true,attributes:true,attributeFilter:["class"]});
+  document.addEventListener("touchmove",function(e){
+    if(!B.classList.contains("lock"))return;
+    var p=e.target.closest&&e.target.closest(".sh.open .pn,.nc.open .ncp");
+    if(!p){e.preventDefault();return}                                   // фон и затемнение — не листаются
+    if(p.scrollHeight<=p.clientHeight+1&&!p.classList.contains("drag"))e.preventDefault();   // в окне нечего листать — пусть не тянет экран
+  },{passive:false});
+  function swipe(p,dir,close){   // dir: 1 — тянуть вниз (нижняя шторка), −1 — вверх (колокольчик сверху)
+    var st=null;
+    p.addEventListener("touchstart",function(e){if(e.touches.length!==1){st=null;return}var t=e.touches[0];st={x:t.clientX,y:t.clientY,t:Date.now(),d:0,on:false}},{passive:true});
+    p.addEventListener("touchmove",function(e){
+      if(!st)return;var t=e.touches[0],dy=t.clientY-st.y,dx=t.clientX-st.x;
+      if(!st.on){
+        if(Math.abs(dy)<8&&Math.abs(dx)<8)return;
+        var edge=dir>0?p.scrollTop<=0:p.scrollTop+p.clientHeight>=p.scrollHeight-1;
+        if(dy*dir>0&&Math.abs(dy)>Math.abs(dx)&&edge&&!(e.target.closest&&e.target.closest("input,textarea,select"))){st.on=true;p.classList.add("drag")}else{st=null;return}
+      }
+      e.preventDefault();st.d=Math.max(0,dy*dir);p.style.transform="translateY("+(dir*(st.d<120?st.d:120+(st.d-120)*.5))+"px)";
+    },{passive:false});
+    function end(){if(!st)return;var s0=st;st=null;if(!s0.on)return;p.classList.remove("drag");
+      var v=s0.d/Math.max(1,Date.now()-s0.t);
+      if(s0.d>90||v>.6){close();setTimeout(function(){p.style.transform=""},20)}else p.style.transform="";}
+    p.addEventListener("touchend",end);p.addEventListener("touchcancel",end);
+  }
+  [["sh",closeSheet],["hs",function(){$("hs").classList.remove("open")}],["sv",svClose],["ps",payClose]].forEach(function(x){var el=$(x[0]);if(el)swipe(el.querySelector(".pn"),1,x[1])});
+  swipe($("ncp"),-1,ncClose);
+})();
 // ---- центр уведомлений: колокольчик справа на строке с датой ----
 var NT={h:[],seen:{},ack:{},bi:{n:0,t:0}},NTL=[],NTA=[],NTE=null,NTS="",NPOP=null,EPT=0;
 try{var nt0=JSON.parse(localStorage.getItem("hours:ntf")||"null");if(nt0){NT.h=nt0.h||[];NT.seen=nt0.seen||{};NT.ack=nt0.ack||{};NT.bi=nt0.bi||{n:0,t:0}}}catch(e){}
@@ -1466,11 +1530,11 @@ function ntSave(){var lim=Date.now()-200*864e5;[NT.seen,NT.ack].forEach(function
 function ntLog(id,x){for(var q=0;q<NT.h.length;q++)if(NT.h[q].id===id)return;NT.h.unshift({id:id,t:Date.now(),x:x});if(NT.h.length>30)NT.h.length=30;ntSave()}
 function ntActs(){
   var a=[];
-  if(MISS){var md=parseISO(MISS),dd=DN[(md.getDay()+6)%7];a.push({id:"miss:"+MISS,err:1,s:"⚠︎ Уход за "+dd,c:"⚠︎ Уход",x:"Не отмечен уход: "+dd+", "+md.getDate()+"."+p2(md.getMonth()+1),b:"Отметить уход",run:function(){$("miss").click()}})}
-  payDues().forEach(function(p){var d0=parseISO(p.k),today=p.k===iso(now0);a.push({id:"pay:"+p.w+":"+p.k,s:"💰 "+pkShort(p.w),x:(today?"Сегодня ":"")+pkName(p.w)+(today?"":" — "+d0.getDate()+" "+MG[d0.getMonth()])+". Отметьте, сколько пришло",b:"Отметить сумму",run:function(){payOpen(p.k,p.w)}})});
+  if(MISS){var md=parseISO(MISS),dd=DN[(md.getDay()+6)%7];a.push({id:"miss:"+MISS,err:1,s:"⚠︎ Уход за "+dd,c:"⚠︎ Уход",x:"Не отмечен уход: "+dd+", "+md.getDate()+"."+p2(md.getMonth()+1),b:"Отметить уход",run:missGo})}
+  payDues().forEach(function(p){var d0=parseISO(p.due),today=p.due===iso(now0),vv=p.w==="v";a.push({id:"pay:"+p.w+":"+p.k,s:"💰 "+(vv?"Отпускные":PK[p.w].n+" № "+PK[p.w].w),x:vv?"Отпускные должны прийти не позже "+d0.getDate()+" "+MG[d0.getMonth()]+". Отметьте, сколько пришло":(today?"Сегодня ":"")+pkName(p.w)+(today?"":" — "+d0.getDate()+" "+MG[d0.getMonth()])+". Отметьте, сколько пришло",b:"Отметить сумму",run:function(){payOpen(p.k,p.w)}})});
   if(window.UPDF)a.push({id:"upd:"+(window.UPDID||0),s:"Обновление",x:"Вышла новая версия РабУч",b:"Обновить",run:function(){window.UPDF()}});
-  if(!$("bkr").hidden)a.push({id:"bk:"+(BK||"0"),s:"Копия данных",c:"Копия",x:"Давно не было копии данных — сохраните файл, чтобы ничего не потерять",b:"Сохранить копию",run:function(){$("bkr").click()}});
-  if(!$("moved").hidden)a.push({id:"moved",s:"Переехали",x:"Трекер переехал в «РабУч» на экране «Домой». Здесь — только запасная копия, отметки сюда не вносите",b:"Открыть РабУч",run:function(){window.open($("moved").href,"_blank")}});
+  if(BKNEED)a.push({id:"bk:"+(BK||"0"),s:"Копия данных",c:"Копия",x:"Давно не было копии данных — сохраните файл, чтобы ничего не потерять",b:"Сохранить копию",run:bkGo});
+  if(MOVED)a.push({id:"moved",s:"Переехали",x:"Трекер переехал в «РабУч» на экране «Домой». Здесь — только запасная копия, отметки сюда не вносите",b:"Открыть РабУч",run:function(){window.open("https://heinrichstrochibaldo.github.io/rabuch/","_blank")}});
   return a;
 }
 // копия: два захода без реакции — плашка уходит, остаётся точка на колокольчике; через неделю — снова плашка

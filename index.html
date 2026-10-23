@@ -257,7 +257,7 @@ html,body{overscroll-behavior:none}
 .phc{background:var(--k-bg);color:var(--k-ink);box-shadow:var(--k-sh);border-radius:24px;padding:16px 18px 18px;text-align:center;cursor:pointer;-webkit-tap-highlight-color:transparent;margin-top:2px}
 .phc .l{font-size:calc(13px*var(--ts,1));opacity:.7}
 .phc .v{font-size:44px;font-weight:700;letter-spacing:-.02em;line-height:1.1;margin:4px 0 2px}
-.phc .d{font-size:calc(13px*var(--ts,1));opacity:.75;min-height:1.3em}.phc .d .up{color:var(--k-acc);opacity:1}.phc .d .dn{color:var(--k-over);opacity:1}
+.phc .d{font-size:calc(13px*var(--ts,1));opacity:.75;min-height:1.3em;white-space:nowrap}.phc .d.j{opacity:.55;margin-top:2px}.phc .d{overflow:hidden;line-height:1.3}.phc .d .up{color:var(--k-acc);opacity:1}.phc .d .dn{color:var(--k-over);opacity:1}
 .pgh{display:grid;grid-template-columns:1fr 1fr auto;align-items:center;gap:8px;margin:16px 2px 6px;font-size:calc(13px*var(--ts,1));color:var(--mute)}
 .pgh span{text-align:center}
 .ped{font:inherit;font-size:17px;width:36px;height:30px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--mute);cursor:pointer;padding:0}.ped.on{background:var(--tint);border-color:var(--ok);color:var(--ok)}
@@ -276,6 +276,35 @@ html,body{overscroll-behavior:none}
 .pin input[hidden],.pin button[hidden]{display:none}
 .pin input:focus{outline:none;border-color:var(--ok);box-shadow:0 0 0 3px var(--tint)}
 .pbt{display:block;width:100%;height:48px;margin-top:10px;border-radius:14px;border:0;font:inherit;font-size:calc(16px*var(--ts,1));font-weight:600;background:var(--go-bg);color:var(--go-ink);cursor:pointer}
+
+/* 1.10: 🎬 просмотр — календарь, список, умный счётчик сезонов и серий */
+.set{grid-template-columns:repeat(7,1fr)}
+.wgr{display:grid;grid-template-columns:repeat(7,1fr);gap:3px}
+.c.wx{opacity:.28;pointer-events:none}.c .wdt{color:var(--ok);font-size:18px;line-height:.5;min-height:12px}
+.phc .v small{font-size:20px;font-weight:600;opacity:.7}
+.wr{display:flex;align-items:center;gap:10px;padding:10px 4px;border-bottom:1px solid var(--line);cursor:pointer;-webkit-tap-highlight-color:transparent}
+.wr .tx{flex:1;min-width:0}.wr .nm{font-weight:600;font-size:calc(15px*var(--ts,1));white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.wr .sb{font-size:calc(13px*var(--ts,1));color:var(--mute);margin-top:2px}
+.wpl{font:inherit;font-weight:700;font-size:calc(15px*var(--ts,1));min-width:54px;height:40px;border-radius:12px;border:0;background:var(--tint);color:var(--ok);cursor:pointer;flex:none}
+.wgh{font-size:calc(12px*var(--ts,1));color:var(--mute);text-transform:uppercase;letter-spacing:.05em;margin:14px 4px 0}
+.wem{text-align:center;color:var(--mute);padding:22px 0;font-size:calc(14px*var(--ts,1))}
+#wseg{margin-top:14px}#wcal[hidden],#wlist[hidden],#wnew[hidden],#wsr[hidden],#wq[hidden]{display:none}
+.win{position:sticky;bottom:calc(-16px - env(safe-area-inset-bottom,0px));background:var(--card);padding-bottom:calc(16px + env(safe-area-inset-bottom,0px));margin-bottom:calc(-16px - env(safe-area-inset-bottom,0px));z-index:2}
+.win #wq{font-size:18px;font-weight:500;text-align:left}
+#wsug .wr{padding:8px 4px}
+#wnew{margin-top:10px}.wnt{font-weight:600;font-size:calc(15px*var(--ts,1));margin-bottom:8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.wrw{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:8px;font-size:calc(14px*var(--ts,1));color:var(--mute)}
+.wni,.pin .wni{display:inline-block;width:64px;font:inherit;font-size:16px;font-weight:600;padding:6px 4px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);text-align:center;-webkit-appearance:none;box-shadow:none}
+.wp{position:fixed;inset:0;z-index:29;visibility:hidden;opacity:0;transition:opacity .2s,visibility 0s .2s}.wp.open{visibility:visible;opacity:1;transition:opacity .2s}
+.wp .bd{position:absolute;inset:0;background:rgba(0,0,0,.45)}
+.wpc{position:absolute;left:16px;right:16px;top:50%;transform:translateY(-50%) scale(.96);transition:transform .2s;max-width:440px;margin:0 auto;max-height:76vh;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;background:var(--card);color:var(--ink);border-radius:22px;padding:18px 16px;box-sizing:border-box;box-shadow:0 20px 60px rgba(0,0,0,.4)}
+.wp.open .wpc{transform:translateY(-50%)}
+.wpc h3{margin:0 0 4px;font-size:calc(19px*var(--ts,1));line-height:1.25}.wpc>.sb{color:var(--mute);font-size:calc(13px*var(--ts,1));margin-bottom:6px}
+.wpc .ln{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--line);font-size:calc(14px*var(--ts,1))}
+.wpc .ln>span:last-child{color:var(--mute);text-align:right;white-space:nowrap}.wpc .ln small{color:var(--mute);font-size:calc(12px*var(--ts,1))}.wpc .ln.wt{cursor:pointer}
+.wpc .pbt.sec{background:var(--bg);color:var(--ink);border:1px solid var(--line)}
+.wst{margin-top:12px;flex-wrap:wrap}.wst button{font-size:calc(13px*var(--ts,1));padding:7px 0;flex:1 1 40%}
+.wdel{display:block;margin:14px auto 0;font:inherit;font-size:calc(14px*var(--ts,1));color:var(--over);background:none;border:0;padding:8px 14px;cursor:pointer}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.rise{opacity:1}}
 </style>
 </head>
@@ -301,6 +330,7 @@ html,body{overscroll-behavior:none}
 <div class="set">
   <button class="rst" id="hist" style="margin-left:0" title="История">🗓</button>
   <button class="rst" id="payb" style="margin-left:0" title="Зарплата">💰</button>
+  <button class="rst" id="watb" style="margin-left:0" title="Просмотр">🎬</button>
   <button class="rst tyb" data-t="vac" style="margin-left:0" title="Отпуск">🌴</button>
   <button class="rst tyb" data-t="sick" style="margin-left:0" title="Больничный">🤒</button>
   <button class="rst tyb" data-t="off" style="margin-left:0" title="Отгул">💤</button>
@@ -317,11 +347,25 @@ html,body{overscroll-behavior:none}
 </div></div>
 <div class="sh" id="ps"><div class="bd" id="psbd"></div><div class="pn hp">
   <div class="shh"><button id="ppm">‹</button><span id="pmt"></span><button id="pnm">›</button></div>
-  <div class="phc" id="ph"><div class="l" id="phl"></div><div class="v" id="phv"></div><div class="d" id="phd"></div></div>
-  <div class="pgh"><span>Работа № 1</span><span>Работа № 2</span><button class="ped" id="ped" title="Править">✎</button></div>
+  <div class="phc" id="ph"><div class="l" id="phl"></div><div class="v" id="phv"></div><div class="d" id="phd"></div><div class="d j" id="phj"></div></div>
+  <div class="pgh"><span>Работа № 2</span><span>Работа № 1</span><button class="ped" id="ped" title="Править">✎</button></div>
   <div class="pgr" id="pgrid"></div>
   <div class="pin" id="pin"><div class="pinl" id="pinl"></div><input id="pamt" inputmode="numeric" autocomplete="off" placeholder="Сумма, ₽"><button class="pbt" id="pok">Внести</button></div>
 </div></div>
+<div class="sh" id="wsh"><div class="bd" id="wsbd"></div><div class="pn hp">
+  <div class="shh"><button id="wpm">‹</button><span id="wmt"></span><button id="wnm">›</button></div>
+  <div class="phc" id="wh"><div class="l" id="whl"></div><div class="v" id="whv"></div><div class="d" id="whd"></div><div class="d j" id="whj"></div></div>
+  <div class="seg" id="wseg"><button data-v="c">Календарь</button><button data-v="l">Список</button></div>
+  <div id="wcal"><div class="wd"><span>пн</span><span>вт</span><span>ср</span><span>чт</span><span>пт</span><span>сб</span><span>вс</span></div><div class="wgr" id="wgr"></div></div>
+  <div id="wlist" hidden><div class="seg" id="wkseg"><button data-k="f">Кино</button><button data-k="s">Сериалы</button><button data-k="a">Аниме</button></div><div id="wrows"></div></div>
+  <div class="pin win" id="win"><div class="pinl" id="winl"></div><div id="wsug"></div><input id="wq" autocomplete="off" autocorrect="off" enterkeyhint="done" placeholder="Название">
+    <div id="wnew" hidden><div class="wnt" id="wnt"></div><div class="seg" id="wty"><button data-k="f">Кино</button><button data-k="s">Сериал</button><button data-k="a">Аниме</button></div>
+      <div class="wrw"><span id="wdul">Серия, мин</span><input class="wni" id="wdu" inputmode="numeric"></div>
+      <div id="wsr"><div class="wrw"><span>Начинаю с сезона · серии</span><span><input class="wni" id="wss" inputmode="numeric" placeholder="1"> <input class="wni" id="wse" inputmode="numeric" placeholder="1"></span></div>
+      <div class="wrw"><span>Серий в сезоне</span><input class="wni" id="wsn" inputmode="numeric" placeholder="?"></div></div>
+      <button class="pbt" id="wadd">Добавить</button></div></div>
+</div></div>
+<div class="wp" id="wp"><div class="bd" id="wpbd"></div><div class="wpc" id="wpc"></div></div>
 <div class="sh" id="hs"><div class="bd" id="hsbd"></div><div class="pn hp">
   <div class="shh"><button id="hpv">‹</button><span id="ht"></span><button id="hnx">›</button></div>
   <div class="seg" id="hseg"><button data-v="y">Год</button><button data-v="m">Месяц</button><button data-v="w">Неделя</button></div>
@@ -338,7 +382,7 @@ function dynType(){var ts=1;try{if(window.CSS&&CSS.supports("font","-apple-syste
   if(document.documentElement.style.getPropertyValue("--ts")!==String(ts)){document.documentElement.style.setProperty("--ts",ts);return true}return false}
 dynType();
 var SPLON=!(window.matchMedia&&matchMedia("(prefers-reduced-motion:reduce)").matches)&&!document.hidden;if(SPLON)document.body.classList.add("splon");
-var VER="1.9",STANDALONE=!!(window.navigator.standalone||(window.matchMedia&&matchMedia("(display-mode: standalone)").matches));
+var VER="1.10.1",STANDALONE=!!(window.navigator.standalone||(window.matchMedia&&matchMedia("(display-mode: standalone)").matches));
 var NAMES=["Понедельник","Вторник","Среда","Четверг","Пятница","Суббота","Воскресенье"],START=480,END=990,BRK=30,MINP=270,N=480,C=326.73;   // MINP: минимум присутствия в рабочий день — 4,5 ч от прихода (обед вычитается как обычно)
 var reduced=window.matchMedia&&matchMedia("(prefers-reduced-motion:reduce)").matches;
 var now0=new Date();
@@ -1231,6 +1275,7 @@ function importData(o){
     if(ch){setTYall(TY);schedule("types")}f+=ch;
   }
   if(o.pay&&typeof o.pay==="object"){var ip=payNorm(o.pay),pc=0;for(var pk in ip){var L2=PAY[pk]||(PAY[pk]={e:{}});for(var pw in ip[pk].e){var iv=ip[pk].e[pw],lv=L2.e[pw];if(!lv||(iv.t||0)>(lv.t||0)){if(!lv||lv.s!==iv.s)pc++;L2.e[pw]={s:iv.s,t:iv.t||now}}}}if(pc){paySave();f+=pc}}
+  if(o.watch&&typeof o.watch==="object")f+=wMerge(o.watch);
   update();setTimeout(bkCheck,0);return{n:n,f:f};
 }
 var BK="";try{BK=localStorage.getItem("hours:bk")||""}catch(e){}
@@ -1238,7 +1283,7 @@ function bkMark(){BK=new Date().toISOString();try{localStorage.setItem("hours:bk
 async function backupText(){
   await loadWeeks();var weeks={};weeks[iso(mon)]={d:S.d,t:S.t};
   Object.keys(HW).forEach(function(k){if(k!==iso(mon)&&hasData(HW[k].d))weeks[k]={d:HW[k].d,t:HW[k].t}});
-  return{txt:JSON.stringify({app:"hours",v:1,saved:new Date().toISOString(),weeks:weeks,types:TY,pay:PAY}),n:Object.keys(weeks).length};
+  return{txt:JSON.stringify({app:"hours",v:1,saved:new Date().toISOString(),weeks:weeks,types:TY,pay:PAY,watch:WT}),n:Object.keys(weeks).length};
 }
 // копия файлом: меню «Поделиться» (→ Сохранить в Файлы); если нельзя — обычное скачивание
 async function saveFile(){
@@ -1260,6 +1305,7 @@ function bkCheck(){
     if(hasData(o.d))has=true;(o.t||[]).forEach(function(x){if(x){if(x.a>lc)lc=x.a;if(x.b>lc)lc=x.b}})}}catch(e){}
   for(var tk in TY)if(TY[tk].t>lc)lc=TY[tk].t;
   try{for(var pk2 in PAY)for(var pw2 in PAY[pk2].e)if(PAY[pk2].e[pw2].t>lc)lc=PAY[pk2].e[pw2].t}catch(e){}
+  try{if(window.wLast)lc=Math.max(lc,wLast())}catch(e){}
   var bt=BK?Date.parse(BK):0;
   BKNEED=!!(has&&(!BK||(Date.now()-bt>7*864e5&&lc>bt)));
   em.hidden=has||Object.keys(TYPES).length>0;
@@ -1365,7 +1411,7 @@ $("svb").addEventListener("click",async function(e){
     svMsg("собираю…");await loadWeeks();
     var weeks={};weeks[iso(mon)]={d:S.d,t:S.t};
     Object.keys(HW).forEach(function(k){if(k!==iso(mon)&&hasData(HW[k].d))weeks[k]={d:HW[k].d,t:HW[k].t}});
-    ta.value=JSON.stringify({app:"hours",v:1,saved:new Date().toISOString(),weeks:weeks,types:TY,pay:PAY});
+    ta.value=JSON.stringify({app:"hours",v:1,saved:new Date().toISOString(),weeks:weeks,types:TY,pay:PAY,watch:WT});
     svMsg("Копия готова: недель "+Object.keys(weeks).length+", типов дней "+Object.keys(TY).length+". Нажмите «Скопировать».");
   }else if(a==="imp"){ta.value="";ta.focus();svMsg("Вставьте текст копии в поле и нажмите «Применить».")}
   else if(a==="copy"){if(!ta.value){svMsg("Сначала сделайте копию.");return}svCopy(ta.value,function(t){svMsg(t);bkMark()})}
@@ -1426,16 +1472,18 @@ function payDues(){   // для колокольчика: пора отмети�
 function payMonth(y,m){var r={1:0,2:0,0:0,t:0},p=y+"-"+p2(m+1);for(var k in PAY)if(k.slice(0,7)===p)for(var w in PAY[k].e){var v=PAY[k].e[w].s;if(v>0){r[PK[w].w]+=v;r.t+=v}}return r}
 function paySpan(f){var r={1:0,2:0,0:0,t:0};for(var k in PAY)if(f(k))for(var w in PAY[k].e){var v=PAY[k].e[w].s;if(v>0){r[PK[w].w]+=v;r.t+=v}}return r}
 var MPR=["январе","феврале","марте","апреле","мае","июне","июле","августе","сентябре","октябре","ноябре","декабре"],MDT=["январю","февралю","марту","апрелю","маю","июню","июлю","августу","сентябрю","октябрю","ноябрю","декабрю"];
-function dlt(df,to){return df?'<span class="'+(df>0?"up":"dn")+'">'+(df>0?"+":"−")+rub(Math.abs(df))+"</span> к "+to:"столько же, сколько в "+to}
+function dlt(df,to){return df?'<span class="'+(df>0?"up":"dn")+'">'+(df>0?"+":"−")+rub(Math.abs(df))+"</span> к "+to:"± 0 ₽ к "+to}
 function payHero(){
-  var y=PS.y,m=PS.m,h="",l="",v=0;
-  if(PS.md==="m"){var r=payMonth(y,m);l="Получено в "+MPR[m];v=r.t;var parts=[];
-    var pm=new Date(y,m-1,1);if(pm.getFullYear()*12+pm.getMonth()>=EPY*12+EPM){var pr=payMonth(pm.getFullYear(),pm.getMonth());if(pr.t&&r.t)parts.push(dlt(r.t-pr.t,MDT[pm.getMonth()]))}
-    var ly=payMonth(y-1,m);if(ly.t&&r.t)parts.push(dlt(r.t-ly.t,MDT[m]+" "+(y-1)));h=parts.join(" · ");}
-  else if(PS.md==="y"){var Y=paySpan(function(k){return k.slice(0,4)===String(y)});l="Получено за "+y+" год";v=Y.t;
-    var P=paySpan(function(k){return k.slice(0,4)===String(y-1)});h=P.t&&Y.t?dlt(Y.t-P.t,String(y-1)):Y.t?"Работа № 1 — "+rub(Y[1])+" · Работа № 2 — "+rub(Y[2]):"";}
-  else{var A=paySpan(function(){return true});l="Получено за всё время";v=A.t;h="с 21 сентября 2026"+(A.t?" · № 1 — "+rub(A[1])+" · № 2 — "+rub(A[2]):"");}
-  $("phl").textContent=l;$("phv").textContent=rub(v);$("phd").innerHTML=h||"&nbsp;";
+  var y=PS.y,m=PS.m,h="",l="",v=0,R;
+  if(PS.md==="m"){R=payMonth(y,m);l="Получено в "+MPR[m];v=R.t;
+    var pm=new Date(y,m-1,1);if(R.t&&pm.getFullYear()*12+pm.getMonth()>=EPY*12+EPM){var pr=payMonth(pm.getFullYear(),pm.getMonth());if(pr.t)h=dlt(R.t-pr.t,MDT[pm.getMonth()])}
+    var ly=payMonth(y-1,m);if(R.t&&ly.t)h=dlt(R.t-ly.t,MDT[m]+" "+(y-1));}
+  else if(PS.md==="y"){R=paySpan(function(k){return k.slice(0,4)===String(y)});l="Получено за "+y+" год";v=R.t;
+    var P=paySpan(function(k){return k.slice(0,4)===String(y-1)});if(P.t&&R.t)h=dlt(R.t-P.t,String(y-1)+" году");}
+  else{R=paySpan(function(){return true});l="Получено за всё время";v=R.t;h="с 21 сентября 2026";}
+  $("phl").textContent=l;$("phv").textContent=rub(v);$("phd").innerHTML=h||"—";
+  $("phj").textContent="№ 2 — "+rub(R[2])+" · № 1 — "+rub(R[1]);
+  ["phd","phj"].forEach(function(id){var e=$(id);e.style.fontSize="";if(e.scrollWidth>e.clientWidth+1)e.style.fontSize=(parseFloat(getComputedStyle(e).fontSize)*e.clientWidth/e.scrollWidth*.98).toFixed(1)+"px"});
 }
 function payCell(k,w,tg){   // одна карточка: заголовок, дата, сумма или состояние
   var t=iso(now0),d=k?parseISO(k):null,at=k?payFind(k,w):null,cls="pq",st="";
@@ -1451,7 +1499,7 @@ function payCell(k,w,tg){   // одна карточка: заголовок, д
 function payDraw(){
   $("pmt").textContent=MN[PS.m]+" "+PS.y;payHero();
   var y=PS.y,m=PS.m,tg=payTarget(),h="";
-  h+=payCell(payDue(y,m,"a1"),"a1",tg)+payCell(payDue(y,m,"a2"),"a2",tg)+payCell(payDue(y,m,"s1"),"s1",tg)+payCell(payDue(y,m,"s2"),"s2",tg);
+  h+=payCell(payDue(y,m,"s2"),"s2",tg)+payCell(payDue(y,m,"s1"),"s1",tg)+payCell(payDue(y,m,"a2"),"a2",tg)+payCell(payDue(y,m,"a1"),"a1",tg);   // по датам: 10 · 15 / 25 · 30
   vacBlocks().forEach(function(b){var d=parseISO(b.a);if(d.getFullYear()===y&&d.getMonth()===m){var e=parseISO(b.b),dd=parseISO(vacDue(b.a));
     var c=payCell(b.a,"v",tg).replace('<div class="t">Отпускные · '+d.getDate()+" "+MS[d.getMonth()]+'</div>','<div class="t">Отпускные · отпуск '+d.getDate()+(d.getMonth()!==e.getMonth()?" "+MS[d.getMonth()]:"")+"–"+e.getDate()+" "+MS[e.getMonth()]+" · не позднее "+dd.getDate()+" "+MS[dd.getMonth()]+'</div>');h+=c}});
   $("pgrid").innerHTML=h;$("ped").classList.toggle("on",PS.ed);
@@ -1492,14 +1540,172 @@ $("pok").addEventListener("click",function(){
   PS.y=d.getFullYear();PS.m=d.getMonth();payDone();
   toast("💰 "+(tg.w==="v"?"Отпускные":PK[tg.w].n+" № "+PK[tg.w].w)+" · "+(v?rub(v):"не было"),function(){var x=PAY[tg.k];if(old)x.e[tg.w]=old;else delete x.e[tg.w];paySave();payDone()},7000);
 });
+// ---- 🎬 просмотр в рабочее время: кино, сериалы, аниме; умный счётчик сезонов и серий ----
+// hours:watch = { t: { id: {n:название, k:"f|s|a", m:мин на фильм/серию, st:"w|p|d|x", ss:[серий в сезоне…], cs:текущий сезон, ce:последняя серия в нём, t:время} },
+//                 e: [ {id, d:"ГГГГ-ММ-ДД", s:сезон, e:серия, m:минут, t:время} ] }   — фильм: s=0, e=0
+var WK={f:"Кино",s:"Сериал",a:"Аниме"},WDEF={f:120,s:45,a:24},WSTN={w:"Смотрю",p:"Жду сезон",d:"Досмотрел",x:"Бросил"},WDN=["Вс","Пн","Вт","Ср","Чт","Пт","Сб"];
+function pl(n,a,b,c){var m=n%10,h=n%100;return n+" "+(m===1&&h!==11?a:m>=2&&m<=4&&(h<12||h>14)?b:c)}
+function wNorm(o){var r={t:{},e:[]};if(!o||typeof o!=="object")return r;
+  var t=o.t||{};for(var id in t){var x=t[id];if(!x||typeof x.n!=="string"||!x.n.trim()||!WK[x.k])continue;
+    r.t[id]={n:x.n.trim().slice(0,80),k:x.k,m:Math.max(1,Math.min(600,+x.m||WDEF[x.k])),st:WSTN[x.st]?x.st:(x.k==="f"?"d":"w"),ss:Array.isArray(x.ss)?x.ss.map(function(n){return Math.max(0,Math.min(999,+n||0))}):[],cs:Math.max(1,+x.cs||1),ce:Math.max(0,+x.ce||0),t:+x.t||0}}
+  (Array.isArray(o.e)?o.e:[]).forEach(function(e){if(e&&r.t[e.id]&&/^\d{4}-\d{2}-\d{2}$/.test(e.d))r.e.push({id:e.id,d:e.d,s:+e.s||0,e:+e.e||0,m:+e.m||r.t[e.id].m,t:+e.t||0})});
+  for(var k in r.t)wFix(r,k);return r}
+function wFix(r,id){var x=r.t[id];if(x.k==="f")return;r.e.forEach(function(e){if(e.id===id&&(e.s>x.cs||(e.s===x.cs&&e.e>x.ce))){x.cs=e.s;x.ce=e.e}})}   // указатель не отстаёт от отметок
+var WT={t:{},e:[]};try{WT=wNorm(JSON.parse(localStorage.getItem("hours:watch")||"{}"))}catch(e){WT={t:{},e:[]}}
+var WS={y:0,m:0,md:"m",v:"c",k:"s",day:null,nk:"s"};
+function wSave(){try{localStorage.setItem("hours:watch",JSON.stringify(WT))}catch(e){}setTimeout(bkCheck,0)}
+function wTm(m){m=Math.round(m);var h=Math.floor(m/60),r=m%60;return h?(h+" ч"+(r?" "+r+" мин":"")):r+" мин"}
+function wDd(k){var d=parseISO(k);return d.getDate()+" "+MS[d.getMonth()]}
+function wOK(k){if(!k||k<EP||k>iso(now0))return false;var f=infoDate(parseISO(k));return f.kind==="work"||f.kind==="extra"}   // только рабочие дни (и ➕ доп. дни)
+function wDay(){return wOK(WS.day)?WS.day:wOK(iso(now0))?iso(now0):null}
+function wNext(x){if(x.k==="f")return null;var s=x.cs,e=x.ce;if(x.ss[s-1]&&e>=x.ss[s-1]){s++;e=0}return{s:s,e:e+1}}
+function wPos(x){if(x.k==="f")return"";var n=x.ss[x.cs-1];return"С"+x.cs+" · "+(x.ce?"Е"+x.ce+(n?" из "+n:""):"не начат")}
+function wOf(id){return WT.e.filter(function(e){return e.id===id})}
+function wAdd(id,d){   // отметить фильм или следующую серию в день d; вернуть отмену
+  var x=WT.t[id],snap={cs:x.cs,ce:x.ce,st:x.st,t:x.t},en={id:id,d:d,s:0,e:0,m:x.m,t:Date.now()};
+  if(x.k!=="f"){var nx=wNext(x);x.cs=nx.s;x.ce=nx.e;en.s=nx.s;en.e=nx.e;x.st="w"}else x.st="d";
+  x.t=en.t;WT.e.push(en);wSave();haptic();
+  toast("🎬 "+x.n+(x.k==="f"?"":" · С"+en.s+" Е"+en.e),function(){var i=WT.e.indexOf(en);if(i>=0)WT.e.splice(i,1);x.cs=snap.cs;x.ce=snap.ce;x.st=snap.st;x.t=snap.t;wSave();wDraw()},7000);
+  wDraw();if(x.k!=="f"&&x.ss[x.cs-1]&&x.ce===x.ss[x.cs-1])setTimeout(function(){wSeasonEnd(id)},350);
+}
+// карточка-итог: часы крупно, названия по видам, серии и дни
+function wHero(){
+  var y=WS.y,m=WS.m,l,f;
+  if(WS.md==="m"){var p=y+"-"+p2(m+1);l="Просмотрено в "+MPR[m];f=function(k){return k.slice(0,7)===p}}
+  else if(WS.md==="y"){l="Просмотрено за "+y+" год";f=function(k){return k.slice(0,4)===String(y)}}
+  else{l="Просмотрено за всё время";f=function(){return true}}
+  var mi=0,ids={f:{},s:{},a:{}},ep=0,days={};
+  WT.e.forEach(function(e){if(!f(e.d))return;var x=WT.t[e.id];mi+=e.m;ids[x.k][e.id]=1;if(x.k!=="f")ep++;days[e.d]=1});
+  var nf=Object.keys(ids.f).length,ns=Object.keys(ids.s).length,na=Object.keys(ids.a).length,nd=Object.keys(days).length;
+  $("whl").textContent=l;$("whv").innerHTML=hmm(mi)+'<small> ч</small>';
+  $("whd").textContent=nf+ns+na?pl(nf,"фильм","фильма","фильмов")+" · "+pl(ns,"сериал","сериала","сериалов")+" · "+na+" аниме":(WS.md==="a"?"с 21 сентября 2026":"пока ничего");
+  $("whj").textContent=nd?pl(ep,"серия","серии","серий")+" · "+dn(nd):"—";
+  ["whd","whj"].forEach(function(id){var e=$(id);e.style.fontSize="";if(e.scrollWidth>e.clientWidth+1)e.style.fontSize=(parseFloat(getComputedStyle(e).fontSize)*e.clientWidth/e.scrollWidth*.98).toFixed(1)+"px"});
+}
+function wCal(){
+  var y=WS.y,m=WS.m,first=new Date(y,m,1),lead=(first.getDay()+6)%7,dim=new Date(y,m+1,0).getDate(),t=iso(now0),h="",has={};
+  WT.e.forEach(function(e){has[e.d]=1});
+  for(var q=0;q<lead;q++)h+="<span></span>";
+  for(var d=1;d<=dim;d++){var k=y+"-"+p2(m+1)+"-"+p2(d),cl="c";
+    if(!wOK(k)&&!has[k])cl+=" wx";if(k===t)cl+=" tdy";if(k===WS.day)cl+=" sel";
+    h+='<button class="'+cl+'" data-k="'+k+'"><b>'+d+'</b><i class="wdt">'+(has[k]?"•":"")+'</i></button>'}
+  $("wgr").innerHTML=h;
+}
+var WGO=["w","p","d","x"];
+function wRow(id,plus){var x=WT.t[id],o=wOf(id),mi=0;o.forEach(function(e){mi+=e.m});
+  var sb=x.k==="f"?(o.length?wTm(mi)+" · "+wDd(o[o.length-1].d)+(o.length>1?" · ×"+o.length:""):wTm(x.m)):wPos(x)+(mi?" · "+wTm(mi):"");
+  var b="";if(plus&&x.k==="f")b='<button class="wpl" data-a="'+id+'">ещё</button>';
+  else if(plus&&(x.st==="w"||x.st==="p")){var nx=wNext(x);b='<button class="wpl" data-a="'+id+'">+1</button>'}
+  return'<div class="wr" data-id="'+id+'"><div class="tx"><div class="nm">'+esc(x.n)+'</div><div class="sb">'+sb+'</div></div>'+b+'</div>'}
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
+function wList(){
+  var ok=!!wDay(),ids=Object.keys(WT.t).filter(function(id){return WT.t[id].k===WS.k}),h="";
+  ids.sort(function(a,b){var A=WT.t[a],B=WT.t[b];return WGO.indexOf(A.st)-WGO.indexOf(B.st)||B.t-A.t});
+  if(!ids.length)h='<div class="wem">Пока пусто — впишите название внизу</div>';
+  var g="";ids.forEach(function(id){var x=WT.t[id];if(x.k!=="f"&&x.st!==g){g=x.st;h+='<div class="wgh">'+WSTN[g]+'</div>'}h+=wRow(id,ok&&x.k!=="f")});
+  $("wrows").innerHTML=h;
+  [].forEach.call($("wkseg").children,function(b){b.classList.toggle("on",b.dataset.k===WS.k)});
+}
+function wInp(){   // поле внизу: подсказки по названию или новое
+  var d=wDay(),lab=$("winl"),q=$("wq"),v=q.value.trim(),lv=v.toLowerCase(),h="";
+  if(!d){lab.textContent="Сегодня не рабочий день — выберите рабочий день в календаре";q.hidden=true;$("wsug").innerHTML="";$("wnew").hidden=true;return}
+  q.hidden=false;var dd=parseISO(d);lab.innerHTML=(d===iso(now0)?"Отметить за сегодня":"Отметить за <b>"+WDN[dd.getDay()].toLowerCase()+", "+dd.getDate()+" "+MG[dd.getMonth()]+"</b>");
+  if(!v){$("wsug").innerHTML="";$("wnew").hidden=true;return}
+  var ids=Object.keys(WT.t).filter(function(id){return WT.t[id].n.toLowerCase().indexOf(lv)>=0}).sort(function(a,b){return WT.t[b].t-WT.t[a].t}).slice(0,4),ex=false;
+  ids.forEach(function(id){var x=WT.t[id];if(x.n.toLowerCase()===lv)ex=true;h+=wRow(id,true).replace('<div class="sb">','<div class="sb">'+WK[x.k]+" · ")});
+  $("wsug").innerHTML=h;$("wnew").hidden=ex;
+  if(!ex){$("wnt").textContent="Новое: «"+v+"»";[].forEach.call($("wty").children,function(b){b.classList.toggle("on",b.dataset.k===WS.nk)});
+    var ser=WS.nk!=="f";$("wsr").hidden=!ser;var du=$("wdu");if(!du.dataset.t)du.value=WDEF[WS.nk];$("wdul").textContent=ser?"Серия, мин":"Длительность, мин"}
+}
+function wDraw(){
+  $("wmt").textContent=MN[WS.m]+" "+WS.y;wHero();
+  [].forEach.call($("wseg").children,function(b){b.classList.toggle("on",b.dataset.v===WS.v)});
+  $("wcal").hidden=WS.v!=="c";$("wlist").hidden=WS.v!=="l";
+  if(WS.v==="c")wCal();else wList();wInp();
+}
+function wOpen(){WS.y=now0.getFullYear();WS.m=now0.getMonth();WS.md="m";WS.day=null;$("wq").value="";wDraw();$("wsh").classList.add("open")}
+function wClose(){$("wsh").classList.remove("open");wPopX();try{$("wq").blur()}catch(e){}}
+// маленькое окно поверх шторки
+function wPop(h){$("wpc").innerHTML=h;$("wpc").scrollTop=0;$("wp").classList.add("open")}
+function wPopX(){$("wp").classList.remove("open")}
+function wDayPop(k){
+  var d=parseISO(k),o=WT.e.filter(function(e){return e.d===k}),g={},ord=[],h="";
+  o.forEach(function(e){if(!g[e.id]){g[e.id]=[];ord.push(e.id)}g[e.id].push(e)});
+  h+='<h3>'+WDN[d.getDay()]+", "+d.getDate()+" "+MG[d.getMonth()]+'</h3><div class="sb">Смотрел в этот день · '+wTm(o.reduce(function(a,e){return a+e.m},0))+'</div>';
+  ord.forEach(function(id){var x=WT.t[id],es=g[id],mi=es.reduce(function(a,e){return a+e.m},0),t;
+    if(x.k==="f")t="";else{var by={};es.forEach(function(e){(by[e.s]=by[e.s]||[]).push(e.e)});t=Object.keys(by).map(function(s){var a=by[s].sort(function(p,q){return p-q});return"С"+s+" Е"+a[0]+(a.length>1?"–Е"+a[a.length-1]:"")}).join(", ")}
+    h+='<div class="ln wt" data-id="'+id+'"><span>'+esc(x.n)+'<br><small>'+WK[x.k]+(t?" · "+t:"")+'</small></span><span>'+wTm(mi)+'</span></div>'});
+  if(wOK(k))h+='<button class="pbt" id="wpgo">Отметить в этот день</button>';
+  wPop(h);
+}
+function wTitlePop(id){
+  var x=WT.t[id];if(!x)return wPopX();var o=wOf(id),mi=0,days={},h="";o.forEach(function(e){mi+=e.m;(days[e.d]=days[e.d]||[]).push(e)});
+  var nd=Object.keys(days).length,ser=x.k!=="f";
+  h+='<h3>'+esc(x.n)+'</h3><div class="sb">'+WK[x.k]+(ser?" · "+wPos(x):"")+'</div>';
+  h+='<div class="ln"><span>Всего</span><span>'+(ser?pl(o.length,"серия","серии","серий")+" · ":"")+wTm(mi)+(nd?" · "+dn(nd):"")+'</span></div>';
+  h+='<div class="ln"><span>'+(ser?"Серия":"Длительность")+'</span><span><input class="wni" id="wtm" inputmode="numeric" value="'+x.m+'"> мин</span></div>';
+  if(ser){h+='<div class="ln"><span>Серий в сезоне '+x.cs+'</span><span><input class="wni" id="wtn" inputmode="numeric" placeholder="?" value="'+(x.ss[x.cs-1]||"")+'"></span></div>';
+    for(var s=1;s<x.cs;s++)h+='<div class="ln"><span>Сезон '+s+'</span><span>'+(x.ss[s-1]?pl(x.ss[s-1],"серия","серии","серий")+" ✓":"✓")+'</span></div>';
+    h+='<div class="seg wst">'+WGO.map(function(s){return'<button data-s="'+s+'" class="'+(x.st===s?"on":"")+'">'+WSTN[s]+'</button>'}).join("")+'</div>';
+    if(x.ce)h+='<button class="pbt sec" id="wns">Начать сезон '+(x.cs+1)+'</button>'}
+  var ks=Object.keys(days).sort().reverse();
+  if(ks.length){h+='<div class="wgh">Дни просмотра</div>';ks.forEach(function(k){var es=days[k],t=ser?es.map(function(e){return"С"+e.s+" Е"+e.e}).join(", "):(es.length>1?"×"+es.length:"");var d=parseISO(k);h+='<div class="ln"><span>'+WDN[d.getDay()]+", "+wDd(k)+'</span><span>'+t+'</span></div>'})}
+  h+='<button class="wdel" id="wdl">Удалить</button>';
+  wPop(h);$("wpc").dataset.id=id;
+}
+function wSeasonEnd(id){var x=WT.t[id];
+  wPop('<h3>'+esc(x.n)+'</h3><div class="sb">Сезон '+x.cs+' досмотрен · '+pl(x.ss[x.cs-1],"серия","серии","серий")+'</div><button class="pbt" data-se="n">Дальше — сезон '+(x.cs+1)+'</button><button class="pbt sec" data-se="p">Жду сезон '+(x.cs+1)+'</button><button class="pbt sec" data-se="d">Досмотрел весь</button>');
+  $("wpc").dataset.id=id}
+$("watb").addEventListener("click",wOpen);
+$("wsbd").addEventListener("click",wClose);
+$("wpbd").addEventListener("click",function(){wPopX();wDraw()});
+$("wh").addEventListener("click",function(){WS.md=WS.md==="m"?"y":WS.md==="y"?"a":"m";wHero()});
+$("wpm").addEventListener("click",function(){if(WS.y*12+WS.m<=EPY*12+EPM)return;WS.m--;if(WS.m<0){WS.m=11;WS.y--}wDraw()});
+$("wnm").addEventListener("click",function(){WS.m++;if(WS.m>11){WS.m=0;WS.y++}wDraw()});
+$("wseg").addEventListener("click",function(e){var b=e.target.closest("button");if(!b)return;WS.v=b.dataset.v;wDraw()});
+$("wkseg").addEventListener("click",function(e){var b=e.target.closest("button");if(!b)return;WS.k=b.dataset.k;wList()});
+$("wgr").addEventListener("click",function(e){var b=e.target.closest(".c");if(!b)return;var k=b.dataset.k;WS.day=k;wDraw();if(WT.e.some(function(x){return x.d===k}))wDayPop(k);else if(wOK(k))setTimeout(function(){try{$("wq").focus()}catch(e){}},50)});
+function wTap(e){var p=e.target.closest(".wpl");if(p){e.stopPropagation();var d=wDay();if(d){wAdd(p.dataset.a,d);$("wq").value="";wInp()}return}var r=e.target.closest(".wr");if(r)wTitlePop(r.dataset.id)}
+$("wrows").addEventListener("click",wTap);$("wsug").addEventListener("click",wTap);
+$("wq").addEventListener("input",function(){wInp()});
+$("wq").addEventListener("keydown",function(e){if(e.key==="Enter"&&!$("wnew").hidden)$("wadd").click()});
+$("wty").addEventListener("click",function(e){var b=e.target.closest("button");if(!b)return;WS.nk=b.dataset.k;delete $("wdu").dataset.t;wInp()});
+$("wdu").addEventListener("input",function(){this.dataset.t=1});
+$("wadd").addEventListener("click",function(){
+  var d=wDay(),n=$("wq").value.trim();if(!d||!n)return;var k=WS.nk,id="w"+Date.now().toString(36),m=Math.max(1,Math.min(600,parseInt($("wdu").value,10)||WDEF[k]));
+  var x={n:n.slice(0,80),k:k,m:m,st:k==="f"?"d":"w",ss:[],cs:1,ce:0,t:Date.now()};
+  if(k!=="f"){var s=Math.max(1,parseInt($("wss").value,10)||1),ep=Math.max(1,parseInt($("wse").value,10)||1),ne=parseInt($("wsn").value,10)||0;x.cs=s;x.ce=ep-1;if(ne)x.ss[s-1]=Math.max(ne,ep)}
+  WT.t[id]=x;$("wq").value="";["wss","wse","wsn"].forEach(function(i){$(i).value=""});delete $("wdu").dataset.t;WS.k=k;
+  wAdd(id,d);try{$("wq").blur()}catch(e){}
+});
+$("wpc").addEventListener("click",function(e){
+  var id=$("wpc").dataset.id,x=WT.t[id],t=e.target;
+  if(t.id==="wpgo"){wPopX();setTimeout(function(){try{$("wq").focus()}catch(e){}},80);return}
+  var r=t.closest(".wt");if(r){wTitlePop(r.dataset.id);return}
+  if(!x)return;
+  var sb=t.closest(".wst button");if(sb){x.st=sb.dataset.s;x.t=Date.now();wSave();wTitlePop(id);wDraw();return}
+  if(t.id==="wns"){x.cs++;x.ce=0;x.st="w";x.t=Date.now();wSave();wTitlePop(id);wDraw();return}
+  var se=t.closest("[data-se]");if(se){var v=se.dataset.se;if(v==="d")x.st="d";else{x.cs++;x.ce=0;x.st=v==="p"?"p":"w"}x.t=Date.now();wSave();wPopX();wDraw();return}
+  if(t.id==="wdl"){var keep=WT.e.filter(function(q){return q.id===id});delete WT.t[id];WT.e=WT.e.filter(function(q){return q.id!==id});wSave();wPopX();wDraw();
+    toast("🎬 Удалено: "+x.n,function(){WT.t[id]=x;WT.e=WT.e.concat(keep);wSave();wDraw()},7000)}
+});
+$("wpc").addEventListener("change",function(e){var id=$("wpc").dataset.id,x=WT.t[id];if(!x)return;var v=parseInt(e.target.value,10);
+  if(e.target.id==="wtm"&&v>0){x.m=Math.min(600,v);x.t=Date.now();wSave();wDraw()}
+  if(e.target.id==="wtn"){x.ss[x.cs-1]=v>0?Math.max(v,x.ce):0;x.t=Date.now();wSave();wTitlePop(id);wDraw()}});
+function wMerge(o){   // из копии: названия — новее побеждает, отметки — объединяются
+  var r=wNorm(o),c=0,key=function(e){return e.id+"|"+e.d+"|"+e.s+"|"+e.e+"|"+(e.s?0:e.t)},have={};
+  for(var id in r.t){var l=WT.t[id];if(!l||r.t[id].t>l.t){WT.t[id]=r.t[id];c++}}
+  WT.e.forEach(function(e){have[key(e)]=1});r.e.forEach(function(e){if(WT.t[e.id]&&!have[key(e)]){WT.e.push(e);have[key(e)]=1;c++}});
+  for(var k in WT.t)wFix(WT,k);if(c)wSave();return c}
+function wLast(){var lc=0;for(var id in WT.t)if(WT.t[id].t>lc)lc=WT.t[id].t;WT.e.forEach(function(e){if(e.t>lc)lc=e.t});return lc}
 // ---- попапы: пока открыт любой, главный экран не листается; свайп по краю закрывает ----
 (function(){
   var B=document.body;
-  function anyOpen(){return!!document.querySelector(".sh.open,.nc.open")}
+  function anyOpen(){return!!document.querySelector(".sh.open,.nc.open,.wp.open")}
   new MutationObserver(function(){B.classList.toggle("lock",anyOpen())}).observe(document.body,{subtree:true,attributes:true,attributeFilter:["class"]});
   document.addEventListener("touchmove",function(e){
     if(!B.classList.contains("lock"))return;
-    var p=e.target.closest&&e.target.closest(".sh.open .pn,.nc.open .ncp");
+    var p=e.target.closest&&e.target.closest(".wp.open .wpc,.sh.open .pn,.nc.open .ncp");
     if(!p){e.preventDefault();return}                                   // фон и затемнение — не листаются
     if(p.scrollHeight<=p.clientHeight+1&&!p.classList.contains("drag"))e.preventDefault();   // в окне нечего листать — пусть не тянет экран
   },{passive:false});
@@ -1520,7 +1726,7 @@ $("pok").addEventListener("click",function(){
       if(s0.d>90||v>.6){close();setTimeout(function(){p.style.transform=""},20)}else p.style.transform="";}
     p.addEventListener("touchend",end);p.addEventListener("touchcancel",end);
   }
-  [["sh",closeSheet],["hs",function(){$("hs").classList.remove("open")}],["sv",svClose],["ps",payClose]].forEach(function(x){var el=$(x[0]);if(el)swipe(el.querySelector(".pn"),1,x[1])});
+  [["sh",closeSheet],["hs",function(){$("hs").classList.remove("open")}],["sv",svClose],["ps",payClose],["wsh",wClose]].forEach(function(x){var el=$(x[0]);if(el)swipe(el.querySelector(".pn"),1,x[1])});
   swipe($("ncp"),-1,ncClose);
 })();
 // ---- центр уведомлений: колокольчик справа на строке с датой ----

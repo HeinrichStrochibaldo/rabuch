@@ -324,6 +324,12 @@ html,body{overscroll-behavior:none}
 .sum .day .marks label.mk.miss .lb,.sum .day .marks label.mk.miss .ph{color:var(--k-err,#dc2626)}
 .day.nowk .tot{visibility:hidden}.sum .day .marks input[type=time]{line-height:1.2;height:auto;padding:0;margin:0}
 .day:not(.void):not(.live) .tot::before{content:"работа ";font-size:calc(12px*var(--ts,1));font-weight:400;color:var(--k-mute)}
+
+/* 1.10.5: 💰 — ссылка к месяцу ожидаемой выплаты; одна высота в обычном режиме и в правке */
+.plink{font:inherit;font-size:calc(14px*var(--ts,1));font-weight:600;color:var(--ok);background:none;border:0;padding:8px 6px 0;cursor:pointer}
+#ps .pq{height:88px;min-height:0;padding-top:8px;padding-bottom:8px}#ps .pq.vac{height:auto;min-height:72px}
+#ps .pq input{margin-top:4px;padding:5px 8px;font-size:17px}
+#ps .pin{min-height:160px;box-sizing:border-box;display:flex;flex-direction:column;justify-content:center}#ps .pin>*{flex:none}#pamt::placeholder{font-size:18px;font-weight:500}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.rise{opacity:1}}
 </style>
 </head>
@@ -401,7 +407,7 @@ function dynType(){var ts=1;try{if(window.CSS&&CSS.supports("font","-apple-syste
   if(document.documentElement.style.getPropertyValue("--ts")!==String(ts)){document.documentElement.style.setProperty("--ts",ts);return true}return false}
 dynType();
 var SPLON=!(window.matchMedia&&matchMedia("(prefers-reduced-motion:reduce)").matches)&&!document.hidden;if(SPLON)document.body.classList.add("splon");
-var VER="1.10.4",STANDALONE=!!(window.navigator.standalone||(window.matchMedia&&matchMedia("(display-mode: standalone)").matches));
+var VER="1.10.5",STANDALONE=!!(window.navigator.standalone||(window.matchMedia&&matchMedia("(display-mode: standalone)").matches));
 var NAMES=["Понедельник","Вторник","Среда","Четверг","Пятница","Суббота","Воскресенье"],START=480,END=990,BRK=30,MINP=270,N=480,C=326.73;   // MINP: минимум присутствия в рабочий день — 4,5 ч от прихода (обед вычитается как обычно)
 var reduced=window.matchMedia&&matchMedia("(prefers-reduced-motion:reduce)").matches;
 var now0=new Date();
@@ -1280,9 +1286,10 @@ function restoreMerge(L,inc,now){   // объединение по времен�
   });
   m.n=n;return m;
 }
+function rsMsg(rs){return"Готово: недель в копии "+rs.n+", изменено отметок "+rs.f+(rs.f?" (часы и отметки — "+rs.h+", деньги — "+rs.p+", просмотры — "+rs.w+")":"")+". Более новые отметки сохранены, стёртые — возвращены."}
 function importData(o){
   if(!o||typeof o!=="object"||!o.weeks)throw new Error("не похоже на копию");
-  var n=0,f=0,now=Date.now();
+  var n=0,f=0,pc=0,now=Date.now();
   Object.keys(o.weeks).forEach(function(mk){
     if(!/^\d{4}-\d{2}-\d{2}$/.test(mk))return;var inc=padW(o.weeks[mk]);
     if(mk===iso(mon)){var m=restoreMerge(S,inc,now);S.d=m.d;S.t=m.t;normS();save();refreshInputs();f+=m.n}
@@ -1301,9 +1308,9 @@ function importData(o){
       else if(!l||v.t>l.t){if(!l||l.v!==v.v)ch++;TY[k]=v}}
     if(ch){setTYall(TY);schedule("types")}f+=ch;
   }
-  if(o.pay&&typeof o.pay==="object"){var ip=payNorm(o.pay),pc=0;for(var pk in ip){var L2=PAY[pk]||(PAY[pk]={e:{}});for(var pw in ip[pk].e){var iv=ip[pk].e[pw],lv=L2.e[pw];if(!lv||(iv.t||0)>(lv.t||0)){if(!lv||lv.s!==iv.s)pc++;L2.e[pw]={s:iv.s,t:iv.t||now}}}}if(pc){paySave();f+=pc}}
-  if(o.watch&&typeof o.watch==="object")f+=wMerge(o.watch);
-  update();setTimeout(bkCheck,0);return{n:n,f:f};
+  if(o.pay&&typeof o.pay==="object"){var ip=payNorm(o.pay);for(var pk in ip){var L2=PAY[pk]||(PAY[pk]={e:{}});for(var pw in ip[pk].e){var iv=ip[pk].e[pw],lv=L2.e[pw];if(!lv||(iv.t||0)>(lv.t||0)){if(!lv||lv.s!==iv.s)pc++;L2.e[pw]={s:iv.s,t:iv.t||now}}}}if(pc){paySave();f+=pc}}
+  var hf=f-(pc||0),wc=0;if(o.watch&&typeof o.watch==="object"){wc=wMerge(o.watch);f+=wc}
+  update();setTimeout(bkCheck,0);return{n:n,f:f,h:hf,p:pc||0,w:wc};
 }
 var BK="";try{BK=localStorage.getItem("hours:bk")||""}catch(e){}
 function bkMark(){BK=new Date().toISOString();try{localStorage.setItem("hours:bk",BK)}catch(e){}bkCheck()}
@@ -1416,7 +1423,7 @@ function svTab(t){
   SV.tab=t;clearInterval(SV.timer);
   [].forEach.call($("svseg").children,function(b){b.classList.toggle("on",b.dataset.v===t)});
   var h="";
-  if(t==="d")h='<div class="tel">Копия — файл со всеми отметками и отпусками. Сохраните его в «Файлы», чтобы ничего не потерять и перенести данные на другой телефон.'+(BK?' Последняя копия: <b>'+fmtR(BK.slice(0,10))+' '+BK.slice(0,4)+'</b>.':' Копий ещё не было.')+'</div>'+(window.claude?'<div class="tel">В чате Claude файлом сохранить нельзя — используйте копию текстом.</div><div id="svmsg" class="tel"></div>':'<div class="sv-row"><button class="svb" data-a="fsave">Сохранить копию файлом</button><button class="svb" data-a="fload">Восстановить из файла</button></div><input type="file" id="svfile" accept=".json,application/json,text/plain" hidden><div id="svmsg" class="tel"></div><div class="tel" style="margin-top:14px">Запасной путь — текстом (для переноса из чата Claude):</div>')+'<div class="sv-row"><button class="svb" data-a="exp">Сделать копию</button><button class="svb" data-a="imp">Восстановить из копии</button></div><textarea id="svta" rows="5"></textarea><div class="sv-row"><button class="svb" data-a="copy">Скопировать</button><button class="svb" data-a="apply">Применить</button></div><div class="sv-row" style="margin-top:14px"><button class="svb" data-a="clrw">Очистить неделю</button></div><div class="tel">Очистку можно отменить в течение 10 секунд.<br>Производственный календарь: 2026 и 2027 — утверждённые, 2028 — предварительный (без переносов января), обновить осенью 2027.<br>Версия '+VER+(STANDALONE?' · приложение на экране «Домой»':'')+'.</div>';
+  if(t==="d")h='<div class="tel">Копия — файл со всем: часы, отметки отпусков и больничных, деньги 💰 и просмотры 🎬. Сохраните его в «Файлы», чтобы ничего не потерять и перенести данные на другой телефон.'+(BK?' Последняя копия: <b>'+fmtR(BK.slice(0,10))+' '+BK.slice(0,4)+'</b>.':' Копий ещё не было.')+'</div>'+(window.claude?'<div class="tel">В чате Claude файлом сохранить нельзя — используйте копию текстом.</div><div id="svmsg" class="tel"></div>':'<div class="sv-row"><button class="svb" data-a="fsave">Сохранить копию файлом</button><button class="svb" data-a="fload">Восстановить из файла</button></div><input type="file" id="svfile" accept=".json,application/json,text/plain" hidden><div id="svmsg" class="tel"></div><div class="tel" style="margin-top:14px">Запасной путь — текстом (для переноса из чата Claude):</div>')+'<div class="sv-row"><button class="svb" data-a="exp">Сделать копию</button><button class="svb" data-a="imp">Восстановить из копии</button></div><textarea id="svta" rows="5"></textarea><div class="sv-row"><button class="svb" data-a="copy">Скопировать</button><button class="svb" data-a="apply">Применить</button></div><div class="sv-row" style="margin-top:14px"><button class="svb" data-a="clrw">Очистить неделю</button></div><div class="tel">Очистку можно отменить в течение 10 секунд.<br>Производственный календарь: 2026 и 2027 — утверждённые, 2028 — предварительный (без переносов января), обновить осенью 2027.<br>Версия '+VER+(STANDALONE?' · приложение на экране «Домой»':'')+'.</div>';
   else h='<canvas id="telc"></canvas><div class="tel" id="tels"></div><div class="sv-row"><button class="svb" data-a="trep">Скопировать отчёт</button><button class="svb" data-a="tclr">Очистить</button><button class="svb" data-a="hap">Проверить отклик</button><button class="svb" data-a="snd">Звуки: '+(SND?"вкл":"выкл")+'</button></div><div class="sv-row"><button class="svb" data-a="bench">Автотест (80 с)</button></div><div class="tev" id="telb"></div><div class="tev" id="telev"></div><textarea id="svta" rows="5" style="display:none"></textarea><div id="svmsg" class="tel"></div>';
   $("svb").innerHTML=h;
   if(t==="t"){telRender();benchShow();SV.timer=setInterval(telRender,1000)}
@@ -1427,7 +1434,7 @@ $("svx").addEventListener("click",svClose);$("svbd").addEventListener("click",sv
 $("svseg").addEventListener("click",function(e){var b=e.target.closest("button");if(b)svTab(b.dataset.v)});
 $("svb").addEventListener("change",function(e){
   var fi=e.target;if(fi.id!=="svfile"||!fi.files||!fi.files[0])return;var rd=new FileReader();
-  rd.onload=function(){try{var rs=importData(JSON.parse(String(rd.result)));svMsg("Готово: недель в копии "+rs.n+", изменено отметок "+rs.f+". Более новые отметки сохранены, стёртые — возвращены.")}catch(err){svMsg("Не получилось прочитать файл: "+(err&&err.message||"ошибка")+".")}};
+  rd.onload=function(){try{var rs=importData(JSON.parse(String(rd.result)));svMsg(rsMsg(rs))}catch(err){svMsg("Не получилось прочитать файл: "+(err&&err.message||"ошибка")+".")}};
   rd.onerror=function(){svMsg("Не получилось открыть файл.")};rd.readAsText(fi.files[0]);
 });
 $("svb").addEventListener("click",async function(e){
@@ -1442,7 +1449,7 @@ $("svb").addEventListener("click",async function(e){
     svMsg("Копия готова: недель "+Object.keys(weeks).length+", типов дней "+Object.keys(TY).length+". Нажмите «Скопировать».");
   }else if(a==="imp"){ta.value="";ta.focus();svMsg("Вставьте текст копии в поле и нажмите «Применить».")}
   else if(a==="copy"){if(!ta.value){svMsg("Сначала сделайте копию.");return}svCopy(ta.value,function(t){svMsg(t);bkMark()})}
-  else if(a==="apply"){try{var rs=importData(JSON.parse(ta.value));svMsg("Готово: недель в копии "+rs.n+", изменено отметок "+rs.f+". Более новые отметки сохранены, стёртые — возвращены.")}catch(err){svMsg("Не получилось: "+(err&&err.message||"ошибка")+".")}}
+  else if(a==="apply"){try{var rs=importData(JSON.parse(ta.value));svMsg(rsMsg(rs))}catch(err){svMsg("Не получилось: "+(err&&err.message||"ошибка")+".")}}
   else if(a==="clrw"){clearWeek()}
   else if(a==="trep"){svCopy(telReport(),svMsg)}
   else if(a==="tclr"){TEL.ev=[];TEL.sec=[];try{localStorage.removeItem("hours:tel")}catch(x){}telRender();svMsg("Очищено.")}
@@ -1498,6 +1505,7 @@ function payDues(){   // для колокольчика: пора отмети�
 }
 function payMonth(y,m){var r={1:0,2:0,0:0,t:0},p=y+"-"+p2(m+1);for(var k in PAY)if(k.slice(0,7)===p)for(var w in PAY[k].e){var v=PAY[k].e[w].s;if(v>0){r[PK[w].w]+=v;r.t+=v}}return r}
 function paySpan(f){var r={1:0,2:0,0:0,t:0};for(var k in PAY)if(f(k))for(var w in PAY[k].e){var v=PAY[k].e[w].s;if(v>0){r[PK[w].w]+=v;r.t+=v}}return r}
+var MPR2=["января","февраля","марта","апреля","мая","июня","июля","августа","сентября","октября","ноября","декабря"],MDT2=["январю","февралю","марту","апрелю","маю","июню","июлю","августу","сентябрю","октябрю","ноябрю","декабрю"];
 var MPR=["январе","феврале","марте","апреле","мае","июне","июле","августе","сентябре","октябре","ноябре","декабре"],MDT=["январю","февралю","марту","апрелю","маю","июню","июлю","августу","сентябрю","октябрю","ноябрю","декабрю"];
 function dlt(df,to){return df?'<span class="'+(df>0?"up":"dn")+'">'+(df>0?"+":"−")+rub(Math.abs(df))+"</span> к "+to:"± 0 ₽ к "+to}
 function payHero(){
@@ -1535,12 +1543,17 @@ function payDraw(){
   ok.textContent="Внести";
   if(!tg){lab.textContent="Все выплаты отмечены";inp.hidden=true;ok.hidden=true;return}
   var td=parseISO(tg.k),nm=tg.w==="v"?"Отпускные · отпуск с "+td.getDate()+" "+MG[td.getMonth()]:pkName(tg.w)+" · "+td.getDate()+" "+MG[td.getMonth()];
+  var tm2=td.getFullYear()*12+td.getMonth(),vm=PS.y*12+PS.m;
+  if(vm!==tm2){inp.hidden=true;ok.hidden=true;   // поле ввода — только в месяце той выплаты, которую ждём
+    lab.innerHTML=(vm<tm2?"Все выплаты "+MPR2[PS.m]+" отмечены":tg.k<=iso(now0)?"Сначала внесите: "+nm:"Пока рано — следующая выплата "+td.getDate()+" "+MG[td.getMonth()])+'<br><button class="plink" id="pgo">'+(vm<tm2?"К "+MDT2[td.getMonth()]+" ›":"К ней ›")+'</button>';
+    $("pgo").onclick=function(){PS.y=td.getFullYear();PS.m=td.getMonth();payDraw()};return}
   if(!tg.open){var op=new Date(td);op.setDate(op.getDate()-3);lab.innerHTML="Следующая: <b>"+nm+"</b><br>внести можно с "+op.getDate()+" "+MG[op.getMonth()];inp.hidden=true;ok.hidden=true;return}
   lab.innerHTML="<b>"+nm+"</b>";inp.hidden=false;ok.hidden=false;
   var prev=0;Object.keys(PAY).sort().forEach(function(x){if(x<tg.k&&payE(x,tg.w))prev=payE(x,tg.w)});
   inp.placeholder=prev?"как в прошлый раз: "+rub(prev):"Сумма, ₽";
 }
-function payOpen(k,w){var d=k?parseISO(k):now0;PS.y=d.getFullYear();PS.m=d.getMonth();if(PS.y*12+PS.m<EPY*12+EPM){PS.y=EPY;PS.m=EPM}PS.md="m";PS.ed=false;$("pamt").value="";payDraw();$("ps").classList.add("open");
+function payOpen(k,w){var d=k?parseISO(k):now0;if(!k){var t0=payTarget();if(t0&&t0.k<iso(now0)&&t0.k.slice(0,7)<iso(now0).slice(0,7))d=parseISO(t0.k)}   // просроченная выплата прошлого месяца — открыть сразу там
+  PS.y=d.getFullYear();PS.m=d.getMonth();if(PS.y*12+PS.m<EPY*12+EPM){PS.y=EPY;PS.m=EPM}PS.md="m";PS.ed=false;$("pamt").value="";payDraw();$("ps").classList.add("open");
   if(k&&!$("pamt").hidden)setTimeout(function(){try{$("pamt").focus()}catch(e){}},300)}
 function payClose(){$("ps").classList.remove("open");PS.ed=false;try{$("pamt").blur()}catch(e){}}
 function paySet(k,w,v){var x=PAY[k]||(PAY[k]={e:{}}),old=x.e[w]?{s:x.e[w].s,t:x.e[w].t}:null;if(v===null)delete x.e[w];else x.e[w]={s:v,t:Date.now()};paySave();return old}
@@ -1564,6 +1577,7 @@ $("pok").addEventListener("click",function(){
   if(isNaN(v)&&/прошлый/.test(inp.placeholder)){var mm=/(\d[\d  ]*)/.exec(inp.placeholder);if(mm)v=parseInt(mm[1].replace(/\D/g,""),10)}
   if(isNaN(v)){inp.focus();return}
   var old=paySet(tg.k,tg.w,v),d=parseISO(tg.k);haptic();inp.value="";
+  var t2=payTarget();if(t2&&t2.open)d=parseISO(t2.k);   // следующую уже можно вносить — сразу к ней
   PS.y=d.getFullYear();PS.m=d.getMonth();payDone();
   toast("💰 "+(tg.w==="v"?"Отпускные":PK[tg.w].n+" № "+PK[tg.w].w)+" · "+(v?rub(v):"не было"),function(){var x=PAY[tg.k];if(old)x.e[tg.w]=old;else delete x.e[tg.w];paySave();payDone()},7000);
 });

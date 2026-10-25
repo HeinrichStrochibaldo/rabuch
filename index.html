@@ -268,6 +268,7 @@ html,body{overscroll-behavior:none}
 .pq.f{background:var(--tint);border-color:transparent}.pq.f::after{content:"✓";position:absolute;right:11px;top:9px;font-size:13px;color:var(--ok);font-weight:700}
 .pq.x{opacity:.45}.pq.tg{border-color:var(--ok);box-shadow:0 0 0 1px var(--ok)}
 .pq.vac{grid-column:1/-1;min-height:0}
+.pq{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}.pq .a{margin-top:6px}.pq input{text-align:center}   /* 1.10.3: подпись и сумма по центру карточки */
 .pq input{display:block;width:100%;box-sizing:border-box;margin-top:6px;font:inherit;font-size:18px;font-weight:600;padding:7px 9px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--ink);-webkit-appearance:none}
 .pq input:focus{outline:none;border-color:var(--ok)}
 .pin{margin-top:14px;border-top:1px solid var(--line);padding-top:12px}.pin[hidden]{display:none}
@@ -305,6 +306,24 @@ html,body{overscroll-behavior:none}
 .wpc .pbt.sec{background:var(--bg);color:var(--ink);border:1px solid var(--line)}
 .wst{margin-top:12px;flex-wrap:wrap}.wst button{font-size:calc(13px*var(--ts,1));padding:7px 0;flex:1 1 40%}
 .wdel{display:block;margin:14px auto 0;font:inherit;font-size:calc(14px*var(--ts,1));color:var(--over);background:none;border:0;padding:8px 14px;cursor:pointer}
+
+/* 1.10.4: карточка дня слева направо — «пришёл → ушёл»; прогресс показывает кольцо, время — таймер сверху */
+.day:not(.void) .fbig{display:flex;flex-direction:column;margin-bottom:10px}
+.day:not(.void) .fbig>.k,.day:not(.void) .fbig>.t,.day:not(.void) .fbig>.sun,.day:not(.void) .fbig>br{display:none}
+.sum .day:not(.void) .marks{position:static;order:1;display:grid;grid-template-columns:1fr auto 1fr;align-items:end;gap:0 8px;margin-top:2px}
+.day:not(.void) .fbig>.chip{order:2;align-self:center;margin-top:10px}
+.marks .arr{font-style:normal;font-size:20px;color:var(--k-mute);opacity:.7;line-height:28px;grid-column:2;grid-row:1}
+.sum .day .marks label.mk,.sum .day .marks label.mk.emp,.sum .day .marks label.mk.gone{display:flex;flex-direction:column;justify-content:flex-end;gap:2px;min-height:0;line-height:1.2;grid-row:1}
+.sum .day .marks label.ma{grid-column:1;align-items:flex-start}.sum .day .marks label.mb{grid-column:3;align-items:flex-end}
+.sum .day .marks .lb{font-size:calc(12px*var(--ts,1));color:var(--k-mute)}
+.sum .day .marks .pk{display:none!important}
+.sum .day .marks input[type=time]{font-size:22px;font-weight:600;width:auto;min-width:70px;font-variant-numeric:tabular-nums;border-bottom:0}
+.sum .day .marks label.ma input{text-align:left}.sum .day .marks label.ma input::-webkit-date-and-time-value{text-align:left}
+.sum .day .marks .ph{font-size:22px;font-weight:500;color:var(--k-mute);font-variant-numeric:tabular-nums;line-height:1.2}
+.sum .day .marks .ph:empty{display:none}
+.sum .day .marks label.mk.miss .lb,.sum .day .marks label.mk.miss .ph{color:var(--k-err,#dc2626)}
+.day.nowk .tot{visibility:hidden}.sum .day .marks input[type=time]{line-height:1.2;height:auto;padding:0;margin:0}
+.day:not(.void):not(.live) .tot::before{content:"работа ";font-size:calc(12px*var(--ts,1));font-weight:400;color:var(--k-mute)}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.rise{opacity:1}}
 </style>
 </head>
@@ -382,7 +401,7 @@ function dynType(){var ts=1;try{if(window.CSS&&CSS.supports("font","-apple-syste
   if(document.documentElement.style.getPropertyValue("--ts")!==String(ts)){document.documentElement.style.setProperty("--ts",ts);return true}return false}
 dynType();
 var SPLON=!(window.matchMedia&&matchMedia("(prefers-reduced-motion:reduce)").matches)&&!document.hidden;if(SPLON)document.body.classList.add("splon");
-var VER="1.10.2",STANDALONE=!!(window.navigator.standalone||(window.matchMedia&&matchMedia("(display-mode: standalone)").matches));
+var VER="1.10.4",STANDALONE=!!(window.navigator.standalone||(window.matchMedia&&matchMedia("(display-mode: standalone)").matches));
 var NAMES=["Понедельник","Вторник","Среда","Четверг","Пятница","Суббота","Воскресенье"],START=480,END=990,BRK=30,MINP=270,N=480,C=326.73;   // MINP: минимум присутствия в рабочий день — 4,5 ч от прихода (обед вычитается как обычно)
 var reduced=window.matchMedia&&matchMedia("(prefers-reduced-motion:reduce)").matches;
 var now0=new Date();
@@ -532,8 +551,8 @@ for(var i=0;i<7;i++){(function(i){
   var date=dt.getDate()+'.'+String(dt.getMonth()+1).padStart(2,"0");
   c.innerHTML='<div class="hd"><span><span class="n">'+NAMES[i]+'</span><span class="d">'+date+'<span class="sx"></span></span></span><span class="hr"><span class="demj"></span><i class="dot"></i><span class="tot">—</span></span></div>'+
   '<div class="fbig"><div class="k">Прогноз ухода</div><div class="t">16:30</div><span class="sun"></span><br><span class="chip">как обычно</span>'+
-  '<div class="marks"><label class="mk ma"><span>пришёл</span><i class="pk" title="вписать время">✎</i><input type="time" class="ai" required></label>'+
-  '<label class="mk mb"><span>ушёл</span><i class="pk" title="вписать время">✎</i><input type="time" class="bi" required></label></div></div>'+
+  '<div class="marks"><label class="mk ma"><span class="lb">пришёл</span><i class="pk" title="вписать время">✎</i><input type="time" class="ai" required><b class="ph"></b></label><i class="arr">→</i>'+
+  '<label class="mk mb"><span class="lb">ушёл</span><i class="pk" title="вписать время">✎</i><input type="time" class="bi" required><b class="ph"></b></label></div></div>'+
   '<div class="dl"><div class="k lab">уход с 16:30</div><div class="dv val">—</div></div>';
   box.appendChild(c);
   var ai=c.querySelector(".ai"),inp=c.querySelector(".bi"),fl={a:ai,b:inp};
@@ -542,7 +561,7 @@ for(var i=0;i<7;i++){(function(i){
   var lab=c.querySelector(".lab");
   lab.addEventListener("click",function(){var f=INFO[i];if(f&&f.kind==="extra"){setTy(f.k,f.counted?"x":"xn");update()}});
   c.querySelector(".chip").addEventListener("click",function(){var f=INFO[i];if(f&&f.kind==="extra"){setTy(f.k,f.counted?"x":"xn");update()}});
-  els.push({c:c,inp:inp,ai:ai,demj:c.querySelector(".demj"),sx:c.querySelector(".sx"),tot:c.querySelector(".tot"),lab:lab,val:c.querySelector(".val"),fk:c.querySelector(".fbig .k"),ft:c.querySelector(".fbig .t"),sun:c.querySelector(".sun"),chip:c.querySelector(".chip"),ma:c.querySelector(".ma"),mb:c.querySelector(".mb"),fl:fl});
+  els.push({c:c,inp:inp,ai:ai,demj:c.querySelector(".demj"),sx:c.querySelector(".sx"),tot:c.querySelector(".tot"),lab:lab,val:c.querySelector(".val"),fk:c.querySelector(".fbig .k"),ft:c.querySelector(".fbig .t"),sun:c.querySelector(".sun"),chip:c.querySelector(".chip"),pha:c.querySelector(".ma .ph"),phb:c.querySelector(".mb .ph"),lbb:c.querySelector(".mb .lb"),ma:c.querySelector(".ma"),mb:c.querySelector(".mb"),fl:fl});
 })(i)}
 function clearWeek(){
   var snap=JSON.parse(JSON.stringify(S.d)),tn=Date.now();for(var q=0;q<7;q++){S.d[q]={};S.t[q]={a:tn,b:tn}}
@@ -692,6 +711,13 @@ e.lab.classList.toggle("tg",k==="extra");
     if(bad){setT(e2.chip,"уход раньше прихода — проверьте");chipC(e2.chip,"err")}
     else if(fu){setT(e2.chip,"приход позже текущего времени?");chipC(e2.chip,"err")}
     e2.inp.classList.toggle("need",bad||f2.k===MISS);e2.ai.classList.toggle("need",fu);
+  }
+  for(i=0;i<7;i++){   // 1.10.4: «пришёл → ушёл» — пустое место занято серым: по графику / цель ухода; забытый уход — красным
+    var e3=els[i],f3=INF[i];if(f3.kind!=="work"&&f3.kind!=="extra")continue;var ha3=!!S.d[i].a,hb3=!!S.d[i].b,G3=RIS[i],miss3=i<todayIdx&&!hb3;
+    setT(e3.pha,ha3?"":clockT(stt(i)));
+    var lb3=hb3||miss3||f3.kind==="extra"?"ушёл":G3?(G3.end?"конец месяца":"остаток недели"):"цель ухода";
+    setT(e3.lbb,lb3);setT(e3.phb,hb3?"":miss3||f3.kind==="extra"?"—:—":G3?(G3.rem<=0?"можно":clockT(G3.fT)):clockT(T[i]));
+    e3.mb.classList.toggle("miss",miss3&&!hb3);e3.c.classList.toggle("nowk",!(R[i]&&!R[i].live));
   }
   els.forEach(function(e){setCls(e.chip,"chip",e.chip._c)});
   var remain=Math.max(0,W-counted),frac=W>0?Math.max(0,Math.min(1,counted/W)):0;

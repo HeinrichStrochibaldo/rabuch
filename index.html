@@ -330,6 +330,11 @@ html,body{overscroll-behavior:none}
 #ps .pq{height:88px;min-height:0;padding-top:8px;padding-bottom:8px}#ps .pq.vac{height:auto;min-height:72px}
 #ps .pq input{margin-top:4px;padding:5px 8px;font-size:17px}
 #ps .pin{min-height:160px;box-sizing:border-box;display:flex;flex-direction:column;justify-content:center}#ps .pin>*{flex:none}#pamt::placeholder{font-size:18px;font-weight:500}
+
+/* 1.10.10: плашка «Данных пока нет», ➕ только по выходным */
+#empty{display:block;width:100%;margin:2px 0 12px;padding:12px 16px;border:0;border-radius:14px;background:var(--tint);color:var(--ok);font:inherit;font-size:calc(15px*var(--ts,1));font-weight:600;text-align:center;cursor:pointer;-webkit-tap-highlight-color:transparent}
+#empty[hidden]{display:none}
+.c.nx{opacity:.28;pointer-events:none}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.rise{opacity:1}}
 </style>
 </head>
@@ -407,7 +412,7 @@ function dynType(){var ts=1;try{if(window.CSS&&CSS.supports("font","-apple-syste
   if(document.documentElement.style.getPropertyValue("--ts")!==String(ts)){document.documentElement.style.setProperty("--ts",ts);return true}return false}
 dynType();
 var SPLON=!(window.matchMedia&&matchMedia("(prefers-reduced-motion:reduce)").matches)&&!document.hidden;if(SPLON)document.body.classList.add("splon");
-var VER="1.10.5",STANDALONE=!!(window.navigator.standalone||(window.matchMedia&&matchMedia("(display-mode: standalone)").matches));
+var VER="1.10.10",STANDALONE=!!(window.navigator.standalone||(window.matchMedia&&matchMedia("(display-mode: standalone)").matches));
 var NAMES=["Понедельник","Вторник","Среда","Четверг","Пятница","Суббота","Воскресенье"],START=480,END=990,BRK=30,MINP=270,N=480,C=326.73;   // MINP: минимум присутствия в рабочий день — 4,5 ч от прихода (обед вычитается как обычно)
 var reduced=window.matchMedia&&matchMedia("(prefers-reduced-motion:reduce)").matches;
 var now0=new Date();
@@ -432,7 +437,8 @@ epPurge();
 try{TY=normTY(JSON.parse(localStorage.getItem("hours:types2")||"{}"))}catch(e){TY={}}
 rebuildTypes();
 function setTy(k,v){TY[k]={v:v||"",t:Date.now()};rebuildTypes();try{localStorage.setItem("hours:types2",JSON.stringify(TY))}catch(e){}schedule("types")}
-function setF(i,key,val){S.d[i][key]=val;S.t[i][key]=Date.now();save()}
+var WCARM=false;
+function setF(i,key,val){S.d[i][key]=val;S.t[i][key]=Date.now();if(key==="b"&&val)WCARM=true;save()}
 var DIRTY={},DV=0;
 try{var dj=localStorage.getItem("hours:dirty");if(dj)JSON.parse(dj).forEach(function(k){DIRTY[k]=1});else{for(var di=0;di<localStorage.length;di++){var dk=/^hours:(\d{4}-\d{2}-\d{2})$/.exec(localStorage.key(di));if(dk)DIRTY[dk[1]]=1}localStorage.setItem("hours:dirty",JSON.stringify(Object.keys(DIRTY)))}}catch(e){}
 function saveDirty(){try{localStorage.setItem("hours:dirty",JSON.stringify(Object.keys(DIRTY)))}catch(e){}}
@@ -461,7 +467,7 @@ function infoDate(d){
 }
 function mins(t){if(!t)return null;var p=t.split(":");return +p[0]*60+ +p[1]}
 // уход раньше прихода = следующие сутки, если смена не длиннее 20 ч; иначе это ошибка ввода
-function endOf(st,b){if(b==null)return null;if(st==null)st=START;if(b>st)return b;if(b<st&&b+1440-st<=1200)return b+1440;return null}
+function endOf(st,b){if(b==null)return null;if(st==null)st=START;if(b>=st)return b;if(b<st&&b+1440-st<=1200)return b+1440;return null}
 function hm(m){return hmm(m)}
 function hmm(m){var a=Math.abs(Math.round(m));return Math.floor(a/60)+":"+String(a%60).padStart(2,"0")}
 function sg(m){m=Math.round(m);return (m>0?"+":m<0?"−":"")+hmm(m)}
@@ -492,6 +498,7 @@ function dayBig(nm){
     var df=D.w-D.norm;setT(rem,(df<0?"−":"+")+hmm(Math.abs(df)));ms.style.display="none";
     setT(rl,D.b-D.st<MINP?"итог дня: меньше 4,5 ч — не отработан":df>5?"итог дня: переработка":df<-5?"итог дня: недоработка":"итог дня: в срок");setT(tot,hm(D.w));return;
   }
+  if(D.isToday&&!D.ha&&!D.ex&&nm>=D.st+D.norm+BRK){ms.style.display="none";setT(rem,"0:00");setT(rl,"итог дня: по графику "+clock(D.st)+"–"+clock(D.st+D.norm+BRK));setT(tot,hm(D.norm));return}
   if(!D.isToday||nm<=D.st){ms.style.display="none";if(D.past){setT(rem,"—");setT(rl,D.ha?"уход не отмечен":"день не отмечен");setT(tot,"—")}else{setT(rem,hmm(D.tg-D.st));setT(rl,"длина рабочего дня");setT(tot,"0:00")}return}
   var left=D.tg-nm,over=left<=0,w=Math.max(0,nm-D.st-BRK);
   setT(rem,over?"+"+hmsF(-left):hmsF(left));
@@ -538,7 +545,8 @@ function dayWork(i,nm){
   var kd=INFO[i]&&INFO[i].kind;if(kd!=="work"&&kd!=="extra")return null;
   var b0=mins(S.d[i].b),st=stt(i),b=endOf(st,b0);
   if(b0!=null)return b!=null?{w:Math.max(0,b-st-BRK),live:false,b:b}:null;
-  if((kd==="work"||(kd==="extra"&&S.d[i].a))&&i==todayIdx&&nm>st)return{w:nm-st-BRK,live:true,b:nm};   // живой день: обед вычитается сразу, неделя тикает секунда в секунду
+  if(kd==="work"&&!S.d[i].a&&i==todayIdx){var se=st+(INFO[i].norm||0)+BRK;if(nm>=se)return{w:INFO[i].norm||0,live:false,b:se,sched:true}}   // 1.10.9: без отметки прихода — день по графику и не дальше, без переработки
+  if((kd==="work"||(kd==="extra"&&S.d[i].a))&&i==todayIdx&&nm>st)return{w:Math.max(0,nm-st-BRK),live:true,b:nm};   // живой день: обед вычитается сразу, неделя тикает секунда в секунду
   return null;
 }
 function setNum(el,to,fmt,quiet){
@@ -703,7 +711,7 @@ e.lab.classList.toggle("tg",k==="extra");
     else{
       setNum(F.ft,G.fT,clockT,true);sunMark(ix,G.fT);
       var dd=us-G.fT;chipC(chip,dd<-5?"under":"");
-      setT(chip,dd>5?"на "+hmm(dd)+" раньше, чем в "+clock(us):dd<-5?"на "+hmm(-dd)+" позже, чем в "+clock(us):"как обычно");
+      setT(chip,dd>5?"на "+hmm(dd)+" раньше, чем в "+clockT(us):dd<-5?"на "+hmm(-dd)+" позже, чем в "+clockT(us):"как обычно");
     }
     if(shut){
       if(G.end){var bm0=bnow(G.m),mt=Math.abs(bm0)<=5?"в норме":sg(bm0);setT(chip,G.wk?"неделя "+hmm(counted)+" · месяц "+mt:"итог месяца "+mt);chipC(chip,bm0>5?"over":bm0<-5?"under":"")}
@@ -714,7 +722,9 @@ e.lab.classList.toggle("tg",k==="extra");
   for(i=0;i<7;i++){
     var e2=els[i],f2=INF[i],ok2=f2.kind==="work"||f2.kind==="extra",ra=mins(S.d[i].a),rb=mins(S.d[i].b);
     var bad=ok2&&rb!=null&&endOf(ra,rb)==null,fu=ok2&&i===todayIdx&&ra!=null&&ra>nm+30&&rb==null;
+    var ng=ok2&&ra!=null&&rb!=null&&rb<ra&&rb+1440-ra>720;   // 1.10.10: смена через полночь длиннее 12 ч — возможно, перепутаны приход и уход
     if(bad){setT(e2.chip,"уход раньше прихода — проверьте");chipC(e2.chip,"err")}
+    else if(ng){setT(e2.chip,"смена через полночь "+hmm(rb+1440-ra-BRK)+" — верно?");chipC(e2.chip,"err")}
     else if(fu){setT(e2.chip,"приход позже текущего времени?");chipC(e2.chip,"err")}
     e2.inp.classList.toggle("need",bad||f2.k===MISS);e2.ai.classList.toggle("need",fu);
   }
@@ -732,7 +742,8 @@ e.lab.classList.toggle("tg",k==="extra");
   setWeekRing(frac);
   $("sum").classList.toggle("done",remain<=0);$("sum").classList.toggle("ovr",counted-W>5&&W>0);
   MODEL={W:W,counted:counted,INF:INF,R:R,T:T,frac:frac,live:live,totalAll:totalAll,remain:remain,RIS:RIS};applySel(nm);
-  if(W>0&&remain<=0&&window.wcCheck)wcCheck();
+  if(W>0&&remain<=0&&WCARM&&window.wcCheck)wcCheck();WCARM=false;   // поздравление — только когда неделю закрыла отметка ухода (не смена типа дня)
+  if(window.wcUndo&&W>0&&remain>5&&live==null)wcUndo();
   // баланс месяца и прошлая неделя
   var mT=iso(now0).slice(0,7),bm=bnow(mT),nd=(BKN[mT]||0)+(wkn[mT]||0),b=$("bal"),bkl="Баланс месяца";
   if(!nd){var pm0=new Date(now0.getFullYear(),now0.getMonth()-1,1),dd1=new Date(pm0),ps=0,pc=0;
@@ -757,13 +768,13 @@ function applySel(nm){
   if(INF[ti].kind==="work"){
     var s2=stt(ti),tb0=mins(S.d[ti].b),tb=endOf(s2,tb0),g2=T[ti],dn=Math.max(1,g2-s2);
     if(tb0!=null){DF=tb!=null&&tb>s2?Math.min(1,(tb-s2)/dn):0;dov=tb!=null&&tb>g2+5}
-    else if(isT&&nm>s2){DF=Math.min(1,(nm-s2)/dn);dov=nm>g2}
+    else if(isT&&nm>s2){DF=Math.min(1,(nm-s2)/dn);dov=nm>g2&&!!S.d[ti].a}
     else DF=0;
   }
   setDayRing(DF,dov);showPct(M.frac,DF);
   var kx=INF[ti].kind;
   DAYI=(kx==="work"||kx==="extra")?{ex:kx==="extra",norm:INF[ti].norm||0,ha:!!S.d[ti].a,st:stt(ti),tg:T[ti],b:endOf(stt(ti),mins(S.d[ti].b)),inv:mins(S.d[ti].b)!=null&&endOf(stt(ti),mins(S.d[ti].b))==null,w:R[ti]?R[ti].w:0,live:!!(R[ti]&&R[ti].live),isToday:isT,past:ti<todayIdx}:null;
-  els.forEach(function(e,i){if(!e.chip)return;var hd=EMV==="day"&&i===ti&&kx==="work"&&DAYI&&DAYI.b!=null&&!DAYI.live;e.chip.style.visibility=hd?"hidden":""});   // итог дня уже крупно под балансом — плашку не дублируем
+  els.forEach(function(e,i){if(!e.chip)return;var f4=INF[i],r4=R[i],cl4=f4.kind==="work"&&r4&&!r4.live;var hd=cl4&&(i!==ti||EMV==="day")&&e.chip._c!=="err";e.chip.style.visibility=hd?"hidden":""});   // закрытый день: итог крупно сверху; у уходящей при листании карточки плашка тоже не «вспыхивает»   // итог дня уже крупно под балансом — плашку не дублируем
   if(EMV==="day")dayBig(nm);
   else{
     setT($("tl"),"Отработано");setT($("rl"),weekRl(nm));
@@ -797,11 +808,11 @@ function drawSheet(){
   for(d=1;d<=dim;d++){
     var dd=new Date(SH.y,SH.m,d),k=iso(dd),ck=calKind(k,dd.getDay()),tp=TYPES[k];
     var em=(tp==="x"||tp==="xn")?"➕":tp?EM[tp]:ck==="hol"?"🎉":"";
-    h+='<button class="c'+(k<EP?" pre":"")+(SH.a&&k>=SH.a&&k<=SH.b?" sel":"")+(ck==="hol"||ck==="rest"?" nw":"")+(k===td?" tdy":"")+'" data-k="'+k+'"><b>'+d+'</b><i>'+em+'</i></button>';
+    h+='<button class="c'+(k<EP?" pre":"")+(SH.mode==="x"&&(ck==="work"||ck==="short")&&tp!=="x"&&tp!=="xn"?" nx":"")+(SH.a&&k>=SH.a&&k<=SH.b?" sel":"")+(ck==="hol"||ck==="rest"?" nw":"")+(k===td?" tdy":"")+'" data-k="'+k+'"><b>'+d+'</b><i>'+em+'</i></button>';
   }
   $("gr").innerHTML=h;
   if(SH.mode){var nm0=TYN[SH.mode];
-    $("sl").textContent=!SH.a?nm0+" — выберите день или начало периода · тап по отмеченному дню снимает":fmtR(SH.a)+(SH.a===SH.b?" · второй тап — конец периода":" – "+fmtR(SH.b))+prioNote();
+    $("sl").textContent=!SH.a?nm0+(SH.mode==="x"?" — только выходные и праздники · выберите день":" — выберите день или начало периода")+" · тап по отмеченному дню снимает":fmtR(SH.a)+(SH.a===SH.b?" · второй тап — конец периода":" – "+fmtR(SH.b))+prioNote();
     $("emok").hidden=!SH.a;if(SH.a)$("okb").textContent="Отметить: "+nm0;}
 }
 $("gr").addEventListener("click",function(e){
@@ -975,7 +986,8 @@ function hInfo(k){
   var r=rec(parseISO(k));
   if(r.inv)return"Уход раньше прихода — проверьте время";
   var st0=mins(r.a)!=null?mins(r.a):START,low=r.b&&r.f.kind==="work"&&endOf(st0,mins(r.b))-st0<MINP;
-  return (r.b?"Отработано <b>"+hm(r.w)+"</b> · "+(r.f.kind==="extra"?"доп. день":"итог <b>"+sg(r.df)+"</b>"):"Уход не отмечен")+(low?" · меньше 4,5 ч — день не отработан":"")+(r.a?"":" · приход не отмечен — с 8:00");
+  var ra0=mins(r.a),rb0=mins(r.b),ngt=ra0!=null&&rb0!=null&&rb0<ra0&&rb0+1440-ra0>720;
+  return (ngt?"⚠︎ Смена через полночь "+r.a+" → "+r.b+"⁺¹ — верно? · ":"")+(r.b?"Отработано <b>"+hm(r.w)+"</b> · "+(r.f.kind==="extra"?"доп. день":"итог <b>"+sg(r.df)+"</b>"):"Уход не отмечен")+(low?" · меньше 4,5 ч — день не отработан":"")+(r.a?"":" · приход не отмечен — с 8:00");
 }
 function hRender(keep){
   var v=HS.v,h="",i,sum=0,bal=0,c,r,d,det="";
@@ -1162,7 +1174,7 @@ $("dots").addEventListener("click",function(e){var b=e.target.closest(".dt");if(
 function tick(){
   if(!LS||FREEZE)return;
   var n=new Date(),nm=n.getHours()*60+n.getMinutes()+n.getSeconds()/60+n.getMilliseconds()/60000;
-  var w=nm-LS.st-BRK,total=LS.base+(LS.cnt?w:0),remain=Math.max(0,LS.W-total),over=nm>=LS.tg,sl=!!(DAYI&&DAYI.isToday&&SEL===LS.i);
+  var w=Math.max(0,nm-LS.st-BRK),total=LS.base+(LS.cnt?w:0),remain=Math.max(0,LS.W-total),over=nm>=LS.tg,sl=!!(DAYI&&DAYI.isToday&&SEL===LS.i);
   var pn=performance.now();
   if(!QUIET&&!reduced&&!NOMS&&pn>=msHold&&(!MS30||pn-lastMs>=33)){     // каждый кадр — только тысячные (не во время свайпа)
     lastMs=pn;
@@ -1286,9 +1298,18 @@ function restoreMerge(L,inc,now){   // объединение по времен�
   });
   m.n=n;return m;
 }
-function rsMsg(rs){return"Готово: недель в копии "+rs.n+", изменено отметок "+rs.f+(rs.f?" (часы и отметки — "+rs.h+", деньги — "+rs.p+", просмотры — "+rs.w+")":"")+". Более новые отметки сохранены, стёртые — возвращены."}
-function importData(o){
-  if(!o||typeof o!=="object"||!o.weeks)throw new Error("не похоже на копию");
+function rsMsg(rs){return"Готово: недель в копии "+rs.n+", изменено отметок "+rs.f+(rs.f?" (часы и отметки — "+rs.h+", деньги — "+rs.p+", просмотры — "+rs.w+")":"")+". Более новые отметки сохранены, стёртые — возвращены."+(rs.bad?" Пропущено битых значений: "+rs.bad+".":"")}
+function cleanCopy(o){   // 1.10.10: битые значения отбрасываются до записи — восстановление всё-или-ничего по каждому значению
+  var TM=/^([01]\d|2[0-3]):[0-5]\d$/,DK=/^\d{4}-\d{2}-\d{2}$/,TV={vac:1,sick:1,off:1,x:1,xn:1,"":1},bad=0,w={},ty={};
+  if(!o||typeof o!=="object"||!o.weeks||typeof o.weeks!=="object")throw new Error("не похоже на копию");
+  Object.keys(o.weeks).forEach(function(mk){var x=o.weeks[mk];if(!DK.test(mk)||!x||typeof x!=="object"||!Array.isArray(x.d)){bad++;return}
+    var d=[],t=[];for(var q=0;q<7;q++){var e=x.d[q]||{},tt=(x.t&&x.t[q])||{},de={},te={};
+      ["a","b"].forEach(function(k){var v=e&&e[k];if(v==null||v==="")return;if(typeof v==="string"&&TM.test(v)){de[k]=v;te[k]=+tt[k]||0}else bad++});d.push(de);t.push(te)}
+    w[mk]={d:d,t:t}});
+  if(o.types&&typeof o.types==="object")Object.keys(o.types).forEach(function(k){var v=o.types[k],vv=v&&typeof v==="object"?v.v:v;if(DK.test(k)&&typeof(vv==null?"":vv)==="string"&&TV[vv==null?"":vv])ty[k]=v;else bad++});
+  return{weeks:w,types:ty,pay:o.pay,watch:o.watch,bad:bad}}
+function importData(o0){
+  var o=cleanCopy(o0);
   var n=0,f=0,pc=0,now=Date.now();
   Object.keys(o.weeks).forEach(function(mk){
     if(!/^\d{4}-\d{2}-\d{2}$/.test(mk))return;var inc=padW(o.weeks[mk]);
@@ -1310,7 +1331,7 @@ function importData(o){
   }
   if(o.pay&&typeof o.pay==="object"){var ip=payNorm(o.pay);for(var pk in ip){var L2=PAY[pk]||(PAY[pk]={e:{}});for(var pw in ip[pk].e){var iv=ip[pk].e[pw],lv=L2.e[pw];if(!lv||(iv.t||0)>(lv.t||0)){if(!lv||lv.s!==iv.s)pc++;L2.e[pw]={s:iv.s,t:iv.t||now}}}}if(pc){paySave();f+=pc}}
   var hf=f-(pc||0),wc=0;if(o.watch&&typeof o.watch==="object"){wc=wMerge(o.watch);f+=wc}
-  update();setTimeout(bkCheck,0);return{n:n,f:f,h:hf,p:pc||0,w:wc};
+  update();setTimeout(bkCheck,0);return{n:n,f:f,h:hf,p:pc||0,w:wc,bad:o.bad};
 }
 var BK="";try{BK=localStorage.getItem("hours:bk")||""}catch(e){}
 function bkMark(){BK=new Date().toISOString();try{localStorage.setItem("hours:bk",BK)}catch(e){}bkCheck()}
@@ -1772,13 +1793,13 @@ function wLast(){var lc=0;for(var id in WT.t)if(WT.t[id].t>lc)lc=WT.t[id].t;WT.e
 })();
 // ---- центр уведомлений: колокольчик справа на строке с датой ----
 var NT={h:[],seen:{},ack:{},bi:{n:0,t:0},pa:[]},NTL=[],NTA=[],NTE=null,NTS="",NPOP=null,EPT=0;
-try{var nt0=JSON.parse(localStorage.getItem("hours:ntf")||"null");if(nt0){NT.h=(nt0.h||[]).filter(function(r){return!/^(pay|miss|upd|bk):|^moved$/.test(r.id)});NT.seen=nt0.seen||{};NT.ack=nt0.ack||{};NT.bi=nt0.bi||{n:0,t:0};NT.pa=nt0.pa||[]}}catch(e){}   // напоминания с кнопкой в «Ранее» не хранятся — только итог сделанного
+try{var nt0=JSON.parse(localStorage.getItem("hours:ntf")||"null");if(nt0){NT.h=(nt0.h||[]).filter(function(r){return!/^(pay|miss|upd|bk):|^moved$/.test(r.id)});NT.seen=nt0.seen||{};NT.ack=nt0.ack||{};NT.bi=nt0.bi||{n:0,t:0};NT.pa=nt0.pa||[];NT.pt=nt0.pt||{}}}catch(e){}   // напоминания с кнопкой в «Ранее» не хранятся — только итог сделанного
 function ntSave(){var lim=Date.now()-200*864e5;[NT.seen,NT.ack].forEach(function(m){for(var k in m)if(m[k]<lim)delete m[k]});try{localStorage.setItem("hours:ntf",JSON.stringify(NT))}catch(e){}}
 function ntLog(id,x){for(var q=0;q<NT.h.length;q++)if(NT.h[q].id===id)return;NT.h.unshift({id:id,t:Date.now(),x:x});if(NT.h.length>30)NT.h.length=30;ntSave()}
-function ntDone(id){   // напоминание ушло: сделано — короткий итог в «Ранее»; причина исчезла — ничего
+function ntDone(id,age){   // напоминание ушло: сделано — короткий итог в «Ранее»; причина исчезла — ничего
   var p=id.split(":");
   if(p[0]==="pay"){var w=p[1],k=p.slice(2).join(":"),at=w==="v"?(payHas(k,"v")?k:null):payFind(k,w);if(!at)return null;var v=payE(at,w);return"💰 "+(w==="v"?"Отпускные":PK[w].n+" № "+PK[w].w)+" · "+(v?"внесено "+rub(v):"отмечено: не было")}
-  if(p[0]==="miss"){var md=parseISO(p[1]);return"Уход отмечен: "+DN[(md.getDay()+6)%7]+", "+md.getDate()+"."+p2(md.getMonth()+1)}
+  if(p[0]==="miss"){if(!NT.ack[id]&&age<60000)return null;var md=parseISO(p[1]);return"Уход отмечен: "+DN[(md.getDay()+6)%7]+", "+md.getDate()+"."+p2(md.getMonth()+1)}
   if(p[0]==="upd")return"Обновлено до версии "+VER;
   if(p[0]==="bk")return BK&&BK!==p.slice(1).join(":")?"Копия данных сохранена":null;
   return null}
@@ -1798,7 +1819,7 @@ function ntRefresh(){
   var a=ntActs(),e=ntEv(),un=a.filter(function(x){return!NT.ack[x.id]}).length,q=bkQuiet();NTA=a;NTE=e;
   if(!a.some(function(x){return x.id.indexOf("bk:")===0})&&NT.bi.n){NT.bi={n:0,t:0};ntSave()}
   var L=a.filter(function(x){return!(q&&x.id.indexOf("bk:")===0)});NTL=L;
-  var ids=a.map(function(x){return x.id});(NT.pa||[]).forEach(function(id){if(ids.indexOf(id)<0){var t=ntDone(id);if(t)ntLog("ok:"+id,t)}});if((NT.pa||[]).join()!==ids.join()){NT.pa=ids;ntSave()}
+  var ids=a.map(function(x){return x.id}),now2=Date.now(),pt=NT.pt||(NT.pt={});(NT.pa||[]).forEach(function(id){if(ids.indexOf(id)<0){var t=ntDone(id,now2-(pt[id]||now2));if(t)ntLog("ok:"+id,t);delete pt[id]}});ids.forEach(function(id){if(!pt[id])pt[id]=now2});if((NT.pa||[]).join()!==ids.join()){NT.pa=ids;ntSave()}
   var sig=a.map(function(x){return x.id}).join()+"|"+un+"|"+q+"|"+(e?e.key+(NT.seen[e.key]?1:0):"");if(sig===NTS)return;NTS=sig;
   var nb=$("nb");nb.classList.toggle("on",a.length>0);nb.classList.toggle("er",a.some(function(x){return x.err}));nb.classList.toggle("nd",un>0||!!(e&&!NT.seen[e.key]));
   if(L.length){if(NPOP){clearTimeout(NPOP.tm);clearTimeout(NPOP.st);NPOP=null}var more=L.length>1?" +"+(L.length-1):"";npShow(L[0].s+more,!!L[0].err);var pp=$("np");if(L[0].c&&pp.scrollWidth>pp.clientWidth+1)pp.textContent=L[0].c+more}else if(!NPOP)npHide();
@@ -1903,6 +1924,8 @@ function wkStreak(){
   }
   return n;
 }
+function wcUndo(){var k=iso(mon);if(WCK!==k||mondayOf(new Date())-mon!==0)return;WCK="";try{localStorage.removeItem("hours:wc")}catch(e){}   // неделя снова не закрыта — поздравление можно получить заново
+  if(window.NT){NT.h=NT.h.filter(function(r){return r.id!=="wc:"+k});ntSave()}}
 function wcCheck(){
   var k=iso(mon);if(WCK===k||!MODEL||MODEL.W<=0||mondayOf(new Date())-mon!==0)return;
   WCK=k;try{localStorage.setItem("hours:wc",k)}catch(e){}
@@ -1986,10 +2009,18 @@ var _as=applySel;applySel=function(n){var t=performance.now();_as(n);tlog("apply
 try{scanLocal()}catch(e){}
 setTimeout(update,120);
 // новые сутки при открытом приложении → перезапуск на сегодняшний день (данные уже сохранены на устройстве)
-function dayCheck(){if(iso(new Date())===iso(now0))return false;var a=document.activeElement;if(a&&a.tagName==="INPUT"&&a.type==="time")return false;try{flushAll()}catch(e){}setTimeout(function(){location.reload()},300);return true}
+// 1.10.6: утренний «прыжок» — новый день открывается под заставкой, вчерашний экран не мелькает
+function coverOn(){if(document.getElementById("dcov"))return;var o=document.createElement("div");o.id="dcov";o.className="spl";
+  o.innerHTML='<div class="sr"><svg viewBox="0 0 120 120"><circle class="t1" cx="60" cy="60" r="52"/><circle class="t2" cx="60" cy="60" r="40"/></svg></div><div class="sl">РабУч</div>';
+  try{var tk=document.querySelectorAll(".ring .trk"),k1=getComputedStyle(tk[0]),k2=getComputedStyle(tk[1]);o.querySelector(".t1").setAttribute("style","stroke:"+k1.stroke+";stroke-width:"+k1.strokeWidth);o.querySelector(".t2").setAttribute("style","stroke:"+k2.stroke+";stroke-width:"+k2.strokeWidth)}catch(e){}
+  document.body.appendChild(o)}
+function coverOff(){var o=document.getElementById("dcov");if(!o)return;o.id="";if(reduced||!o.animate){o.remove();return}o.animate([{opacity:1},{opacity:0}],{duration:220,fill:"forwards"}).onfinish=function(){o.remove()}}
+function dayCheck(){if(iso(new Date())===iso(now0))return false;var a=document.activeElement;if(a&&a.tagName==="INPUT"&&a.type==="time")return false;coverOn();try{flushAll()}catch(e){}setTimeout(function(){location.reload()},40);return true}
 setInterval(function(){if(dayCheck())return;if(ANIM||(DR&&DR.drag))return;update()},20000);
-document.addEventListener("visibilitychange",function(){if(!document.hidden)dayCheck()});
-window.addEventListener("pageshow",function(){dayCheck()});
+document.addEventListener("visibilitychange",function(){
+  if(document.hidden){var h=new Date().getHours();if(h>=20||h<5)coverOn();return}   // вечером уходим под заставку: в снимок для переключателя приложений попадёт она, а не вчерашний день
+  if(!dayCheck())coverOff()});
+window.addEventListener("pageshow",function(){if(!dayCheck())coverOff()});
 if(reduced)setInterval(tick,1000);else requestAnimationFrame(loop);
 </script>
 <script>
@@ -1997,7 +2028,7 @@ if(reduced)setInterval(tick,1000);else requestAnimationFrame(loop);
 (function(){
   if(!("serviceWorker" in navigator))return;
   var asked=false,lastChk=0;
-  function offer(w){if(asked)return;asked=true;window.UPDF=function(){w.postMessage("skip")};window.UPDID=Date.now();if(window.ntRefresh)ntRefresh()}   // обновление — только плашкой в колокольчике
+  function offer(w){if(asked)return;asked=true;window.UPDF=function(){w.postMessage("skip")};window.UPDID="new";fetch("sw.js",{cache:"no-store"}).then(function(r){return r.text()}).then(function(t){var m=/CACHE="([^"]+)"/.exec(t);if(m)window.UPDID=m[1]}).catch(function(){}).then(function(){if(window.ntRefresh)ntRefresh()})}   // 13: постоянный номер — имя кэша новой версии   // обновление — только плашкой в колокольчике
   navigator.serviceWorker.register("sw.js").then(function(reg){
     if(reg.waiting&&navigator.serviceWorker.controller)offer(reg.waiting);
     reg.addEventListener("updatefound",function(){var w=reg.installing;if(!w)return;w.addEventListener("statechange",function(){if(w.state==="installed"&&navigator.serviceWorker.controller)offer(w)})});

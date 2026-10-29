@@ -422,7 +422,7 @@ function dynType(){var ts=1;try{if(window.CSS&&CSS.supports("font","-apple-syste
   if(document.documentElement.style.getPropertyValue("--ts")!==String(ts)){document.documentElement.style.setProperty("--ts",ts);return true}return false}
 dynType();
 var SPLON=!(window.matchMedia&&matchMedia("(prefers-reduced-motion:reduce)").matches)&&!document.hidden;if(SPLON)document.body.classList.add("splon");
-var VER="1.12.4",STANDALONE=!!(window.navigator.standalone||(window.matchMedia&&matchMedia("(display-mode: standalone)").matches));
+var VER="1.12.5",STANDALONE=!!(window.navigator.standalone||(window.matchMedia&&matchMedia("(display-mode: standalone)").matches));
 var NAMES=["Понедельник","Вторник","Среда","Четверг","Пятница","Суббота","Воскресенье"],START=Core.DAY_START,BRK=Core.LUNCH,MINP=Core.MIN_PRESENCE,C=326.73;
 var reduced=window.matchMedia&&matchMedia("(prefers-reduced-motion:reduce)").matches;
 var now0=new Date();
@@ -1249,11 +1249,16 @@ function svMsg(t){var m=document.getElementById("svmsg");if(m)m.textContent=t}
 // память раз в минуту: число элементов страницы и анимаций — их рост без причины и есть утечка
 function memNow(){var sz=0;try{for(var q=0;q<localStorage.length;q++){var k=localStorage.key(q);sz+=k.length+(localStorage.getItem(k)||"").length}}catch(e){}
   return{t:Date.now(),n:document.getElementsByTagName("*").length,a:document.getAnimations?document.getAnimations().length:-1,u:Math.round(performance.now()/1000),st:Math.round((Date.now()-performance.now())/1000),kb:Math.round(sz*2/1024)}}   // st — когда открыта страница: метка запуска
-setInterval(function(){if(document.hidden)return;TEL.mem.push(memNow());if(TEL.mem.length>240)TEL.mem.shift()},60000);
+setInterval(function(){if(document.hidden)return;var m=memNow();m.o=!!document.querySelector(".sh.open,.nc.open,.wp.open");TEL.mem.push(m);if(TEL.mem.length>240)TEL.mem.shift()},60000);
 function memText(){
   var m=memNow(),s=TEL.mem.filter(function(x){return Math.abs(x.st-m.st)<=2});   // замеры этого запуска
   var hr=Math.floor(m.u/3600),mi=Math.floor(m.u%3600/60),tx="Память: элементов на странице "+m.n+" · анимаций "+(m.a<0?"?":m.a)+" · хранилище ≈"+m.kb+" КБ · открыто "+(hr?hr+" ч ":"")+mi+" мин";
-  if(s.length){var d=m.n-s[0].n,mins=Math.max(1,(m.u-s[0].u)/60),ph=Math.round(d/mins*60);tx+=" · элементов с первого замера "+(d>=0?"+":"")+d+" за "+Math.round(mins)+" мин"+(ph>200?" ⚠︎ растёт ~"+ph+"/ч — похоже на утечку":"")}
+  // утечка — это рост раз за разом, а не разовая ступенька: открытые окна (история, 💰, 🎬) добавляют элементы и оставляют их — так задумано.
+  // Поэтому сравниваем только замеры без открытых окон и тревожимся, если элементов прибавлялось почти на каждом из них хотя бы 10 минут.
+  s=s.filter(function(x){return!x.o});
+  if(s.length>=2){var a=s[0],b=s[s.length-1],mins=(b.u-a.u)/60,up=0;for(var q=1;q<s.length;q++)if(s[q].n>s[q-1].n)up++;
+    tx+=" · без открытых окон: "+a.n+" → "+b.n+" за "+Math.round(mins)+" мин";
+    if(mins>=10&&b.n-a.n>100&&up>=(s.length-1)*.7)tx+=" ⚠︎ растёт почти на каждом замере — похоже на утечку"}
   return tx}
 // «Проверить данные»: битые значения в сохранённом — время не по формату, уход раньше прихода, ссылки в никуда
 function dataCheck(){
@@ -1925,20 +1930,24 @@ window.addEventListener("pageshow",function(){if(!dayCheck())coverOff()});
 if(reduced)setInterval(tick,1000);else requestAnimationFrame(loop);
 </script>
 <script>
-// ---- PWA: офлайн и обновления (новая версия ставится только по кнопке) ----
+// ---- PWA: офлайн и обновления (новая версия показывается только после «Обновить» в колокольчике) ----
 (function(){
   if(!("serviceWorker" in navigator))return;
-  var asked=false,lastChk=0;
-  function offer(w){if(asked)return;asked=true;window.UPDF=function(){w.postMessage("skip")};window.UPDID="new";fetch("sw.js",{cache:"no-store"}).then(function(r){return r.text()}).then(function(t){var m=/CACHE="([^"]+)"/.exec(t);if(m)window.UPDID=m[1]}).catch(function(){}).then(function(){if(window.ntRefresh)ntRefresh()})}   // 13: постоянный номер — имя кэша новой версии   // обновление — только плашкой в колокольчике
-  navigator.serviceWorker.register("sw.js").then(function(reg){
-    if(reg.waiting&&navigator.serviceWorker.controller)offer(reg.waiting);
-    reg.addEventListener("updatefound",function(){var w=reg.installing;if(!w)return;w.addEventListener("statechange",function(){if(w.state==="installed"&&navigator.serviceWorker.controller)offer(w)})});
+  var asked=false,lastChk=0,SWC=navigator.serviceWorker;
+  function ask(w,msg){return new Promise(function(done){var ch=new MessageChannel();ch.port1.onmessage=function(e){done(e.data)};try{w.postMessage(msg,[ch.port2])}catch(x){done(null)}setTimeout(function(){done(null)},3000)})}
+  // w — версия, которую одобрит «Обновить»: ожидающая или уже включившаяся, но не одобренная; id — имя её кэша (постоянный номер плашки)
+  function offer(w,id){if(asked)return;asked=true;window.UPDID=id||"new";window.UPDF=function(){ask(w,"skip").then(function(){if(w===SWC.controller)location.reload()})};if(window.ntRefresh)ntRefresh()}
+  function offerOf(w){ask(w,"status").then(function(s){offer(w,s&&s.cache)})}
+  function pending(){var c=SWC.controller;if(c)ask(c,"status").then(function(s){if(s&&s.approved&&s.cache!==s.approved)offer(c,s.cache)})}   // приложение закрывали — новая уже включилась, но не одобрена
+  SWC.register("sw.js").then(function(reg){
+    if(reg.waiting&&SWC.controller)offerOf(reg.waiting);
+    reg.addEventListener("updatefound",function(){var w=reg.installing;if(!w)return;w.addEventListener("statechange",function(){if(w.state==="installed"&&SWC.controller)offerOf(w)})});
     function chk(){if(Date.now()-lastChk<30*60000)return;lastChk=Date.now();reg.update().catch(function(){})}
-    document.addEventListener("visibilitychange",function(){if(!document.hidden)chk()});
-    setInterval(chk,6*3600000);
+    document.addEventListener("visibilitychange",function(){if(!document.hidden){chk();pending()}});
+    setInterval(chk,6*3600000);pending();
   }).catch(function(){});
-  var rl=false,had=!!navigator.serviceWorker.controller;   // при самой первой установке не перезагружаемся
-  navigator.serviceWorker.addEventListener("controllerchange",function(){if(!had){had=true;return}if(rl)return;rl=true;location.reload()});   // первая смена — это установка, дальше — обновления
+  var rl=false,had=!!SWC.controller;   // при самой первой установке не перезагружаемся
+  SWC.addEventListener("controllerchange",function(){if(!had){had=true;return}if(rl)return;rl=true;location.reload()});   // первая смена — это установка, дальше — обновления
 })();
 </script>
 </body>

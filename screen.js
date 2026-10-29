@@ -213,7 +213,7 @@
     const f = plan.info[i], r = plan.work[i], counts = core.countsToNorm(f), G = plan.rest[i];
     return {
       i, st: startOf(marks[i]), tg: plan.target[i], W: plan.norm, cnt: counts, ex: f.kind === "extra",
-      base: plan.counted - (counts ? r.w : 0), baseAll: plan.total - r.w,
+      base: plan.counted - (counts ? r.w : 0),
       ul: G && Math.abs(G.bank) >= EPSILON ? "с банком уход в " : "уход в ",
     };
   }
@@ -293,29 +293,29 @@
   }
 
   /**
-   * Большой таймер в режиме «день». ms — минуты для тысячных (null — тысячные не показывать).
+   * Большой таймер в режиме «день»: крупное число и подпись над ним.
+   * ms — минуты для тысячных (null — тысячные не показывать).
    */
   function dayHeadline(D, now) {
-    const title = D && D.isToday ? "Отработано сегодня" : "Отработано в этот день";
-    const h = (big, caption, total, ms = null) => ({ title, big, caption, total, ms });
-    if (!D) return h("—", "в этот день нет рабочих часов", "—");
-    if (D.inv) return h("—", "проверьте время: уход раньше прихода", "—");
+    const h = (big, caption, ms = null) => ({ big, caption, ms });
+    if (!D) return h("—", "в этот день нет рабочих часов");
+    if (D.inv) return h("—", "проверьте время: уход раньше прихода");
     if (D.ex) {
-      if (D.b != null) return h(hmm(D.w), "доп. день · отработано", hmm(D.w));
-      if (D.isToday && D.ha && now > D.st) { const w = Math.max(0, now - D.st - LUNCH); return h(hmsF(w), "доп. день идёт", hmsF(w)); }
-      return h("—", D.ha ? "доп. день · уход не отмечен" : "доп. день · отметьте приход", "—");
+      if (D.b != null) return h(hmm(D.w), "доп. день · отработано");
+      if (D.isToday && D.ha && now > D.st) return h(hmsF(Math.max(0, now - D.st - LUNCH)), "доп. день идёт");
+      return h("—", D.ha ? "доп. день · уход не отмечен" : "доп. день · отметьте приход");
     }
     if (D.b != null) {
       const d = D.w - D.norm;
       const caption = D.b - D.st < MIN_PRESENCE ? "итог дня: меньше 4,5 ч — не отработан" : d > EPSILON ? "итог дня: переработка" : d < -EPSILON ? "итог дня: недоработка" : "итог дня: в срок";
-      return h((d < 0 ? "−" : "+") + hmm(Math.abs(d)), caption, hmm(D.w));
+      return h((d < 0 ? "−" : "+") + hmm(Math.abs(d)), caption);
     }
     if (D.isToday && !D.ha && now >= D.st + D.norm + LUNCH)
-      return h("0:00", "итог дня: по графику " + clock(D.st) + "–" + clock(D.st + D.norm + LUNCH), hmm(D.norm));
+      return h("0:00", "итог дня: по графику " + clock(D.st) + "–" + clock(D.st + D.norm + LUNCH));
     if (!D.isToday || now <= D.st)
-      return D.past ? h("—", D.ha ? "уход не отмечен" : "день не отмечен", "—") : h(hmm(D.tg - D.st), "длина рабочего дня", "0:00");
+      return D.past ? h("—", D.ha ? "уход не отмечен" : "день не отмечен") : h(hmm(D.tg - D.st), "длина рабочего дня");
     const left = D.tg - now, over = left <= 0;
-    return h(over ? "+" + hmsF(-left) : hmsF(left), over ? "переработка идёт" : "до ухода", hmsF(Math.max(0, now - D.st - LUNCH)), over ? -left : left);
+    return h(over ? "+" + hmsF(-left) : hmsF(left), over ? "переработка идёт" : "до ухода", over ? -left : left);
   }
 
   const screen = {

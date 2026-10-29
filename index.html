@@ -57,10 +57,10 @@ body.quiet .ms{opacity:.3}
 .sum.done .prg{animation:glow 2.2s ease-in-out infinite}.sum.ovr .prg{stroke:var(--k-over)}
 body.quiet .sum.done .prg,body.quiet .dot::after{animation-play-state:paused}
 .side .k{font-size:calc(13px*var(--ts,1));opacity:.65}
-.side .v{font-size:26px;font-weight:700;letter-spacing:-.02em;line-height:1.15;margin-bottom:12px}
-.side .b{font-size:calc(17px*var(--ts,1));font-weight:700;transition:color .4s}.side .b.ok{color:var(--k-acc)}.side .b.over{color:var(--k-over)}.side .b.under{color:var(--k-under)}
-body.lean #tl,body.lean #total{display:none}body.lean .side .b{font-size:34px;letter-spacing:-.02em;line-height:1.1;margin-top:2px}body.lean .side .pw{font-size:calc(14px*var(--ts,1));opacity:.75}
-.side .pw{font-size:calc(12px*var(--ts,1));opacity:.6;margin-top:3px;min-height:1em}
+
+.side .b{font-size:34px;font-weight:700;letter-spacing:-.02em;line-height:1.1;margin-top:2px;transition:color .4s}.side .b.ok{color:var(--k-acc)}.side .b.over{color:var(--k-over)}.side .b.under{color:var(--k-under)}
+
+.side .pw{font-size:calc(14px*var(--ts,1));opacity:.75;margin-top:3px;min-height:1em}
 .dot{display:none;flex-shrink:0;margin-top:6px;width:9px;height:9px;border-radius:50%;background:var(--k-acc);margin-right:8px;position:relative;vertical-align:middle}
 .dot::after{content:"";position:absolute;inset:0;border-radius:50%;background:var(--k-acc);animation:ping 1.6s ease-out infinite}
 @keyframes ping{0%{transform:scale(1);opacity:.55}100%{transform:scale(2.6);opacity:0}}
@@ -338,11 +338,11 @@ html,body{overscroll-behavior:none}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.rise{opacity:1}}
 
 /* спрятанные переключатели под пальцем — ради тактильного щелчка на iOS */
-#sum .big,#sum .ring{cursor:pointer;-webkit-tap-highlight-color:transparent}#sum .big{position:relative}
+#sum .big,#sum .ring{cursor:pointer;-webkit-tap-highlight-color:transparent}
 .hsw{display:none}.hsw-over{position:absolute;inset:0;width:100%;height:100%;margin:0;opacity:.011;cursor:pointer;z-index:2;-webkit-tap-highlight-color:transparent}
 </style>
 </head>
-<body class="lean">
+<body>
 <main>
 <h1><span id="wk"></span><button id="sy" class="sy">☁︎ …</button><button class="nb" id="nb" aria-label="Уведомления"><svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 16.5V11a6 6 0 0 1 12 0v5.5l1.6 2H4.4z"/><path d="M10 21a2.1 2.1 0 0 0 4 0"/></svg><i></i></button><button class="np" id="np"></button></h1>
 <div class="sytx" id="sytx" hidden></div>
@@ -353,7 +353,6 @@ html,body{overscroll-behavior:none}
     <div class="mid"><div class="pct"><span id="pn">0</span><small id="pu">%</small></div><div class="cap" id="cap">неделя</div></div>
   </div>
   <div class="side">
-    <div class="k" id="tl">Отработано</div><div class="v" id="total">0:00</div>
     <div class="k" id="bk">Баланс месяца</div><div class="b" id="bal"></div><div class="pw" id="pw"></div>
   </div>
   <div class="big"><div class="rl" id="rl">осталось до 40 ч</div><div class="rt"><span id="rem">40:00</span><span class="ms" id="ms"></span></div></div>
@@ -418,15 +417,12 @@ var Screen=window.RabuchScreen;   // что показать на главном
 // тактильный щелчок на iOS 26: кодом его не вызвать, он бывает, только когда палец сам переключает переключатель switch,
 // поэтому под палец подкладываем спрятанный: в «подписи» (.hsw) или прозрачный поверх (.hsw-over)
 var HSW='<input type="checkbox" switch class="hsw" tabindex="-1" aria-hidden="true">',HSW_OVER=HSW.replace("hsw","hsw-over");
-function hapOn(el){if(!el||el.querySelector(":scope>.hsw-over"))return;if(getComputedStyle(el).position==="static")el.style.position="relative";el.insertAdjacentHTML("beforeend",HSW_OVER)}
-function hapAll(root,sel){[].forEach.call(root.querySelectorAll(sel),hapOn)}
-function btnText(el,t){var n=el.firstChild;if(n&&n.nodeType===3){if(n.nodeValue!==t)n.nodeValue=t}else el.insertBefore(document.createTextNode(t),el.firstChild)}   // текст кнопки, не задевая переключатель внутри
 // размер текста из настроек iPhone (Dynamic Type): мелкий текст растёт вместе с системным, крупные цифры остаются
 function dynType(){var ts=1;try{if(window.CSS&&CSS.supports("font","-apple-system-body")){var e=document.createElement("div");e.style.cssText="font:-apple-system-body;position:absolute;visibility:hidden";document.body.appendChild(e);var f=parseFloat(getComputedStyle(e).fontSize)||17;e.remove();ts=Math.max(.9,Math.min(1.35,f/17))}}catch(x){}
   if(document.documentElement.style.getPropertyValue("--ts")!==String(ts)){document.documentElement.style.setProperty("--ts",ts);return true}return false}
 dynType();
 var SPLON=!(window.matchMedia&&matchMedia("(prefers-reduced-motion:reduce)").matches)&&!document.hidden;if(SPLON)document.body.classList.add("splon");
-var VER="1.12.2",STANDALONE=!!(window.navigator.standalone||(window.matchMedia&&matchMedia("(display-mode: standalone)").matches));
+var VER="1.12.4",STANDALONE=!!(window.navigator.standalone||(window.matchMedia&&matchMedia("(display-mode: standalone)").matches));
 var NAMES=["Понедельник","Вторник","Среда","Четверг","Пятница","Суббота","Воскресенье"],START=Core.DAY_START,BRK=Core.LUNCH,MINP=Core.MIN_PRESENCE,C=326.73;
 var reduced=window.matchMedia&&matchMedia("(prefers-reduced-motion:reduce)").matches;
 var now0=new Date();
@@ -477,15 +473,15 @@ function p2(n){return Core.pad2(n)}
 function hmsF(m){return Screen.hmsF(m)}
 function ms3(m){return Screen.ms3(m)}
 function setT(el,v){var n=el.firstChild;if(n&&n.nodeType===3&&el.childNodes.length===1){if(n.nodeValue!==v)n.nodeValue=v}else if(el.textContent!==v)el.textContent=v}
-var FREEZE=false,NOMS=false,MS30=false,lastMs=0,msHold=0,SEL=-1,ANIM=false,MODEL=null,idleT=0,DR=null,lastRing=0,DAYI=null,LS=null,lastSec=-1,C2=251.33,LASTW=0,LASTD=null,PM="week";
+var FREEZE=false,NOMS=false,MS30=false,lastMs=0,msHold=0,SEL=-1,ANIM=false,MODEL=null,idleT=0,DR=null,DAYI=null,LS=null,lastSec=-1,C2=251.33,LASTW=0,LASTD=null,PM="week";
 PM="auto";try{var pj=JSON.parse(localStorage.getItem("hours:pm")||"null");if(pj&&pj.d===iso(now0)&&(pj.m==="day"||pj.m==="week"))PM=pj.m}catch(e){}
 // авто: в обычный рабочий день — «день», в день остатка недели и в выходные — «неделя»; тап по кольцу меняет вид до конца суток
 function autoMode(){var M=MODEL,f=M&&M.INF[todayIdx];if(f&&f.kind==="extra")return"day";if(!f||f.kind!=="work"||(M.RIS&&M.RIS[todayIdx]))return"week";return"day"}
 var EMV="week",PU=false,RP="",ringEl=document.querySelector(".ring");
 function showPct(wf,df){LASTW=wf;LASTD=df;var d=EMV==="day",nul=d?df==null:!!(MODEL&&MODEL.W<=0);var pv=d?df:wf;setT($("pn"),nul?"—":String(pv>=1?100:Math.min(99,Math.floor(pv*100+1e-9))));if(nul!==PU){PU=nul;$("pu").style.display=nul?"none":""}setT($("cap"),d?"день":"неделя");if(RP!==EMV){RP=EMV;ringEl.classList.toggle("dm",d)}}
 function dayBig(nm){
-  var H=Screen.dayHeadline(DAYI,nm),rem=$("rem"),ms=$("ms"),tot=$("total");
-  rem._v=null;tot._v=null;setT($("tl"),H.title);setT(rem,H.big);setT($("rl"),H.caption);setT(tot,H.total);
+  var H=Screen.dayHeadline(DAYI,nm),rem=$("rem"),ms=$("ms");
+  rem._v=null;setT(rem,H.big);setT($("rl"),H.caption);
   if(H.ms==null||reduced)ms.style.display="none";else{ms.style.display="inline-block";if(!QUIET)setT(ms,ms3(H.ms))}
 }
 var SDR={q:-2,o:null};
@@ -496,8 +492,8 @@ function nowMin(){var n=new Date();return n.getHours()*60+n.getMinutes()+n.getSe
 var todayIdx=(now0.getDay()+6)%7,X={},$=function(id){return X[id]||(X[id]=document.getElementById(id))};
 function stt(i){return Core.startOf(S.d[i])}
 // ---- телеметрия (для отладки; потом удалить целиком вместе со служебным экраном) ----
-var TEL={ev:[],sec:[],ctx:"idle",ctxT:0,hz:60},BENCH={cur:null,res:[],run:false};
-try{var tj=JSON.parse(localStorage.getItem("hours:tel")||"null");if(tj){TEL.ev=tj.ev||[];TEL.sec=tj.sec||[]}}catch(e){}
+var TEL={ev:[],sec:[],mem:[],ctx:"idle",ctxT:0,hz:60},BENCH={cur:null,res:[],run:false};
+try{var tj=JSON.parse(localStorage.getItem("hours:tel")||"null");if(tj){TEL.ev=tj.ev||[];TEL.sec=tj.sec||[];TEL.mem=tj.mem||[]}}catch(e){}
 function FB(){return 1000/TEL.hz}   // длительность кадра: 16,7 мс на 60 Гц, 8,3 мс на 120 Гц
 function act(n){TEL.ctx=n;TEL.ctxT=performance.now()}
 function ctxNow(){return performance.now()-TEL.ctxT<600?TEL.ctx:"idle"}
@@ -522,7 +518,7 @@ function tlog(kind,ms,x){if(ms<6)return;TEL.ev.push({t:Date.now(),k:kind,ms:Math
   }
   var run=true;requestAnimationFrame(f);
   window.telStart=function(){if(run)return;run=true;last=0;s0=0;cnt=0;mx=0;jk=0;sl=0;requestAnimationFrame(f)};
-  setInterval(function(){try{localStorage.setItem("hours:tel",JSON.stringify({ev:TEL.ev.slice(-150),sec:TEL.sec.slice(-300)}))}catch(e){}},8000);
+  setInterval(function(){try{localStorage.setItem("hours:tel",JSON.stringify({ev:TEL.ev.slice(-150),sec:TEL.sec.slice(-300),mem:TEL.mem.slice(-240)}))}catch(e){}},8000);
 })();
 function setNum(el,to,fmt,quiet){
   to=Math.round(to);var from=el._v==null?0:el._v;
@@ -666,9 +662,9 @@ function applySel(nm){
   els.forEach(function(e,i){e.chip.style.visibility=Screen.chipHidden(i,ti,EMV,M.plan,e.chip._c)?"hidden":""});   // итог закрытого дня уже крупно сверху — плашку не дублируем
   if(EMV==="day")dayBig(nm);
   else{
-    setT($("tl"),"Отработано");setT($("rl"),Screen.weekCaption(M.W,M.counted));
-    if(M.live==null){setNum($("total"),M.totalAll,hm,true);setNum($("rem"),M.W>0&&M.remain<=0?-(M.counted-M.W):M.remain,Screen.remFmt,true);$("ms").style.display="none"}
-    else{$("total")._v=null;$("rem")._v=null;$("ms").style.display=reduced?"none":"inline-block"}
+    setT($("rl"),Screen.weekCaption(M.W,M.counted));
+    if(M.live==null){setNum($("rem"),M.W>0&&M.remain<=0?-(M.counted-M.W):M.remain,Screen.remFmt,true);$("ms").style.display="none"}
+    else{$("rem")._v=null;$("ms").style.display=reduced?"none":"inline-block"}
   }
   vacScreen();
 }
@@ -752,7 +748,7 @@ var ringHold=0;
 function togPM(){var tt=Date.now();if(tt-ringHold<300||performance.now()-DREND<350)return;ringHold=tt;PM=EMV==="day"?"week":"day";try{localStorage.setItem("hours:pm",JSON.stringify({m:PM,d:iso(now0)}))}catch(e){}update();scheduleIdle()}
 document.querySelector(".ring").addEventListener("click",togPM);
 document.querySelector("#sum .big").addEventListener("click",togPM);
-ringEl.insertAdjacentHTML("beforeend",HSW_OVER);document.querySelector("#sum .big").insertAdjacentHTML("beforeend",HSW_OVER);   // щелчок при тапе по кольцу и цифре
+ringEl.insertAdjacentHTML("beforeend",HSW_OVER);$("nb").insertAdjacentHTML("beforeend",HSW_OVER);   // щелчок при тапе по кольцу и колокольчику
 $("dots").addEventListener("keydown",function(e){var b=e.target.closest(".dt");if(b&&(e.key==="Enter"||e.key===" ")){e.preventDefault();b.click()}});
 $("sy").addEventListener("click",function(){var t=$("sytx");t.hidden=!t.hidden;if(!t.textContent)t.textContent=SY.st==="ok"?"Данные в облаке Claude: открываются на любом устройстве.":"Облако недоступно."});
 function schedule(kind){var q=Q[kind];q.pend=true;if(kind==="types")TV++;if(!DBX)return;clearTimeout(q.timer);setStatus("wait","");q.timer=setTimeout(function(){flush(kind)},400)}
@@ -1074,7 +1070,7 @@ function tick(){
   if(n.getDate()!==now0.getDate()&&dayCheck())return;               // наступили новые сутки — перезапуск, без «вчерашних» цифр
   var e=els[LS.i];
   if(EMV==="day"){if(DAYI&&DAYI.isToday)DAYI.w=w;dayBig(nm)}
-  else{setT($("rem"),remain>0?hmsF(remain):(total-LS.W>=1/60?"+":"")+hmsF(total-LS.W));setT($("total"),hmsF(LS.baseAll+w))}
+  else{setT($("rem"),remain>0?hmsF(remain):(total-LS.W>=1/60?"+":"")+hmsF(total-LS.W))}
   if(!e.c.hidden&&!e.c.classList.contains("off")){
     setT(e.tot,hmsF(w));setT(e.lab,over?"переработка идёт":"до ухода осталось");
     setT(e.val,over?"+"+hmsF(nm-LS.tg):hmsF(LS.tg-nm));e.val.classList.toggle("over",over);
@@ -1154,17 +1150,7 @@ function missGo(){
 function toast(txt,undo,ms,lbl){TU=undo;$("tun").hidden=!undo;$("tun").textContent=lbl||"Отменить";$("ttx").textContent=txt;$("toast").classList.add("show");clearTimeout(TT);TT=setTimeout(function(){$("toast").classList.remove("show");TU=null},ms||5000)}
 $("tun").addEventListener("click",function(){var u=TU;TU=null;clearTimeout(TT);$("toast").classList.remove("show");if(u)u()});
 // ---- служебный экран: данные, вид, отладка ----
-var HL=null,SV={tab:"d",timer:0};
-function ensureHL(){
-  if(HL)return;HL=document.createElement("label");HL.setAttribute("aria-hidden","true");HL.style.cssText="position:fixed;left:-99px;top:-99px;opacity:0;pointer-events:none";
-  var ip=document.createElement("input");ip.type="checkbox";ip.setAttribute("switch","");HL.appendChild(ip);document.body.appendChild(HL);
-}
-var NOHAP=false;
-function haptic(){
-  if(NOHAP)return;
-  try{ensureHL();HL.click();if(document.activeElement===HL.firstChild)HL.firstChild.blur()}catch(e){}
-  try{if(navigator.vibrate)navigator.vibrate(8)}catch(e){}
-}
+var SV={tab:"d",timer:0};
 async function loadWeeks(){
   scanLocal();
   if(DBX&&DBX.base){try{
@@ -1260,6 +1246,34 @@ function svCopy(text,done){
   fb();
 }
 function svMsg(t){var m=document.getElementById("svmsg");if(m)m.textContent=t}
+// память раз в минуту: число элементов страницы и анимаций — их рост без причины и есть утечка
+function memNow(){var sz=0;try{for(var q=0;q<localStorage.length;q++){var k=localStorage.key(q);sz+=k.length+(localStorage.getItem(k)||"").length}}catch(e){}
+  return{t:Date.now(),n:document.getElementsByTagName("*").length,a:document.getAnimations?document.getAnimations().length:-1,u:Math.round(performance.now()/1000),st:Math.round((Date.now()-performance.now())/1000),kb:Math.round(sz*2/1024)}}   // st — когда открыта страница: метка запуска
+setInterval(function(){if(document.hidden)return;TEL.mem.push(memNow());if(TEL.mem.length>240)TEL.mem.shift()},60000);
+function memText(){
+  var m=memNow(),s=TEL.mem.filter(function(x){return Math.abs(x.st-m.st)<=2});   // замеры этого запуска
+  var hr=Math.floor(m.u/3600),mi=Math.floor(m.u%3600/60),tx="Память: элементов на странице "+m.n+" · анимаций "+(m.a<0?"?":m.a)+" · хранилище ≈"+m.kb+" КБ · открыто "+(hr?hr+" ч ":"")+mi+" мин";
+  if(s.length){var d=m.n-s[0].n,mins=Math.max(1,(m.u-s[0].u)/60),ph=Math.round(d/mins*60);tx+=" · элементов с первого замера "+(d>=0?"+":"")+d+" за "+Math.round(mins)+" мин"+(ph>200?" ⚠︎ растёт ~"+ph+"/ч — похоже на утечку":"")}
+  return tx}
+// «Проверить данные»: битые значения в сохранённом — время не по формату, уход раньше прихода, ссылки в никуда
+function dataCheck(){
+  var ok=/^([01]\d|2[0-3]):[0-5]\d$/,wk=0,marks=0,badT=[],badS=[],open=[],tdy=iso(now0);
+  for(var q=0;q<localStorage.length;q++){var k=localStorage.key(q),m=/^hours:(\d{4}-\d{2}-\d{2})$/.exec(k);if(!m)continue;var o;try{o=JSON.parse(localStorage.getItem(k))}catch(e){badT.push(m[1]+" (не читается)");continue}if(!o||!o.d)continue;wk++;
+    o.d.forEach(function(x,i){if(!x)return;var day=iso(Core.addDays(parseISO(m[1]),i));["a","b"].forEach(function(f){if(x[f]){marks++;if(!ok.test(x[f]))badT.push(day+" «"+x[f]+"»")}});
+      if(x.b&&ok.test(x.b)&&(!x.a||ok.test(x.a))&&endOf(mins(x.a),mins(x.b))==null)badS.push(day+" "+(x.a||"08:00")+"→"+x.b);
+      if(x.a&&!x.b&&day<tdy&&day>=EP)open.push(day)})}
+  var tyBad=Object.keys(TY).filter(function(k){var v=TY[k].v;return!/^\d{4}-\d{2}-\d{2}$/.test(k)||(v&&!/^(vac|sick|off|x|xn)$/.test(v))});
+  var payBad=0;for(var pk in PAY)for(var pw in PAY[pk].e){var s=PAY[pk].e[pw].s;if(typeof s!=="number"||s<0||!isFinite(s))payBad++}
+  var wOrph=WT.e.filter(function(e){return!WT.t[e.id]}).length;
+  var L=["Недель: "+wk+", отметок времени: "+marks+"."];
+  L.push(badT.length?"⚠︎ Время не по формату: "+badT.slice(0,5).join(", ")+(badT.length>5?" и ещё "+(badT.length-5):""):"Время: всё по формату.");
+  L.push(badS.length?"⚠︎ Уход раньше прихода: "+badS.slice(0,5).join(", "):"Смены: без ошибок.");
+  if(open.length)L.push("Без отметки ухода: "+open.length+" дн. (последний "+open.sort().pop()+").");
+  L.push(tyBad.length?"⚠︎ Странные отметки дней: "+tyBad.slice(0,5).join(", "):"Отпуска и больничные: в порядке.");
+  L.push(payBad?"⚠︎ Странных сумм в 💰: "+payBad:"Деньги: в порядке.");
+  L.push(wOrph?"⚠︎ Просмотров без названия: "+wOrph:"Просмотры: в порядке.");
+  return L.join(" ");
+}
 function telReport(){
   var all=TEL.sec,eco=all.filter(function(x){return!x.d&&x.a}).length,s=all.filter(function(x){return!x.d&&!x.a}),sum=0,mn=999,jn=0,sl=0,mxf=0;
   s.forEach(function(x){sum+=x.f;if(x.f<mn)mn=x.f;if(x.j>0)jn++;sl+=x.s;if(x.mx>mxf)mxf=x.mx});
@@ -1267,7 +1281,7 @@ function telReport(){
   var top=Object.keys(agg).sort(function(a,b){return agg[b].sum-agg[a].sum}).slice(0,10).map(function(k){return k+": "+agg[k].n+"× · сумма "+Math.round(agg[k].sum)+" мс · макс "+Math.round(agg[k].max)+" мс"});
   var L=["ОТЧЁТ ТЕЛЕМЕТРИИ "+new Date().toISOString(),"UA: "+navigator.userAgent,"экран: "+innerWidth+"×"+innerHeight+" @"+(window.devicePixelRatio||1)+"x · reduced-motion: "+reduced+" · версия: "+VER+" · режим: "+(STANDALONE?"PWA":"чат")+" · облако: "+(DBX?"да":"нет"),
     "секунд записано: "+s.length+" (не учтены: с открытым экраном "+(all.length-s.length-eco)+", экономия экрана в покое "+eco+") · средний fps: "+(s.length?Math.round(sum/s.length):0)+" · мин fps: "+(s.length?mn:0)+" · экран: "+TEL.hz+" Гц · секунд с пропуском кадра: "+jn+" · кадров с пропуском 2+: "+sl+" · самый долгий кадр: "+mxf+" мс",
-    "","ТОП ПО СУММЕ ПОТЕРЬ:"].concat(top,BENCH.res.length?["","АВТОТЕСТ (на режим по 5 с тишины и 5 с автосвайпов):",benchText()]:[],["","ПОСЛЕДНИЕ СОБЫТИЯ:"],TEL.ev.slice(-40).map(function(e){return new Date(e.t).toTimeString().slice(0,8)+" "+e.k+" "+e.ms+" мс ["+e.c+"] "+e.x}));
+    "",memText(),"","ТОП ПО СУММЕ ПОТЕРЬ:"].concat(top,BENCH.res.length?["","АВТОТЕСТ (на режим по 5 с тишины и 5 с автосвайпов):",benchText()]:[],["","ПОСЛЕДНИЕ СОБЫТИЯ:"],TEL.ev.slice(-40).map(function(e){return new Date(e.t).toTimeString().slice(0,8)+" "+e.k+" "+e.ms+" мс ["+e.c+"] "+e.x}));
   return L.join("\n");
 }
 function telRender(){
@@ -1281,7 +1295,7 @@ function telRender(){
   s.forEach(function(x,i){var bh=Math.min(h,h*x.f/120);g.fillStyle=(x.d||x.a)?"#94a3b8":x.s>0?"#ef4444":x.j>0?"#f59e0b":"#34d399";g.fillRect(w-(s.length-i)*bw,h-bh,Math.max(1,bw-1),bh)});
   var sum=0,mn=999,jn=0,mxf=0;s.forEach(function(x){sum+=x.f;if(x.f<mn)mn=x.f;if(x.j>0)jn++;if(x.mx>mxf)mxf=x.mx});
   var cur=s.length?s[s.length-1].f:0;
-  document.getElementById("tels").innerHTML="Экран: "+TEL.hz+" Гц. Линии — 60 и 120 кадров/с. Зелёный — без просадок, жёлтый — пропущен кадр, красный — пропущено 2 и больше, серый — экономия экрана в покое и секунды с открытым экраном отладки (не учитываются).<br>Сейчас <b>"+cur+"</b> · среднее <b>"+(s.length?Math.round(sum/s.length):0)+"</b> · минимум <b>"+(s.length?mn:0)+"</b> · секунд с просадками <b>"+jn+"</b> из "+s.length+" · самый долгий кадр <b>"+mxf+" мс</b>";
+  document.getElementById("tels").innerHTML="Экран: "+TEL.hz+" Гц. Линии — 60 и 120 кадров/с. Зелёный — без просадок, жёлтый — пропущен кадр, красный — пропущено 2 и больше, серый — экономия экрана в покое и секунды с открытым экраном отладки (не учитываются).<br>Сейчас <b>"+cur+"</b> · среднее <b>"+(s.length?Math.round(sum/s.length):0)+"</b> · минимум <b>"+(s.length?mn:0)+"</b> · секунд с просадками <b>"+jn+"</b> из "+s.length+" · самый долгий кадр <b>"+mxf+" мс</b><br>"+esc(memText());
   document.getElementById("telev").textContent=TEL.ev.slice(-25).reverse().map(function(e){return new Date(e.t).toTimeString().slice(0,8)+"  "+e.k+"  "+e.ms+" мс  ["+e.c+"] "+e.x}).join("\n")||"Просадок пока нет.";
 }
 function bstat(a){
@@ -1304,7 +1318,7 @@ async function benchRun(dur){
   if(BENCH.run)return;dur=dur||10000;
   var td=todayIdx,bk=null,sel0=SEL,note=$("sytx");
   if(!(INFO[td]&&INFO[td].kind==="work")){svMsg("Сегодня не рабочий день: автотест нужен в рабочий день (проверяется живой отсчёт).");return}
-  BENCH.run=true;BENCH.res=[];NOHAP=true;svClose();
+  BENCH.run=true;BENCH.res=[];svClose();
   if(!LS){bk={a:S.d[td].a,b:S.d[td].b};S.d[td].a=clock(nowMin()-180);S.d[td].b="";update()}   // временный «живой» день, без сохранения
   if(SEL!==td){SEL=td;update()}
   note.hidden=false;
@@ -1318,7 +1332,7 @@ async function benchRun(dur){
     var sw=bstat(BENCH.cur);BENCH.cur=null;BENCH.res.push({name:BPH[i],idle:idle,sw:sw});
     await new Promise(function(r){setTimeout(r,500)});
   }
-  bapply(-1);NOHAP=false;
+  bapply(-1);
   if(bk){S.d[td].a=bk.a;S.d[td].b=bk.b;update()}
   if(sel0!==SEL&&els[sel0])selectDay(sel0,1,0);
   note.hidden=true;BENCH.run=false;setStatus(SY.st,SY.tx);if(DBX)DBX.week.get().then(applyWeek).catch(function(){});svOpen();svTab("t");
@@ -1333,7 +1347,7 @@ function svTab(t){
   [].forEach.call($("svseg").children,function(b){b.classList.toggle("on",b.dataset.v===t)});
   var h="";
   if(t==="d")h='<div class="tel">Копия — файл со всем: часы, отметки отпусков и больничных, деньги 💰 и просмотры 🎬. Сохраните его в «Файлы», чтобы ничего не потерять и перенести данные на другой телефон.'+(BK?' Последняя копия: <b>'+fmtR(BK.slice(0,10))+' '+BK.slice(0,4)+'</b>.':' Копий ещё не было.')+'</div>'+(window.claude?'<div class="tel">В чате Claude файлом сохранить нельзя — используйте копию текстом.</div><div id="svmsg" class="tel"></div>':'<div class="sv-row"><button class="svb" data-a="fsave">Сохранить копию файлом</button><button class="svb" data-a="fload">Восстановить из файла</button></div><input type="file" id="svfile" accept=".json,application/json,text/plain" hidden><div id="svmsg" class="tel"></div><div class="tel" style="margin-top:14px">Запасной путь — текстом (для переноса из чата Claude):</div>')+'<div class="sv-row"><button class="svb" data-a="exp">Сделать копию</button><button class="svb" data-a="imp">Восстановить из копии</button></div><textarea id="svta" rows="5"></textarea><div class="sv-row"><button class="svb" data-a="copy">Скопировать</button><button class="svb" data-a="apply">Применить</button></div><div class="sv-row" style="margin-top:14px"><button class="svb" data-a="clrw">Очистить неделю</button></div><div class="tel">Очистку можно отменить в течение 10 секунд.<br>Производственный календарь: 2026 и 2027 — утверждённые, 2028 — предварительный (без переносов января), обновить осенью 2027.<br>Версия '+VER+(STANDALONE?' · приложение на экране «Домой»':'')+'.</div>';
-  else h='<canvas id="telc"></canvas><div class="tel" id="tels"></div><div class="sv-row"><button class="svb" data-a="trep">Скопировать отчёт</button><button class="svb" data-a="tclr">Очистить</button><button class="svb" data-a="hap">Проверить отклик</button><button class="svb" data-a="snd">Звуки: '+(SND?"вкл":"выкл")+'</button></div><div class="sv-row"><button class="svb" data-a="bench">Автотест (80 с)</button></div><div class="tev" id="telb"></div><div class="tev" id="telev"></div><textarea id="svta" rows="5" style="display:none"></textarea><div id="svmsg" class="tel"></div>';
+  else h='<canvas id="telc"></canvas><div class="tel" id="tels"></div><div class="sv-row"><button class="svb" data-a="trep">Скопировать отчёт</button><button class="svb" data-a="tclr">Очистить</button><button class="svb" data-a="snd">Звуки: '+(SND?"вкл":"выкл")+'</button></div><div class="sv-row"><button class="svb" data-a="bench">Автотест (80 с)</button><button class="svb" data-a="dchk">Проверить данные</button></div><div class="tev" id="telb"></div><div class="tev" id="telev"></div><textarea id="svta" rows="5" style="display:none"></textarea><div id="svmsg" class="tel"></div>';
   $("svb").innerHTML=h;
   if(t==="t"){telRender();benchShow();SV.timer=setInterval(telRender,1000)}
 }
@@ -1361,12 +1375,11 @@ $("svb").addEventListener("click",async function(e){
   else if(a==="apply"){try{var rs=importData(JSON.parse(ta.value));svMsg(rsMsg(rs))}catch(err){svMsg("Не получилось: "+(err&&err.message||"ошибка")+".")}}
   else if(a==="clrw"){clearWeek()}
   else if(a==="trep"){svCopy(telReport(),svMsg)}
-  else if(a==="tclr"){TEL.ev=[];TEL.sec=[];try{localStorage.removeItem("hours:tel")}catch(x){}telRender();svMsg("Очищено.")}
+  else if(a==="tclr"){TEL.ev=[];TEL.sec=[];TEL.mem=[];try{localStorage.removeItem("hours:tel")}catch(x){}telRender();svMsg("Очищено.")}
   else if(a==="bench"){benchRun(BENCH.dur)}
+  else if(a==="dchk"){svMsg(dataCheck())}
   else if(a==="snd"){SND=!SND;try{localStorage.setItem("hours:snd",SND?"1":"0")}catch(x){}b.textContent="Звуки: "+(SND?"вкл":"выкл");if(SND){sndClick();setTimeout(sndChime,400)}}
-  else if(a==="hap"){haptic();setTimeout(haptic,160);setTimeout(haptic,320);svMsg("Три отклика отправлены. Если ничего не почувствовали: нужен iOS 18+, звук и вибрации включены, режим «Без звука» не мешает не всегда.")}
 });
-try{ensureHL()}catch(e){}
 
 // ---- 💰 деньги: две работы, аванс и зарплата, отпускные; одно поле ввода по очереди дат, карандаш для правки ----
 // hours:pay = { "ГГГГ-ММ-ДД": { e: { a1|s1|a2|s2|v|o: {s:сумма,t:время} } } }; v — отпускные (ключ — первый день отпуска)
@@ -1448,8 +1461,8 @@ function payDraw(){
     var c=payCell(b.a,"v",tg).replace('<div class="t">Отпускные · '+d.getDate()+" "+MS[d.getMonth()]+'</div>','<div class="t">Отпускные · отпуск '+d.getDate()+(d.getMonth()!==e.getMonth()?" "+MS[d.getMonth()]:"")+"–"+e.getDate()+" "+MS[e.getMonth()]+" · не позднее "+dd.getDate()+" "+MS[dd.getMonth()]+'</div>');h+=c}});
   $("pgrid").innerHTML=h;$("ped").classList.toggle("on",PS.ed);
   var inp=$("pamt"),ok=$("pok"),lab=$("pinl");
-  if(PS.ed){lab.textContent="Правка: пустое поле — без отметки, 0 — выплаты не было";inp.hidden=true;ok.hidden=false;btnText(ok,"Готово");return}
-  btnText(ok,"Внести");
+  if(PS.ed){lab.textContent="Правка: пустое поле — без отметки, 0 — выплаты не было";inp.hidden=true;ok.hidden=false;ok.textContent="Готово";return}
+  ok.textContent="Внести";
   if(!tg){lab.textContent="Все выплаты отмечены";inp.hidden=true;ok.hidden=true;return}
   var td=parseISO(tg.k),nm=tg.w==="v"?"Отпускные · отпуск с "+td.getDate()+" "+MG[td.getMonth()]:pkName(tg.w)+" · "+td.getDate()+" "+MG[td.getMonth()];
   var tm2=td.getFullYear()*12+td.getMonth(),vm=PS.y*12+PS.m;
@@ -1819,7 +1832,7 @@ function wcCheck(){
   WCK=k;try{localStorage.setItem("hours:wc",k)}catch(e){}
   var n=wkStreak(),tx="Неделя закрыта"+(n>1?" · "+n+"-я подряд":" 🎉");
   try{if(!reduced)$("ring").animate([{filter:"drop-shadow(0 0 0 rgba(94,234,212,0))"},{filter:"drop-shadow(0 0 16px rgba(94,234,212,1))"},{filter:"drop-shadow(0 0 0 rgba(94,234,212,0))"}],{duration:1400,easing:"ease-in-out"})}catch(e){}
-  haptic();setTimeout(haptic,140);if(window.ntLog)ntLog("wc:"+k,tx);
+  if(window.ntLog)ntLog("wc:"+k,tx);
   var tries=0;(function show(){if((SPLON||$("toast").classList.contains("show")||document.querySelector(".sh.open"))&&tries++<240){setTimeout(show,500);return}toast(tx,function(){shareWeek(n)},9000,"Поделиться")})();
 }
 function shareWeek(n){
@@ -1877,7 +1890,7 @@ function fireworks(){
   if(reduced)return;fxCanvas();fxSize();var cs=["#5eead4","#fbbf24","#f472b6","#93c5fd","#eaf6f2"],W=FX.w,H=FX.h;
   [0,350,700,1050].forEach(function(t,j){setTimeout(function(){var x=W*(.2+Math.random()*.6),y=H*(.15+Math.random()*.3),c=cs[j%cs.length];
     for(var q=0;q<46;q++){var a=Math.random()*6.283,v=60+Math.random()*150;FX.pt.push({x:x,y:y,vx:Math.cos(a)*v,vy:Math.sin(a)*v,r:1.4+Math.random()*1.6,c:Math.random()<.25?"#fff":c,l:1.1+Math.random()*.6,l0:1.7})}
-    FX.on=true;FX.t=performance.now();if(j===0)haptic()},t)});
+    FX.on=true;FX.t=performance.now()},t)});
 }
 window.fxTest={snow:snowOn,fireworks:fireworks,splash:splash,wc:function(){WCK="";wcCheck()},share:shareWeek,season:snowSeason};
 snowOn(snowSeason());splash();
@@ -1895,9 +1908,6 @@ var _fit=fitCards;fitCards=function(){var t=performance.now();_fit();tlog("fitCa
 var _hr=hRender;hRender=function(k){var t=performance.now();act("history");_hr(k);tlog("hRender",performance.now()-t)};
 var _as=applySel;applySel=function(n){var t=performance.now();_as(n);tlog("applySel",performance.now()-t)};
 try{scanLocal()}catch(e){}
-// тактильный щелчок (см. HSW выше): колокольчик, «Внести/Готово» в 💰, «+1/ещё» и «Добавить» в 🎬
-hapAll(document,"#nb,#pok,#wadd");
-[["wList","wrows"],["wInp","wsug"]].forEach(function(x){var f=window[x[0]];window[x[0]]=function(){var r=f.apply(this,arguments);hapAll($(x[1]),".wpl");return r}});   // «+1» перерисовываются
 setTimeout(update,120);
 // новые сутки при открытом приложении → перезапуск на сегодняшний день (данные уже сохранены на устройстве)
 // 1.10.6: утренний «прыжок» — новый день открывается под заставкой, вчерашний экран не мелькает

@@ -422,7 +422,7 @@ function dynType(){var ts=1;try{if(window.CSS&&CSS.supports("font","-apple-syste
   if(document.documentElement.style.getPropertyValue("--ts")!==String(ts)){document.documentElement.style.setProperty("--ts",ts);return true}return false}
 dynType();
 var SPLON=!(window.matchMedia&&matchMedia("(prefers-reduced-motion:reduce)").matches)&&!document.hidden;if(SPLON)document.body.classList.add("splon");
-var VER="1.12.5",STANDALONE=!!(window.navigator.standalone||(window.matchMedia&&matchMedia("(display-mode: standalone)").matches));
+var VER="1.12.6",STANDALONE=!!(window.navigator.standalone||(window.matchMedia&&matchMedia("(display-mode: standalone)").matches));
 var NAMES=["Понедельник","Вторник","Среда","Четверг","Пятница","Суббота","Воскресенье"],START=Core.DAY_START,BRK=Core.LUNCH,MINP=Core.MIN_PRESENCE,C=326.73;
 var reduced=window.matchMedia&&matchMedia("(prefers-reduced-motion:reduce)").matches;
 var now0=new Date();
@@ -633,14 +633,14 @@ function renderCard(i,v){
   if(v.hidden)return;
   var F=v.flags;
   e.ma.classList.toggle("emp",F.arriveEmpty);e.mb.classList.toggle("emp",F.leaveEmpty);e.ma.classList.toggle("gone",F.arriveGone);e.mb.classList.toggle("gone",F.leaveGone);
-  cl.toggle("xd",F.xd);cl.toggle("void",F.void);cl.toggle("fri",F.fri);cl.toggle("live",F.live);
+  cl.toggle("xd",F.xd);cl.toggle("void",F.void);cl.toggle("fri",F.fri);cl.toggle("live",F.live);cl.toggle("nowk",!!F.nowk);   // признак не должен залёживаться, когда рабочий день стал отпуском
   setT(e.demj,v.emoji);setT(e.sx,v.suffix);
   if(v.labToggle!=null)e.lab.classList.toggle("tg",v.labToggle);
   putVal(e.tot,v.total);
   setT(e.fk,v.forecast.label);putVal(e.ft,v.forecast.value);sunMark(i,v.forecast.sun);
   if(v.lab!=null){setT(e.lab,v.lab);putVal(e.val,v.val.value);setCls(e.val,"dv val",v.val.cls)}
   setT(e.chip,v.chip.text);e.chip._c=v.chip.cls;setCls(e.chip,"chip",v.chip.cls);
-  if(v.marks){var M=v.marks;setT(e.pha,M.arrive);setT(e.lbb,M.leaveLabel);setT(e.phb,M.leave);e.mb.classList.toggle("miss",M.missed);cl.toggle("nowk",F.nowk)}
+  if(v.marks){var M=v.marks;setT(e.pha,M.arrive);setT(e.lbb,M.leaveLabel);setT(e.phb,M.leave);e.mb.classList.toggle("miss",M.missed)}
 }
 // баланс месяца в шапке; пока в месяце нет закрытых дней — итог прошлого
 function renderBalance(bankNow,P){
@@ -1176,7 +1176,7 @@ function rsMsg(rs){return"Готово: недель в копии "+rs.n+", и�
 function cleanCopy(o){   // 1.10.10: битые значения отбрасываются до записи — восстановление всё-или-ничего по каждому значению
   var TM=/^([01]\d|2[0-3]):[0-5]\d$/,DK=/^\d{4}-\d{2}-\d{2}$/,TV={vac:1,sick:1,off:1,x:1,xn:1,"":1},bad=0,w={},ty={};
   if(!o||typeof o!=="object"||!o.weeks||typeof o.weeks!=="object")throw new Error("не похоже на копию");
-  Object.keys(o.weeks).forEach(function(mk){var x=o.weeks[mk];if(!DK.test(mk)||!x||typeof x!=="object"||!Array.isArray(x.d)){bad++;return}
+  Object.keys(o.weeks).forEach(function(mk){var x=o.weeks[mk];if(!DK.test(mk)||iso(mondayOf(parseISO(mk)))!==mk||!x||typeof x!=="object"||!Array.isArray(x.d)){bad++;return}   // неделя — только с понедельника: иначе запишется туда, откуда её никто не прочитает
     var d=[],t=[];for(var q=0;q<7;q++){var e=x.d[q]||{},tt=(x.t&&x.t[q])||{},de={},te={};
       ["a","b"].forEach(function(k){var v=e&&e[k];if(v==null||v==="")return;if(typeof v==="string"&&TM.test(v)){de[k]=v;te[k]=+tt[k]||0}else bad++});d.push(de);t.push(te)}
     w[mk]={d:d,t:t}});
@@ -1205,7 +1205,7 @@ function importData(o0){
   }
   if(o.pay&&typeof o.pay==="object"){var ip=payNorm(o.pay);for(var pk in ip){var L2=PAY[pk]||(PAY[pk]={e:{}});for(var pw in ip[pk].e){var iv=ip[pk].e[pw],lv=L2.e[pw];if(!lv||(iv.t||0)>(lv.t||0)){if(!lv||lv.s!==iv.s)pc++;L2.e[pw]={s:iv.s,t:iv.t||now}}}}if(pc){paySave();f+=pc}}
   var hf=f-(pc||0),wc=0;if(o.watch&&typeof o.watch==="object"){wc=wMerge(o.watch);f+=wc}
-  update();setTimeout(bkCheck,0);return{n:n,f:f,h:hf,p:pc||0,w:wc,bad:o.bad};
+  SEL=-1;update();setTimeout(bkCheck,0);return{n:n,f:f,h:hf,p:pc||0,w:wc,bad:o.bad};   // после восстановления — экран как при обычном открытии
 }
 var BK="";try{BK=localStorage.getItem("hours:bk")||""}catch(e){}
 function bkMark(){BK=new Date().toISOString();try{localStorage.setItem("hours:bk",BK)}catch(e){}bkCheck()}

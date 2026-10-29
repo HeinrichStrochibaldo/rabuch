@@ -336,6 +336,10 @@ html,body{overscroll-behavior:none}
 #empty[hidden]{display:none}
 .c.nx{opacity:.28;pointer-events:none}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.rise{opacity:1}}
+
+/* спрятанные переключатели под пальцем — ради тактильного щелчка на iOS */
+#sum .big,#sum .ring{cursor:pointer;-webkit-tap-highlight-color:transparent}#sum .big{position:relative}
+.hsw{display:none}.hsw-over{position:absolute;inset:0;width:100%;height:100%;margin:0;opacity:.011;cursor:pointer;z-index:2;-webkit-tap-highlight-color:transparent}
 </style>
 </head>
 <body class="lean">
@@ -411,12 +415,18 @@ html,body{overscroll-behavior:none}
 <script>
 var Core=window.RabuchCore;   // расчёты: календарь, рабочий день, банк, план недели — core.js
 var Screen=window.RabuchScreen;   // что показать на главном экране — screen.js; здесь только перенос в DOM
+// тактильный щелчок на iOS 26: кодом его не вызвать, он бывает, только когда палец сам переключает переключатель switch,
+// поэтому под палец подкладываем спрятанный: в «подписи» (.hsw) или прозрачный поверх (.hsw-over)
+var HSW='<input type="checkbox" switch class="hsw" tabindex="-1" aria-hidden="true">',HSW_OVER=HSW.replace("hsw","hsw-over");
+function hapOn(el){if(!el||el.querySelector(":scope>.hsw-over"))return;if(getComputedStyle(el).position==="static")el.style.position="relative";el.insertAdjacentHTML("beforeend",HSW_OVER)}
+function hapAll(root,sel){[].forEach.call(root.querySelectorAll(sel),hapOn)}
+function btnText(el,t){var n=el.firstChild;if(n&&n.nodeType===3){if(n.nodeValue!==t)n.nodeValue=t}else el.insertBefore(document.createTextNode(t),el.firstChild)}   // текст кнопки, не задевая переключатель внутри
 // размер текста из настроек iPhone (Dynamic Type): мелкий текст растёт вместе с системным, крупные цифры остаются
 function dynType(){var ts=1;try{if(window.CSS&&CSS.supports("font","-apple-system-body")){var e=document.createElement("div");e.style.cssText="font:-apple-system-body;position:absolute;visibility:hidden";document.body.appendChild(e);var f=parseFloat(getComputedStyle(e).fontSize)||17;e.remove();ts=Math.max(.9,Math.min(1.35,f/17))}}catch(x){}
   if(document.documentElement.style.getPropertyValue("--ts")!==String(ts)){document.documentElement.style.setProperty("--ts",ts);return true}return false}
 dynType();
 var SPLON=!(window.matchMedia&&matchMedia("(prefers-reduced-motion:reduce)").matches)&&!document.hidden;if(SPLON)document.body.classList.add("splon");
-var VER="1.12.0",STANDALONE=!!(window.navigator.standalone||(window.matchMedia&&matchMedia("(display-mode: standalone)").matches));
+var VER="1.12.2",STANDALONE=!!(window.navigator.standalone||(window.matchMedia&&matchMedia("(display-mode: standalone)").matches));
 var NAMES=["Понедельник","Вторник","Среда","Четверг","Пятница","Суббота","Воскресенье"],START=Core.DAY_START,BRK=Core.LUNCH,MINP=Core.MIN_PRESENCE,C=326.73;
 var reduced=window.matchMedia&&matchMedia("(prefers-reduced-motion:reduce)").matches;
 var now0=new Date();
@@ -644,13 +654,13 @@ function renderBalance(bankNow,P){
 }
 // полоска дней под карточкой
 function renderDots(){
-  var h="";vis().forEach(function(i){var rr=rec(Core.addDays(mon,i)),em=rr.cls==="type"||rr.cls==="hol"?rr.em:"";h+='<button class="dt'+(i===SEL?" on":"")+(i===todayIdx?" td":"")+(em?" emj":"")+'" data-c="'+rr.cls+'" data-i="'+i+'"><b>'+DN[i][0].toUpperCase()+DN[i][1]+'</b><i>'+em+'</i></button>'});
+  var h="";vis().forEach(function(i){var rr=rec(Core.addDays(mon,i)),em=rr.cls==="type"||rr.cls==="hol"?rr.em:"";h+='<label class="dt'+(i===SEL?" on":"")+(i===todayIdx?" td":"")+(em?" emj":"")+'" data-c="'+rr.cls+'" data-i="'+i+'" role="button" tabindex="0"><b>'+DN[i][0].toUpperCase()+DN[i][1]+'</b><i>'+em+'</i>'+HSW+'</label>'});
   var d=$("dots");if(d._h!==h){d._h=h;d.innerHTML=h}
 }
 function applySel(nm){
   var M=MODEL;if(!M)return;
   var ti=SEL,ctx={plan:M.plan,marks:S.d,now:nm,todayIdx:todayIdx};
-  EMV=SEL!==defSel()?"day":(PM==="day"||PM==="week")?PM:autoMode();   // чужой день всегда показывается как «день», без живого отсчёта недели
+  EMV=(PM==="day"||PM==="week")?PM:SEL!==defSel()?"day":autoMode();   // выбранный тапом вид — на любом дне; без выбора чужой день показывается как «день»
   var ring=Screen.dayRing(ti,ctx);setDayRing(ring.frac,ring.over);showPct(M.frac,ring.frac);
   DAYI=Screen.dayFocus(ti,ctx);
   els.forEach(function(e,i){e.chip.style.visibility=Screen.chipHidden(i,ti,EMV,M.plan,e.chip._c)?"hidden":""});   // итог закрытого дня уже крупно сверху — плашку не дублируем
@@ -738,7 +748,12 @@ var SOONT=0;function SOON(){clearTimeout(SOONT);SOONT=setTimeout(function(){upda
 function setStatus(st,tx){SY.st=st;SY.tx=tx||"";var b=$("sy");b.dataset.st=st;b.textContent=st==="ok"?"☁︎ сохранено":st==="wait"?"☁︎ …":st==="local"?"на устройстве":"⚠︎ только здесь";$("sytx").textContent=tx||""}
 function errTxt(e){return (e&&(e.code||e.message))?String(e.code||e.message):"ошибка"}
 var ringHold=0;
-document.querySelector(".ring").addEventListener("click",function(){var tt=Date.now();if(tt-ringHold<450)return;if(SEL!==defSel()){ringHold=tt;goToday();return}var dbl=tt-lastRing<340;lastRing=tt;PM=EMV==="day"?"week":"day";if(dbl)goToday();try{localStorage.setItem("hours:pm",JSON.stringify({m:PM,d:iso(now0)}))}catch(e){}update()});
+// 1.10.11: тап по кольцу или по крупной цифре — «день ↔ неделя» на любом дне; к сегодня — кнопкой «К сегодня» или сам через минуту
+function togPM(){var tt=Date.now();if(tt-ringHold<300||performance.now()-DREND<350)return;ringHold=tt;PM=EMV==="day"?"week":"day";try{localStorage.setItem("hours:pm",JSON.stringify({m:PM,d:iso(now0)}))}catch(e){}update();scheduleIdle()}
+document.querySelector(".ring").addEventListener("click",togPM);
+document.querySelector("#sum .big").addEventListener("click",togPM);
+ringEl.insertAdjacentHTML("beforeend",HSW_OVER);document.querySelector("#sum .big").insertAdjacentHTML("beforeend",HSW_OVER);   // щелчок при тапе по кольцу и цифре
+$("dots").addEventListener("keydown",function(e){var b=e.target.closest(".dt");if(b&&(e.key==="Enter"||e.key===" ")){e.preventDefault();b.click()}});
 $("sy").addEventListener("click",function(){var t=$("sytx");t.hidden=!t.hidden;if(!t.textContent)t.textContent=SY.st==="ok"?"Данные в облаке Claude: открываются на любом устройстве.":"Облако недоступно."});
 function schedule(kind){var q=Q[kind];q.pend=true;if(kind==="types")TV++;if(!DBX)return;clearTimeout(q.timer);setStatus("wait","");q.timer=setTimeout(function(){flush(kind)},400)}
 function mergeTY(rm){
@@ -987,7 +1002,7 @@ if(document.fonts&&document.fonts.ready)document.fonts.ready.then(function(){fit
 function selectDay(idx,dir,off){
   if(idx===SEL||!els[idx])return;
   var t0=performance.now(),old=els[SEL]&&els[SEL].c,nw=els[idx].c;SEL=idx;off=off||0;act("swipe");
-  nw.classList.remove("off");haptic();
+  nw.classList.remove("off");
   if(!reduced&&old&&dir&&old.animate){
     ANIM=true;msHold=t0+450;
     var AX=NAV.h?"translateX(":"translateY(",SH0=NAV.h?48:36;
@@ -1043,7 +1058,7 @@ function navApply(){sumEl.classList.toggle("hlm",!!NAV.h);hlPos()}
 window.addEventListener("resize",function(){hlPos()});
 sumEl.addEventListener("pointerup",endDr);sumEl.addEventListener("pointercancel",endDr);
 sumEl.addEventListener("click",function(e){if(performance.now()-DREND<400){e.preventDefault();e.stopPropagation()}},true);
-$("dots").addEventListener("click",function(e){var b=e.target.closest(".dt");if(!b)return;var i=+b.dataset.i;if(i!==SEL)selectDay(i,i>SEL?1:-1,0)});
+$("dots").addEventListener("click",function(e){if(e.target.tagName==="INPUT")return;var b=e.target.closest(".dt");if(!b)return;var i=+b.dataset.i;if(i!==SEL)selectDay(i,i>SEL?1:-1,0)});
 function tick(){
   if(!LS||FREEZE)return;
   var n=new Date(),nm=n.getHours()*60+n.getMinutes()+n.getSeconds()/60+n.getMilliseconds()/60000;
@@ -1096,7 +1111,7 @@ function goBtn(){
 }
 function goAct(){
   var g=GO;if(!g)return;var i=g.i,k=g.k,n=new Date(),v=p2(n.getHours())+":"+p2(n.getMinutes()),prev=S.d[i][k]||"";
-  var run=function(){els[i].fl[k].value=v;setF(i,k,v);haptic();sndClick();update();if(k==="a")chargeRing();if(k==="b"&&i===todayIdx&&longRest())setTimeout(fireworks,420);
+  var run=function(){els[i].fl[k].value=v;setF(i,k,v);sndClick();update();if(k==="a")chargeRing();if(k==="b"&&i===todayIdx&&longRest())setTimeout(fireworks,420);
     toast((k==="a"?"Приход ":"Уход ")+v,function(){els[i].fl[k].value=prev;setF(i,k,prev);update()})};
   if(k==="b"&&!reduced)leaveScene(run);else run();
 }
@@ -1433,8 +1448,8 @@ function payDraw(){
     var c=payCell(b.a,"v",tg).replace('<div class="t">Отпускные · '+d.getDate()+" "+MS[d.getMonth()]+'</div>','<div class="t">Отпускные · отпуск '+d.getDate()+(d.getMonth()!==e.getMonth()?" "+MS[d.getMonth()]:"")+"–"+e.getDate()+" "+MS[e.getMonth()]+" · не позднее "+dd.getDate()+" "+MS[dd.getMonth()]+'</div>');h+=c}});
   $("pgrid").innerHTML=h;$("ped").classList.toggle("on",PS.ed);
   var inp=$("pamt"),ok=$("pok"),lab=$("pinl");
-  if(PS.ed){lab.textContent="Правка: пустое поле — без отметки, 0 — выплаты не было";inp.hidden=true;ok.hidden=false;ok.textContent="Готово";return}
-  ok.textContent="Внести";
+  if(PS.ed){lab.textContent="Правка: пустое поле — без отметки, 0 — выплаты не было";inp.hidden=true;ok.hidden=false;btnText(ok,"Готово");return}
+  btnText(ok,"Внести");
   if(!tg){lab.textContent="Все выплаты отмечены";inp.hidden=true;ok.hidden=true;return}
   var td=parseISO(tg.k),nm=tg.w==="v"?"Отпускные · отпуск с "+td.getDate()+" "+MG[td.getMonth()]:pkName(tg.w)+" · "+td.getDate()+" "+MG[td.getMonth()];
   var tm2=td.getFullYear()*12+td.getMonth(),vm=PS.y*12+PS.m;
@@ -1465,12 +1480,12 @@ $("pok").addEventListener("click",function(){
   if(PS.ed){   // «Готово»: сохранить все поля
     var ch=[];[].forEach.call($("pgrid").querySelectorAll("input"),function(el){var k=el.dataset.k,w=el.dataset.w,raw=el.value.replace(/\D/g,""),v=raw===""?null:parseInt(raw,10),cur=payHas(k,w)?payE(k,w):null;
       if(v!==cur)ch.push([k,w,paySet(k,w,v)])});
-    PS.ed=false;payDone();if(ch.length){haptic();toast("💰 Исправлено: "+ch.length,function(){ch.forEach(function(c){var x=PAY[c[0]]||(PAY[c[0]]={e:{}});if(c[2])x.e[c[1]]=c[2];else delete x.e[c[1]]});paySave();payDone()},7000)}
+    PS.ed=false;payDone();if(ch.length){toast("💰 Исправлено: "+ch.length,function(){ch.forEach(function(c){var x=PAY[c[0]]||(PAY[c[0]]={e:{}});if(c[2])x.e[c[1]]=c[2];else delete x.e[c[1]]});paySave();payDone()},7000)}
     return}
   var tg=payTarget();if(!tg||!tg.open)return;var inp=$("pamt"),raw=inp.value.replace(/\D/g,""),v=raw===""?NaN:parseInt(raw,10);
   if(isNaN(v)&&/прошлый/.test(inp.placeholder)){var mm=/(\d[\d  ]*)/.exec(inp.placeholder);if(mm)v=parseInt(mm[1].replace(/\D/g,""),10)}
   if(isNaN(v)){inp.focus();return}
-  var old=paySet(tg.k,tg.w,v),d=parseISO(tg.k);haptic();inp.value="";
+  var old=paySet(tg.k,tg.w,v),d=parseISO(tg.k);inp.value="";
   var t2=payTarget();if(t2&&t2.open)d=parseISO(t2.k);   // следующую уже можно вносить — сразу к ней
   PS.y=d.getFullYear();PS.m=d.getMonth();payDone();
   toast("💰 "+(tg.w==="v"?"Отпускные":PK[tg.w].n+" № "+PK[tg.w].w)+" · "+(v?rub(v):"не было"),function(){var x=PAY[tg.k];if(old)x.e[tg.w]=old;else delete x.e[tg.w];paySave();payDone()},7000);
@@ -1499,7 +1514,7 @@ function wOf(id){return WT.e.filter(function(e){return e.id===id})}
 function wAdd(id,d){   // отметить фильм или следующую серию в день d; вернуть отмену
   var x=WT.t[id],snap={cs:x.cs,ce:x.ce,st:x.st,t:x.t},en={id:id,d:d,s:0,e:0,m:x.m,t:Date.now()};
   if(x.k!=="f"){var nx=wNext(x);x.cs=nx.s;x.ce=nx.e;en.s=nx.s;en.e=nx.e;x.st="w"}else x.st="d";
-  x.t=en.t;WT.e.push(en);wSave();haptic();
+  x.t=en.t;WT.e.push(en);wSave();
   toast("🎬 "+x.n+(x.k==="f"?"":" · С"+en.s+" Е"+en.e),function(){var i=WT.e.indexOf(en);if(i>=0)WT.e.splice(i,1);x.cs=snap.cs;x.ce=snap.ce;x.st=snap.st;x.t=snap.t;wSave();wDraw()},7000);
   wDraw();if(x.k!=="f"&&x.ss[x.cs-1]&&x.ce===x.ss[x.cs-1])setTimeout(function(){wSeasonEnd(id)},350);
 }
@@ -1733,7 +1748,7 @@ function ncRender(){
 }
 function ncOpen(){
   var n=Date.now();NTA.forEach(function(x){NT.ack[x.id]=n});if(NTE&&!NT.seen[NTE.key]){NT.seen[NTE.key]=n;ntLog(NTE.key,NTE.t)}ntSave();NTS="";ntRefresh();
-  ncRender();var r=$("nb").getBoundingClientRect();$("ncp").style.top=Math.round(r.bottom+2)+"px";$("ncp").scrollTop=0;$("nc").classList.add("open");haptic();
+  ncRender();var r=$("nb").getBoundingClientRect();$("ncp").style.top=Math.round(r.bottom+2)+"px";$("ncp").scrollTop=0;$("nc").classList.add("open");
 }
 function ncClose(){$("nc").classList.remove("open")}
 $("nb").addEventListener("click",function(){if($("nc").classList.contains("open"))ncClose();else{if(NPOP)evPopDone();ncOpen()}});
@@ -1880,6 +1895,9 @@ var _fit=fitCards;fitCards=function(){var t=performance.now();_fit();tlog("fitCa
 var _hr=hRender;hRender=function(k){var t=performance.now();act("history");_hr(k);tlog("hRender",performance.now()-t)};
 var _as=applySel;applySel=function(n){var t=performance.now();_as(n);tlog("applySel",performance.now()-t)};
 try{scanLocal()}catch(e){}
+// тактильный щелчок (см. HSW выше): колокольчик, «Внести/Готово» в 💰, «+1/ещё» и «Добавить» в 🎬
+hapAll(document,"#nb,#pok,#wadd");
+[["wList","wrows"],["wInp","wsug"]].forEach(function(x){var f=window[x[0]];window[x[0]]=function(){var r=f.apply(this,arguments);hapAll($(x[1]),".wpl");return r}});   // «+1» перерисовываются
 setTimeout(update,120);
 // новые сутки при открытом приложении → перезапуск на сегодняшний день (данные уже сохранены на устройстве)
 // 1.10.6: утренний «прыжок» — новый день открывается под заставкой, вчерашний экран не мелькает

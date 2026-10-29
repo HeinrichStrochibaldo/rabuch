@@ -406,18 +406,22 @@ html,body{overscroll-behavior:none}
   <div class="seg" id="svseg"><button data-v="d">Данные</button><button data-v="t">Отладка</button></div>
   <div id="svb"></div>
 </div></div>
+<script src="core.js"></script>
+<script src="screen.js"></script>
 <script>
+var Core=window.RabuchCore;   // расчёты: календарь, рабочий день, банк, план недели — core.js
+var Screen=window.RabuchScreen;   // что показать на главном экране — screen.js; здесь только перенос в DOM
 // размер текста из настроек iPhone (Dynamic Type): мелкий текст растёт вместе с системным, крупные цифры остаются
 function dynType(){var ts=1;try{if(window.CSS&&CSS.supports("font","-apple-system-body")){var e=document.createElement("div");e.style.cssText="font:-apple-system-body;position:absolute;visibility:hidden";document.body.appendChild(e);var f=parseFloat(getComputedStyle(e).fontSize)||17;e.remove();ts=Math.max(.9,Math.min(1.35,f/17))}}catch(x){}
   if(document.documentElement.style.getPropertyValue("--ts")!==String(ts)){document.documentElement.style.setProperty("--ts",ts);return true}return false}
 dynType();
 var SPLON=!(window.matchMedia&&matchMedia("(prefers-reduced-motion:reduce)").matches)&&!document.hidden;if(SPLON)document.body.classList.add("splon");
-var VER="1.10.10",STANDALONE=!!(window.navigator.standalone||(window.matchMedia&&matchMedia("(display-mode: standalone)").matches));
-var NAMES=["Понедельник","Вторник","Среда","Четверг","Пятница","Суббота","Воскресенье"],START=480,END=990,BRK=30,MINP=270,N=480,C=326.73;   // MINP: минимум присутствия в рабочий день — 4,5 ч от прихода (обед вычитается как обычно)
+var VER="1.12.0",STANDALONE=!!(window.navigator.standalone||(window.matchMedia&&matchMedia("(display-mode: standalone)").matches));
+var NAMES=["Понедельник","Вторник","Среда","Четверг","Пятница","Суббота","Воскресенье"],START=Core.DAY_START,BRK=Core.LUNCH,MINP=Core.MIN_PRESENCE,C=326.73;
 var reduced=window.matchMedia&&matchMedia("(prefers-reduced-motion:reduce)").matches;
 var now0=new Date();
 var mon=new Date(now0.getFullYear(),now0.getMonth(),now0.getDate()-((now0.getDay()+6)%7));
-function iso(d){return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")}
+function iso(d){return Core.isoDate(d)}
 var KEY="hours:"+iso(mon),S={d:[],t:[]};
 try{var raw=localStorage.getItem(KEY);if(raw){var o0=JSON.parse(raw);if(o0&&o0.d){S.d=o0.d;S.t=o0.t||[]}}}catch(e){}
 function normS(){for(var q=0;q<7;q++){if(!S.d[q])S.d[q]={};if(!S.t[q])S.t[q]={}}}
@@ -426,7 +430,7 @@ var TY={},TYPES={},INFO=[];
 function normTY(m){var r={};for(var k in (m||{})){var v=m[k];r[k]=(v&&typeof v==="object")?{v:v.v||"",t:v.t||0}:{v:v||"",t:0}}return r}
 function rebuildTypes(){TYPES={};for(var k in TY)if(TY[k].v)TYPES[k]=TY[k].v}
 // начало учёта: всё до этой даты не существует (стёрто при обновлении 1.9)
-var EP="2026-09-21",EPY=2026,EPM=8;
+var EP=Core.ACCOUNTING_START,EPY=2026,EPM=8;
 function epPurge(){try{if(localStorage.getItem("hours:ep")===EP)return;var del=[];
   for(var q=0;q<localStorage.length;q++){var k=localStorage.key(q),m=/^hours:(\d{4}-\d{2}-\d{2})$/.exec(k);if(m&&m[1]<EP)del.push(k)}
   del.forEach(function(k){localStorage.removeItem(k)});
@@ -448,34 +452,20 @@ function touchWk(mk){VW[mk]=(VW[mk]||0)+1;markDirty(mk)}
 function cleanDirty(mk){if(DIRTY[mk]){delete DIRTY[mk];saveDirty()}}
 function save(){DV++;if($("empty")&&!$("empty").hidden)setTimeout(bkCheck,0);try{localStorage.setItem(KEY,JSON.stringify({d:S.d,t:S.t}))}catch(e){}markDirty(iso(mon));schedule("week")}
 function hasData(d){return Array.isArray(d)&&d.some(function(x){return x&&(x.a||x.b)})}
-var HOL={},SHORT={},WSAT={},EM={vac:"🌴",sick:"🤒",off:"💤"},LBL={vac:"Отпуск",sick:"Больничный",off:"Отгул"};
-// Производственный календарь РФ: 2026 и 2027 утверждены (2027 — постановление № 1187 от 17.09.2026); 2028 — предварительно, по ТК без переносов января; обновить осенью 2027
-"2026-01-01 2026-01-02 2026-01-05 2026-01-06 2026-01-07 2026-01-08 2026-01-09 2026-02-23 2026-03-09 2026-05-01 2026-05-11 2026-06-12 2026-11-04 2026-12-31 2027-01-01 2027-01-04 2027-01-05 2027-01-06 2027-01-07 2027-01-08 2027-02-22 2027-02-23 2027-03-08 2027-05-03 2027-05-10 2027-06-14 2027-11-04 2027-11-05 2027-12-31 2028-01-03 2028-01-04 2028-01-05 2028-01-06 2028-01-07 2028-02-23 2028-03-08 2028-05-01 2028-05-09 2028-06-12 2028-11-06".split(" ").forEach(function(k){HOL[k]=1});
-"2026-04-30 2026-05-08 2026-06-11 2026-11-03 2027-02-20 2027-04-30 2027-06-11 2027-11-03 2028-02-22 2028-03-07 2028-05-08 2028-11-03".split(" ").forEach(function(k){SHORT[k]=1});
-WSAT["2027-02-20"]=1;
-function calKind(k,dow){if(HOL[k])return"hol";if((dow===0||dow===6)&&!WSAT[k])return"rest";return SHORT[k]?"short":"work"}
-function infoOf(i){return infoDate(new Date(mon.getFullYear(),mon.getMonth(),mon.getDate()+i))}
-function infoDate(d){
-  var k=iso(d);if(k<EP)return{kind:"pre",k:k,norm:0};
-  var ck=calKind(k,d.getDay()),tp=TYPES[k];
-  if(tp==="x"||tp==="xn")return{kind:"extra",counted:tp==="xn",k:k,tp:tp,norm:0};
-  if(ck==="work"||ck==="short"){
-    if(tp==="vac"||tp==="sick"||tp==="off")return{kind:"type",tp:tp,k:k,norm:0};
-    return{kind:"work",norm:ck==="short"?420:480,short:ck==="short",k:k};
-  }
-  return{kind:ck==="hol"?"hol":"rest",k:k,norm:0};
-}
-function mins(t){if(!t)return null;var p=t.split(":");return +p[0]*60+ +p[1]}
-// уход раньше прихода = следующие сутки, если смена не длиннее 20 ч; иначе это ошибка ввода
-function endOf(st,b){if(b==null)return null;if(st==null)st=START;if(b>=st)return b;if(b<st&&b+1440-st<=1200)return b+1440;return null}
-function hm(m){return hmm(m)}
-function hmm(m){var a=Math.abs(Math.round(m));return Math.floor(a/60)+":"+String(a%60).padStart(2,"0")}
-function sg(m){m=Math.round(m);return (m>0?"+":m<0?"−":"")+hmm(m)}
-function clock(m){m=Math.round(m);return String(Math.floor(m/60)%24).padStart(2,"0")+":"+String(m%60).padStart(2,"0")}
-function clockT(m){return Math.round(m)>=1440?clock(m)+"⁺¹":clock(m)}   // цель ухода: после полуночи — с пометкой следующих суток
-function p2(n){return String(n).padStart(2,"0")}
-function hmsF(m){var t=Math.floor(Math.max(0,m)*60+1e-6);return Math.floor(t/3600)+":"+p2(Math.floor(t%3600/60))+":"+p2(t%60)}
-function ms3(m){var f=(Math.max(0,m)*60)%1;return "."+String(Math.min(999,Math.floor(f*1000))).padStart(3,"0")}
+var EM=Screen.TYPE_EMOJI,LBL=Screen.TYPE_LABEL;
+function calKind(k,dow){return Core.calendarKind(k,dow)}
+function infoDate(d){return Core.dayInfo(d,TYPES)}
+function mins(t){return Core.minutesOf(t)}
+function endOf(st,b){return Core.shiftEnd(st,b)}
+// форматы времени — screen.js
+function hm(m){return Screen.hmm(m)}
+function hmm(m){return Screen.hmm(m)}
+function sg(m){return Screen.sg(m)}
+function clock(m){return Screen.clock(m)}
+function clockT(m){return Screen.clockT(m)}
+function p2(n){return Core.pad2(n)}
+function hmsF(m){return Screen.hmsF(m)}
+function ms3(m){return Screen.ms3(m)}
 function setT(el,v){var n=el.firstChild;if(n&&n.nodeType===3&&el.childNodes.length===1){if(n.nodeValue!==v)n.nodeValue=v}else if(el.textContent!==v)el.textContent=v}
 var FREEZE=false,NOMS=false,MS30=false,lastMs=0,msHold=0,SEL=-1,ANIM=false,MODEL=null,idleT=0,DR=null,lastRing=0,DAYI=null,LS=null,lastSec=-1,C2=251.33,LASTW=0,LASTD=null,PM="week";
 PM="auto";try{var pj=JSON.parse(localStorage.getItem("hours:pm")||"null");if(pj&&pj.d===iso(now0)&&(pj.m==="day"||pj.m==="week"))PM=pj.m}catch(e){}
@@ -483,27 +473,10 @@ PM="auto";try{var pj=JSON.parse(localStorage.getItem("hours:pm")||"null");if(pj&
 function autoMode(){var M=MODEL,f=M&&M.INF[todayIdx];if(f&&f.kind==="extra")return"day";if(!f||f.kind!=="work"||(M.RIS&&M.RIS[todayIdx]))return"week";return"day"}
 var EMV="week",PU=false,RP="",ringEl=document.querySelector(".ring");
 function showPct(wf,df){LASTW=wf;LASTD=df;var d=EMV==="day",nul=d?df==null:!!(MODEL&&MODEL.W<=0);var pv=d?df:wf;setT($("pn"),nul?"—":String(pv>=1?100:Math.min(99,Math.floor(pv*100+1e-9))));if(nul!==PU){PU=nul;$("pu").style.display=nul?"none":""}setT($("cap"),d?"день":"неделя");if(RP!==EMV){RP=EMV;ringEl.classList.toggle("dm",d)}}
-function remFmt(m){return m<-0.5?"+"+hmm(-m):hmm(Math.max(0,m))}
-function weekRl(nm){var M=MODEL;return M.W<=0?"на этой неделе нет рабочих часов":M.remain<=0?(M.counted-M.W>=1?"сверх нормы недели":"норма недели выполнена"):"осталось до "+(M.W/60)+" ч"}
 function dayBig(nm){
-  var D=DAYI,rem=$("rem"),ms=$("ms"),rl=$("rl"),tot=$("total");
-  rem._v=null;tot._v=null;setT($("tl"),D&&D.isToday?"Отработано сегодня":"Отработано в этот день");
-  if(!D){setT(rem,"—");ms.style.display="none";setT(rl,"в этот день нет рабочих часов");setT(tot,"—");return}
-  if(D.inv){setT(rem,"—");ms.style.display="none";setT(rl,"проверьте время: уход раньше прихода");setT(tot,"—");return}
-  if(D.ex){ms.style.display="none";
-    if(D.b!=null){setT(rem,hmm(D.w));setT(rl,"доп. день · отработано");setT(tot,hm(D.w));return}
-    if(D.isToday&&D.ha&&nm>D.st){var wx=Math.max(0,nm-D.st-BRK);setT(rem,hmsF(wx));setT(rl,"доп. день идёт");setT(tot,hmsF(wx));return}
-    setT(rem,"—");setT(rl,D.ha?"доп. день · уход не отмечен":"доп. день · отметьте приход");setT(tot,"—");return}
-  if(D.b!=null){
-    var df=D.w-D.norm;setT(rem,(df<0?"−":"+")+hmm(Math.abs(df)));ms.style.display="none";
-    setT(rl,D.b-D.st<MINP?"итог дня: меньше 4,5 ч — не отработан":df>5?"итог дня: переработка":df<-5?"итог дня: недоработка":"итог дня: в срок");setT(tot,hm(D.w));return;
-  }
-  if(D.isToday&&!D.ha&&!D.ex&&nm>=D.st+D.norm+BRK){ms.style.display="none";setT(rem,"0:00");setT(rl,"итог дня: по графику "+clock(D.st)+"–"+clock(D.st+D.norm+BRK));setT(tot,hm(D.norm));return}
-  if(!D.isToday||nm<=D.st){ms.style.display="none";if(D.past){setT(rem,"—");setT(rl,D.ha?"уход не отмечен":"день не отмечен");setT(tot,"—")}else{setT(rem,hmm(D.tg-D.st));setT(rl,"длина рабочего дня");setT(tot,"0:00")}return}
-  var left=D.tg-nm,over=left<=0,w=Math.max(0,nm-D.st-BRK);
-  setT(rem,over?"+"+hmsF(-left):hmsF(left));
-  if(reduced)ms.style.display="none";else{ms.style.display="inline-block";if(!QUIET)setT(ms,ms3(over?-left:left))}
-  setT(rl,over?"переработка идёт":"до ухода");setT(tot,hmsF(w));
+  var H=Screen.dayHeadline(DAYI,nm),rem=$("rem"),ms=$("ms"),tot=$("total");
+  rem._v=null;tot._v=null;setT($("tl"),H.title);setT(rem,H.big);setT($("rl"),H.caption);setT(tot,H.total);
+  if(H.ms==null||reduced)ms.style.display="none";else{ms.style.display="inline-block";if(!QUIET)setT(ms,ms3(H.ms))}
 }
 var SDR={q:-2,o:null};
 function setDayRing(df,over){var q=df==null?-1:Math.round(df*251),o=!!over;if(q===SDR.q&&o===SDR.o)return;SDR.q=q;SDR.o=o;var r=$("ring2");r.style.strokeDashoffset=C2*(1-(df||0));r.style.opacity=(df==null||q<4)?0:"";r.classList.toggle("over",o)}
@@ -511,7 +484,7 @@ var RQ=-1;
 function setWeekRing(f){var q=Math.round(f*327);if(q===RQ)return;RQ=q;$("ring").style.strokeDashoffset=C*(1-f)}
 function nowMin(){var n=new Date();return n.getHours()*60+n.getMinutes()+n.getSeconds()/60+n.getMilliseconds()/60000}
 var todayIdx=(now0.getDay()+6)%7,X={},$=function(id){return X[id]||(X[id]=document.getElementById(id))};
-function stt(i){var a=mins(S.d[i].a);return a!=null?a:START}
+function stt(i){return Core.startOf(S.d[i])}
 // ---- телеметрия (для отладки; потом удалить целиком вместе со служебным экраном) ----
 var TEL={ev:[],sec:[],ctx:"idle",ctxT:0,hz:60},BENCH={cur:null,res:[],run:false};
 try{var tj=JSON.parse(localStorage.getItem("hours:tel")||"null");if(tj){TEL.ev=tj.ev||[];TEL.sec=tj.sec||[]}}catch(e){}
@@ -541,14 +514,6 @@ function tlog(kind,ms,x){if(ms<6)return;TEL.ev.push({t:Date.now(),k:kind,ms:Math
   window.telStart=function(){if(run)return;run=true;last=0;s0=0;cnt=0;mx=0;jk=0;sl=0;requestAnimationFrame(f)};
   setInterval(function(){try{localStorage.setItem("hours:tel",JSON.stringify({ev:TEL.ev.slice(-150),sec:TEL.sec.slice(-300)}))}catch(e){}},8000);
 })();
-function dayWork(i,nm){
-  var kd=INFO[i]&&INFO[i].kind;if(kd!=="work"&&kd!=="extra")return null;
-  var b0=mins(S.d[i].b),st=stt(i),b=endOf(st,b0);
-  if(b0!=null)return b!=null?{w:Math.max(0,b-st-BRK),live:false,b:b}:null;
-  if(kd==="work"&&!S.d[i].a&&i==todayIdx){var se=st+(INFO[i].norm||0)+BRK;if(nm>=se)return{w:INFO[i].norm||0,live:false,b:se,sched:true}}   // 1.10.9: без отметки прихода — день по графику и не дальше, без переработки
-  if((kd==="work"||(kd==="extra"&&S.d[i].a))&&i==todayIdx&&nm>st)return{w:Math.max(0,nm-st-BRK),live:true,b:nm};   // живой день: обед вычитается сразу, неделя тикает секунда в секунду
-  return null;
-}
 function setNum(el,to,fmt,quiet){
   to=Math.round(to);var from=el._v==null?0:el._v;
   if(el._v===to)return;
@@ -588,7 +553,6 @@ $("wk").textContent=["Пн","Вт","Ср","Чт","Пт","Сб","Вс"][todayIdx]
 var BKC={},BKN={};
 // классы состояния меняем только при реальном изменении — лишние записи в DOM заставляют iPhone пересчитывать стили
 function setCls(el,base,c){var v=base+(c?" "+c:"");if(el.className!==v)el.className=v}
-function chipC(ch,c){ch._c=c||""}   // итоговый класс подсказки применяется один раз в конце update()
 // закат для Москвы (формула NOAA, без интернета): минуты от полуночи по московскому времени
 var SSC={};
 function sunset(d){var k=iso(d);if(SSC[k]!=null)return SSC[k];
@@ -602,9 +566,9 @@ function sunMark(i,t){var e=els[i];if(t==null||i<todayIdx){setT(e.sun,"");return
 function dn(n){var m=n%10,h=n%100;return n+" "+(m===1&&h!==11?"день":m>=2&&m<=4&&(h<12||h>14)?"дня":"дней")}
 function evInfo(){
   var t0=new Date(now0.getFullYear(),now0.getMonth(),now0.getDate()),D=function(n){return new Date(t0.getFullYear(),t0.getMonth(),t0.getDate()+n)},R=function(id,n,t){return{id:id,n:n,t:t}};
-  var tm=D(1),tk=iso(tm);if(SHORT[tk]&&!TYPES[tk])return R("sh:"+tk,1,"Завтра на час короче");
-  for(var n=1;n<=3;n++)if(WSAT[iso(D(n))])return R("ws:"+iso(D(n)),n,n===1?"Завтра рабочая суббота":"Рабочая сб через "+dn(n));
-  for(n=1;n<=14;n++)if(HOL[iso(D(n))])return R("hol:"+iso(D(n)),n,n===1?"🎉 Завтра праздник":"🎉 До праздника "+dn(n));
+  var tm=D(1),tk=iso(tm);if(Core.SHORT_DAYS.has(tk)&&!TYPES[tk])return R("sh:"+tk,1,"Завтра на час короче");
+  for(var n=1;n<=3;n++)if(Core.WORKING_SATURDAYS.has(iso(D(n))))return R("ws:"+iso(D(n)),n,n===1?"Завтра рабочая суббота":"Рабочая сб через "+dn(n));
+  for(n=1;n<=14;n++)if(Core.HOLIDAYS.has(iso(D(n))))return R("hol:"+iso(D(n)),n,n===1?"🎉 Завтра праздник":"🎉 До праздника "+dn(n));
   if(TYPES[iso(t0)]!=="vac")for(n=1;n<=30;n++)if(TYPES[iso(D(n))]==="vac")return R("vac:"+iso(D(n)),n,n===1?"🌴 Завтра отпуск":"🌴 До отпуска "+dn(n));
   return null;
 }
@@ -629,164 +593,80 @@ function vacScreen(){
   for(var q=1;q<=120;q++){var d=new Date(t0.getFullYear(),t0.getMonth(),t0.getDate()+q),f=infoDate(d);if(f.kind==="work"){var m=Math.max(0,Math.round((new Date(d.getFullYear(),d.getMonth(),d.getDate(),START/60)-n)/60000)),dd=Math.floor(m/1440),r=$("rem");
     cancelAnimationFrame(r._r);r._v=null;setT(r,(dd?dd+" дн ":"")+hmm(m%1440));$("ms").style.display="none";setT($("rl"),"🌴 до выхода на работу");return}}
 }
-function monthEnd(d){var x=new Date(d.getFullYear(),d.getMonth(),d.getDate()+1);while(x.getMonth()===d.getMonth()){if(infoDate(x).kind==="work")return false;x.setDate(x.getDate()+1)}return true}
 function bankPrev(mk){   // закрытые дни месяца mk до понедельника текущей недели
-  if(BKC[mk]!=null)return BKC[mk];var p=mk.split("-"),mo=+p[1]-1,d=new Date(+p[0],mo,1),s=0,n=0;
-  while(d<mon&&d.getMonth()===mo){var rr=rec(d);if(rr.cls==="over"||rr.cls==="under"||rr.cls==="ok"){s+=rr.df;n++}d.setDate(d.getDate()+1)}
-  BKN[mk]=n;return BKC[mk]=s;
+  if(BKC[mk]==null){var b=Core.monthBank(mk,mon,rec);BKC[mk]=b.sum;BKN[mk]=b.days}
+  return BKC[mk];
 }
 function update(){
-  var nm=nowMin(),INF=[],R=[],T=[],totalAll=0,counted=0,live=null,W=0,Ri=-1,i,k,r,MD=[],RIS={},SEG={},wkm={},wkn={};
+  var nm=nowMin();
   BKC={};BKN={};
-  for(i=0;i<7;i++){INF[i]=infoOf(i);var dI=new Date(mon.getFullYear(),mon.getMonth(),mon.getDate()+i);MD[i]=dI.getFullYear()+"-"+p2(dI.getMonth()+1);if(INF[i].kind==="work"){W+=INF[i].norm;if(i<5)Ri=i}}
-  INFO=INF;checkMiss();if(SEL<0||!INF[SEL]||INF[SEL].kind==="rest")SEL=defSel();
-  for(i=0;i<7;i++){
-    r=dayWork(i,nm);R[i]=r;if(!r)continue;
-    totalAll+=r.w;k=INF[i].kind;if(k==="work"||INF[i].counted)counted+=r.w;
-    if(r.live)live=i;else{wkm[MD[i]]=(wkm[MD[i]]||0)+(k==="work"?r.w-INF[i].norm:INF[i].counted?r.w:0);wkn[MD[i]]=(wkn[MD[i]]||0)+1}
-  }
-  function bnow(mk){return bankPrev(mk)+(wkm[mk]||0)}
-  // день остатка: последний рабочий день недели в каждом месяце (пятница или последний рабочий день месяца)
-  for(i=0;i<5;i++)if(INF[i].kind==="work")SEG[MD[i]]=i;
-  for(var mk in SEG){
-    var ri=SEG[mk],Ws=0,sO=0,kn=true,bp=bankPrev(mk);
-    for(i=0;i<7;i++){
-      if(MD[i]!==mk)continue;k=INF[i].kind;if(k==="work")Ws+=INF[i].norm;if(i===ri)continue;
-      if(k==="work"){if(R[i]&&!R[i].live)sO+=R[i].w;else{sO+=INF[i].norm;kn=false}}
-      else if(k==="extra"&&INF[i].counted&&R[i]&&!R[i].live)sO+=R[i].w;
-    }
-    var rf=Ws-sO-bp;RIS[ri]={m:mk,rem:rf,fT:Math.max(stt(ri)+MINP,stt(ri)+BRK+Math.max(0,rf)),known:kn,bank:bp,end:monthEnd(new Date(mon.getFullYear(),mon.getMonth(),mon.getDate()+ri)),wk:ri===Ri};
-  }
-  for(i=0;i<7;i++)T[i]=RIS[i]?RIS[i].fT:stt(i)+(INF[i].norm||0)+BRK;
-  GO=null;
-  for(i=0;i<7;i++){
-    var e=els[i],f=INF[i],t=e.tot;k=f.kind;r=R[i];
-    if(e.c.hidden!==(k==="rest"))e.c.hidden=(k==="rest");if(!ANIM)e.c.classList.toggle("off",i!==SEL);if(k==="rest")continue;
-    var nt=i!==todayIdx,ha=!!S.d[i].a,hb=!!S.d[i].b,ov=i===todayIdx-1&&ha&&!hb&&nm<360&&nm<stt(i),pb=(!nt&&ha&&!hb)||ov;   // ov: ночная смена вчерашнего дня ещё идёт
-    if(ov)GO={i:i,k:"b"};else if(!nt&&!GO&&k!=="type"&&k!=="hol"&&(!ha||!hb))GO={i:i,k:ha?"b":"a"};
-    e.ma.classList.toggle("emp",!ha);e.mb.classList.toggle("emp",!hb);var fu2=i>todayIdx;e.ma.classList.toggle("gone",fu2&&!ha);e.mb.classList.toggle("gone",(!nt&&!ha&&!hb)||(fu2&&!hb)||(!ha&&!hb&&!nt));e.c.classList.toggle("xd",k==="extra");
-    var isV=(k==="type"||k==="hol");
-    e.c.classList.toggle("void",isV);e.c.classList.toggle("fri",!!RIS[i]);e.c.classList.toggle("live",!!(r&&r.live));
-    setT(e.demj,k==="type"?EM[f.tp]:k==="extra"?"➕":"");
-    setT(e.sx,(k==="hol"?" · праздник":"")+(f.short?" · сокр.":"")+(k==="extra"?" · доп.":""));
-    if(isV){
-      setT(t,"");t._v=null;
-      sunMark(i,null);setT(e.fk,k==="hol"?"Праздник":LBL[f.tp]);e.ft._v=null;setT(e.ft,k==="hol"?"🎉":EM[f.tp]);
-      setT(e.chip,k==="hol"?"нерабочий день":"день не требует отметок");chipC(e.chip,"n");continue;
-    }
-e.lab.classList.toggle("tg",k==="extra");
-    if(r&&!r.live)setNum(t,r.w,hm,false);else if(r){t._v=null}else{setT(t,"—");t._v=null}
-    if(k==="extra"){
-      sunMark(i,null);setT(e.fk,"Доп. день");e.ft._v=null;setT(e.ft,r?hmm(r.w):"—");
-      setT(e.chip,f.counted?"в счёт нормы":"сверх нормы");chipC(e.chip,f.counted?"":"over");
-      setT(e.lab,f.counted?"в счёт нормы":"сверх нормы");
-      if(r){setNum(e.val,r.w,function(m){return"+"+hmm(m)});setCls(e.val,"dv val","over")}else{e.val._v=null;setT(e.val,"—");setCls(e.val,"dv val","")}
-      continue;
-    }
-    if(!RIS[i]){
-      setT(e.fk,"Цель ухода");setNum(e.ft,T[i],clockT,true);sunMark(i,T[i]);
-      var closed=r&&!r.live,dd0=closed?r.w-f.norm:0,bn=bnow(MD[i]);
-      var lowD=closed&&r.b-stt(i)<MINP;   // день короче минимума: банк его не закрывает
-      setT(e.chip,lowD?"меньше 4,5 ч — день не отработан":closed?(dd0>5?"переработка +"+hmm(dd0):dd0<-5?"недоработка −"+hmm(-dd0):"ровно в срок")
-        :bn>=5?"с банком можно в "+clockT(Math.max(stt(i)+MINP,T[i]-bn))
-        :bn<=-5?"долг "+hmm(-bn)+" · уход в "+clockT(T[i]-bn)
-        :r?"идёт рабочий день":f.short?"сокращённый день":"обычный день");
-      chipC(e.chip,closed?(dd0>5?"over":dd0<-5?"under":""):bn<=-5?"under":"");
-    }
-    if(r&&!r.live){
-      var df=r.b-T[i];setNum(e.val,df,sg);
-      setT(e.lab,df>5?"переработка":df<-5?"недоработка":"ровно в срок");
-      setCls(e.val,"dv val",df>5?"over":df<-5?"under":"ok");
-    }else if(r){
-      e.val._v=null;
-      if(nm<T[i]){setT(e.lab,"до ухода осталось");setT(e.val,hmm(T[i]-nm));setCls(e.val,"dv val","")}
-      else{setT(e.lab,"переработка идёт");setT(e.val,"+"+hmm(nm-T[i]));setCls(e.val,"dv val","over")}
-    }else{e.val._v=null;setT(e.lab,RIS[i]?(RIS[i].rem>0?"уход в "+clockT(RIS[i].fT):"норма набрана"):"уход с "+clockT(T[i]));setT(e.val,"—");setCls(e.val,"dv val","")}
-  }
-  for(var rk in RIS){
-    var ix=+rk,G=RIS[ix],F=els[ix],chip=F.chip,fr=R[ix],us=stt(ix)+INF[ix].norm+BRK,shut=fr&&!fr.live;
-    setT(F.fk,G.end?"Конец месяца":G.known?"Остаток недели":"Прогноз ухода");
-    chipC(chip,"");
-    if(G.rem<=0){var mp=stt(ix)+MINP,canGo=ix<todayIdx||(ix===todayIdx&&nm>=mp);F.ft._v=null;setT(F.ft,canGo?"можно":clockT(mp));sunMark(ix,canGo?null:mp);setT(chip,canGo?"норма набрана — можно домой":"норма набрана — можно с "+clock(mp))}
-    else{
-      setNum(F.ft,G.fT,clockT,true);sunMark(ix,G.fT);
-      var dd=us-G.fT;chipC(chip,dd<-5?"under":"");
-      setT(chip,dd>5?"на "+hmm(dd)+" раньше, чем в "+clockT(us):dd<-5?"на "+hmm(-dd)+" позже, чем в "+clockT(us):"как обычно");
-    }
-    if(shut){
-      if(G.end){var bm0=bnow(G.m),mt=Math.abs(bm0)<=5?"в норме":sg(bm0);setT(chip,G.wk?"неделя "+hmm(counted)+" · месяц "+mt:"итог месяца "+mt);chipC(chip,bm0>5?"over":bm0<-5?"under":"")}
-      else{var wd=counted-W;setT(chip,"неделя "+hmm(counted)+" · "+(Math.abs(wd)<=5?"в норме":sg(wd)));chipC(chip,wd>5?"over":wd<-5?"under":"")}
-      if(fr.b-stt(ix)<MINP){setT(chip,"меньше 4,5 ч — день не отработан");chipC(chip,"under")}
-    }
-  }
-  for(i=0;i<7;i++){
-    var e2=els[i],f2=INF[i],ok2=f2.kind==="work"||f2.kind==="extra",ra=mins(S.d[i].a),rb=mins(S.d[i].b);
-    var bad=ok2&&rb!=null&&endOf(ra,rb)==null,fu=ok2&&i===todayIdx&&ra!=null&&ra>nm+30&&rb==null;
-    var ng=ok2&&ra!=null&&rb!=null&&rb<ra&&rb+1440-ra>720;   // 1.10.10: смена через полночь длиннее 12 ч — возможно, перепутаны приход и уход
-    if(bad){setT(e2.chip,"уход раньше прихода — проверьте");chipC(e2.chip,"err")}
-    else if(ng){setT(e2.chip,"смена через полночь "+hmm(rb+1440-ra-BRK)+" — верно?");chipC(e2.chip,"err")}
-    else if(fu){setT(e2.chip,"приход позже текущего времени?");chipC(e2.chip,"err")}
-    e2.inp.classList.toggle("need",bad||f2.k===MISS);e2.ai.classList.toggle("need",fu);
-  }
-  for(i=0;i<7;i++){   // 1.10.4: «пришёл → ушёл» — пустое место занято серым: по графику / цель ухода; забытый уход — красным
-    var e3=els[i],f3=INF[i];if(f3.kind!=="work"&&f3.kind!=="extra")continue;var ha3=!!S.d[i].a,hb3=!!S.d[i].b,G3=RIS[i],miss3=i<todayIdx&&!hb3;
-    setT(e3.pha,ha3?"":clockT(stt(i)));
-    var lb3=hb3||miss3||f3.kind==="extra"?"ушёл":G3?(G3.end?"конец месяца":"остаток недели"):"цель ухода";
-    setT(e3.lbb,lb3);setT(e3.phb,hb3?"":miss3||f3.kind==="extra"?"—:—":G3?(G3.rem<=0?"можно":clockT(G3.fT)):clockT(T[i]));
-    e3.mb.classList.toggle("miss",miss3&&!hb3);e3.c.classList.toggle("nowk",!(R[i]&&!R[i].live));
-  }
-  els.forEach(function(e){setCls(e.chip,"chip",e.chip._c)});
-  var remain=Math.max(0,W-counted),frac=W>0?Math.max(0,Math.min(1,counted/W)):0;
-  var lcn=live!=null&&(INF[live].kind==="work"||INF[live].counted);
-  LS=live==null?null:{i:live,st:stt(live),tg:T[live],base:counted-(lcn?R[live].w:0),baseAll:totalAll-R[live].w,W:W,cnt:lcn,ex:INF[live].kind==="extra",ul:(RIS[live]&&Math.abs(RIS[live].bank)>=5)?"с банком уход в ":"уход в "};lastSec=-1;
-  setWeekRing(frac);
-  $("sum").classList.toggle("done",remain<=0);$("sum").classList.toggle("ovr",counted-W>5&&W>0);
-  MODEL={W:W,counted:counted,INF:INF,R:R,T:T,frac:frac,live:live,totalAll:totalAll,remain:remain,RIS:RIS};applySel(nm);
-  if(W>0&&remain<=0&&WCARM&&window.wcCheck)wcCheck();WCARM=false;   // поздравление — только когда неделю закрыла отметка ухода (не смена типа дня)
-  if(window.wcUndo&&W>0&&remain>5&&live==null)wcUndo();
-  // баланс месяца и прошлая неделя
-  var mT=iso(now0).slice(0,7),bm=bnow(mT),nd=(BKN[mT]||0)+(wkn[mT]||0),b=$("bal"),bkl="Баланс месяца";
-  if(!nd){var pm0=new Date(now0.getFullYear(),now0.getMonth()-1,1),dd1=new Date(pm0),ps=0,pc=0;
-    while(dd1.getMonth()===pm0.getMonth()){var rr1=rec(dd1);if(rr1.cls==="over"||rr1.cls==="under"||rr1.cls==="ok"){ps+=rr1.df;pc++}dd1.setDate(dd1.getDate()+1)}
-    if(pc){bm=ps;nd=pc;bkl="Итог "+MG[pm0.getMonth()]}}
-  setT($("bk"),bkl);
-  var bc=!nd?"":Math.abs(bm)<=5?"ok":bm>0?"over":"under",LEAN=document.body.classList.contains("lean");setCls(b,"b",bc);
-  if(LEAN){setT(b,!nd?"—":bc==="ok"?"0:00":sg(bm));setT($("pw"),!nd?"нет данных":bc==="ok"?"в норме":bc==="over"?"переработка":"недоработка")}
-  else{setT(b,!nd?"Нет данных":bc==="ok"?"В норме":(bc==="over"?"Переработка ":"Недоработка ")+hmm(bm));
-  var pws=0,pwn=0;for(i=1;i<=7;i++){var rp=rec(new Date(mon.getFullYear(),mon.getMonth(),mon.getDate()-i));if(rp.cls==="over"||rp.cls==="under"||rp.cls==="ok"){pws+=rp.df;pwn++}}
-  setT($("pw"),pwn?"прошлая неделя "+(Math.abs(pws)<=5?"в норме":sg(pws)):"")}
-  var dh="";vis().forEach(function(i){var rr=rec(new Date(mon.getFullYear(),mon.getMonth(),mon.getDate()+i)),em=(rr.cls==="type"||rr.cls==="hol")?rr.em:"";dh+='<button class="dt'+(i===SEL?" on":"")+(i===todayIdx?" td":"")+(em?" emj":"")+'" data-c="'+rr.cls+'" data-i="'+i+'"><b>'+DN[i][0].toUpperCase()+DN[i][1]+'</b><i>'+em+'</i></button>'});
-  if($("dots")._h!==dh){$("dots")._h=dh;$("dots").innerHTML=dh}
-  var fsig=INF.map(function(x){return x.kind}).join();if(fsig!==FITSIG){FITSIG=fsig;fitCards()}
+  var P=Core.weekPlan({monday:mon,marks:S.d,dayTypes:TYPES,now:nm,todayIdx:todayIdx,bankBefore:bankPrev});
+  INFO=P.info;checkMiss();if(SEL<0||!INFO[SEL]||INFO[SEL].kind==="rest")SEL=defSel();
+  function bankNow(mk){return bankPrev(mk)+(P.monthDelta[mk]||0)}
+  var ctx={plan:P,marks:S.d,now:nm,todayIdx:todayIdx,bankNow:bankNow,miss:MISS};
+  GO=Screen.goTarget(P,S.d,nm,todayIdx);
+  for(var i=0;i<7;i++)renderCard(i,Screen.dayCard(i,ctx));
+  var wk=Screen.weekSummary(P);
+  LS=Screen.liveState(P,S.d);lastSec=-1;
+  setWeekRing(wk.frac);
+  $("sum").classList.toggle("done",wk.done);$("sum").classList.toggle("ovr",wk.over);
+  MODEL={W:P.norm,counted:P.counted,INF:P.info,R:P.work,T:P.target,RIS:P.rest,frac:wk.frac,live:P.live,totalAll:P.total,remain:wk.remain,plan:P};applySel(nm);
+  if(P.norm>0&&wk.remain<=0&&WCARM&&window.wcCheck)wcCheck();WCARM=false;   // поздравление — только когда неделю закрыла отметка ухода (не смена типа дня)
+  if(window.wcUndo&&P.norm>0&&wk.remain>5&&P.live==null)wcUndo();
+  renderBalance(bankNow,P);renderDots();
+  var fsig=INFO.map(function(x){return x.kind}).join();if(fsig!==FITSIG){FITSIG=fsig;fitCards()}
   else{var cs=els[SEL]&&els[SEL].c;if(cs&&FIT&&!ANIM&&cs.scrollHeight>FIT+1)fitCards()}
   goBtn();atmos(nm);tick();if(window.ntRefresh)ntRefresh();hlPos();
 }
+// значение из модели экрана: число (с анимацией), готовый текст или «не трогать» — его ведёт живой отсчёт
+function putVal(el,v){if(v.keep){el._v=null;return}if(v.num!=null){setNum(el,v.num,Screen.FORMATS[v.fmt],v.quiet);return}el._v=null;setT(el,v.text)}
+function renderCard(i,v){
+  var e=els[i],cl=e.c.classList;
+  if(e.c.hidden!==v.hidden)e.c.hidden=v.hidden;if(!ANIM)cl.toggle("off",i!==SEL);
+  e.inp.classList.toggle("need",v.need.leave);e.ai.classList.toggle("need",v.need.arrive);
+  if(v.hidden)return;
+  var F=v.flags;
+  e.ma.classList.toggle("emp",F.arriveEmpty);e.mb.classList.toggle("emp",F.leaveEmpty);e.ma.classList.toggle("gone",F.arriveGone);e.mb.classList.toggle("gone",F.leaveGone);
+  cl.toggle("xd",F.xd);cl.toggle("void",F.void);cl.toggle("fri",F.fri);cl.toggle("live",F.live);
+  setT(e.demj,v.emoji);setT(e.sx,v.suffix);
+  if(v.labToggle!=null)e.lab.classList.toggle("tg",v.labToggle);
+  putVal(e.tot,v.total);
+  setT(e.fk,v.forecast.label);putVal(e.ft,v.forecast.value);sunMark(i,v.forecast.sun);
+  if(v.lab!=null){setT(e.lab,v.lab);putVal(e.val,v.val.value);setCls(e.val,"dv val",v.val.cls)}
+  setT(e.chip,v.chip.text);e.chip._c=v.chip.cls;setCls(e.chip,"chip",v.chip.cls);
+  if(v.marks){var M=v.marks;setT(e.pha,M.arrive);setT(e.lbb,M.leaveLabel);setT(e.phb,M.leave);e.mb.classList.toggle("miss",M.missed);cl.toggle("nowk",F.nowk)}
+}
+// баланс месяца в шапке; пока в месяце нет закрытых дней — итог прошлого
+function renderBalance(bankNow,P){
+  var mT=iso(now0).slice(0,7),sum=bankNow(mT);
+  var B=Screen.monthBalance({sum:sum,days:(BKN[mT]||0)+(P.closedDays[mT]||0),today:now0,recordOf:rec});
+  setT($("bk"),B.label);setCls($("bal"),"b",B.cls);setT($("bal"),B.value);setT($("pw"),B.note);
+}
+// полоска дней под карточкой
+function renderDots(){
+  var h="";vis().forEach(function(i){var rr=rec(Core.addDays(mon,i)),em=rr.cls==="type"||rr.cls==="hol"?rr.em:"";h+='<button class="dt'+(i===SEL?" on":"")+(i===todayIdx?" td":"")+(em?" emj":"")+'" data-c="'+rr.cls+'" data-i="'+i+'"><b>'+DN[i][0].toUpperCase()+DN[i][1]+'</b><i>'+em+'</i></button>'});
+  var d=$("dots");if(d._h!==h){d._h=h;d.innerHTML=h}
+}
 function applySel(nm){
   var M=MODEL;if(!M)return;
-  var INF=M.INF,R=M.R,T=M.T,DF=null,dov=false,ti=SEL,isT=(ti===todayIdx);
+  var ti=SEL,ctx={plan:M.plan,marks:S.d,now:nm,todayIdx:todayIdx};
   EMV=SEL!==defSel()?"day":(PM==="day"||PM==="week")?PM:autoMode();   // чужой день всегда показывается как «день», без живого отсчёта недели
-  if(INF[ti].kind==="work"){
-    var s2=stt(ti),tb0=mins(S.d[ti].b),tb=endOf(s2,tb0),g2=T[ti],dn=Math.max(1,g2-s2);
-    if(tb0!=null){DF=tb!=null&&tb>s2?Math.min(1,(tb-s2)/dn):0;dov=tb!=null&&tb>g2+5}
-    else if(isT&&nm>s2){DF=Math.min(1,(nm-s2)/dn);dov=nm>g2&&!!S.d[ti].a}
-    else DF=0;
-  }
-  setDayRing(DF,dov);showPct(M.frac,DF);
-  var kx=INF[ti].kind;
-  DAYI=(kx==="work"||kx==="extra")?{ex:kx==="extra",norm:INF[ti].norm||0,ha:!!S.d[ti].a,st:stt(ti),tg:T[ti],b:endOf(stt(ti),mins(S.d[ti].b)),inv:mins(S.d[ti].b)!=null&&endOf(stt(ti),mins(S.d[ti].b))==null,w:R[ti]?R[ti].w:0,live:!!(R[ti]&&R[ti].live),isToday:isT,past:ti<todayIdx}:null;
-  els.forEach(function(e,i){if(!e.chip)return;var f4=INF[i],r4=R[i],cl4=f4.kind==="work"&&r4&&!r4.live;var hd=cl4&&(i!==ti||EMV==="day")&&e.chip._c!=="err";e.chip.style.visibility=hd?"hidden":""});   // закрытый день: итог крупно сверху; у уходящей при листании карточки плашка тоже не «вспыхивает»   // итог дня уже крупно под балансом — плашку не дублируем
+  var ring=Screen.dayRing(ti,ctx);setDayRing(ring.frac,ring.over);showPct(M.frac,ring.frac);
+  DAYI=Screen.dayFocus(ti,ctx);
+  els.forEach(function(e,i){e.chip.style.visibility=Screen.chipHidden(i,ti,EMV,M.plan,e.chip._c)?"hidden":""});   // итог закрытого дня уже крупно сверху — плашку не дублируем
   if(EMV==="day")dayBig(nm);
   else{
-    setT($("tl"),"Отработано");setT($("rl"),weekRl(nm));
-    if(M.live==null){setNum($("total"),M.totalAll,hm,true);setNum($("rem"),M.W>0&&M.remain<=0?-(M.counted-M.W):M.remain,remFmt,true);$("ms").style.display="none"}
+    setT($("tl"),"Отработано");setT($("rl"),Screen.weekCaption(M.W,M.counted));
+    if(M.live==null){setNum($("total"),M.totalAll,hm,true);setNum($("rem"),M.W>0&&M.remain<=0?-(M.counted-M.W):M.remain,Screen.remFmt,true);$("ms").style.display="none"}
     else{$("total")._v=null;$("rem")._v=null;$("ms").style.display=reduced?"none":"inline-block"}
-  }  vacScreen();
+  }
+  vacScreen();
 }
 function dotsOn(){var ds=$("dots").children;for(var q=0;q<ds.length;q++)ds[q].classList.toggle("on",+ds[q].dataset.i===SEL)}
 // ---- выбор дней: типы, диапазон, доп. день ----
-var MG=["января","февраля","марта","апреля","мая","июня","июля","августа","сентября","октября","ноября","декабря"];
+var MG=Screen.MONTHS_GEN;
 var SH={y:0,m:0,a:null,b:null},MN=["Январь","Февраль","Март","Апрель","Май","Июнь","Июль","Август","Сентябрь","Октябрь","Ноябрь","Декабрь"],MS=["янв","фев","мар","апр","мая","июн","июл","авг","сен","окт","ноя","дек"];
-function parseISO(k){var p=k.split("-");return new Date(+p[0],+p[1]-1,+p[2])}
+function parseISO(k){return Core.parseIso(k)}
 function fmtR(k){var d=parseISO(k);return d.getDate()+" "+MS[d.getMonth()]}
 var TYN={vac:"🌴 Отпуск",sick:"🤒 Больничный",off:"💤 Отгул",x:"➕ Доп. день"};
 // выбор типа → календарь: тап — начало, второй тап — конец периода; тап по уже отмеченному этим типом дню — снять
@@ -945,21 +825,14 @@ document.addEventListener("visibilitychange",function(){if(document.hidden)flush
 window.addEventListener("pagehide",flushAll);
 // ---- история ----
 var HW={},HS={v:"m",y:now0.getFullYear(),m:now0.getMonth(),w:null,sel:null},DN=["пн","вт","ср","чт","пт","сб","вс"],PWq=Promise.resolve();
-function mondayOf(d){return new Date(d.getFullYear(),d.getMonth(),d.getDate()-((d.getDay()+6)%7))}
+function mondayOf(d){return Core.mondayOf(d)}
 function padW(o){o.t=o.t||[];for(var q=0;q<7;q++){o.d[q]=o.d[q]||{};o.t[q]=o.t[q]||{}}return o}
-function rec(d){
-  var k=iso(d),idx=(d.getDay()+6)%7,mk=iso(mondayOf(d)),w=mk===iso(mon)?S:HW[mk],r=(w&&w.d&&w.d[idx])||{},f=infoDate(d);
-  var o={k:k,f:f,a:r.a||"",b:r.b||"",cls:"",w:0,df:0,em:""};
-  if(f.kind==="rest"){o.cls="rest";return o}
-  if(f.kind==="pre"){o.cls="pre";return o}
-  if(f.kind==="hol"){o.cls="hol";o.em="🎉";return o}
-  if(f.kind==="type"){o.cls="type";o.em=EM[f.tp];return o}
-  var b=mins(r.b);
-  if(b!=null){var st=mins(r.a);if(st==null)st=START;b=endOf(st,b);if(b==null){o.inv=true;o.em="⚠︎";o.cls=k<iso(now0)?"none":"fut";return o}o.w=Math.max(0,b-st-BRK);o.df=f.kind==="work"?o.w-f.norm:(f.counted?o.w:0);o.cls=f.kind==="extra"?(o.w>5?"over":"ok"):o.df>5?"over":o.df<-5?"under":"ok";if(f.kind==="extra")o.em="➕"}
-  else o.cls=k<iso(now0)?"none":"fut";
+function rec(d){   // итог дня из любой недели; эмодзи — забота интерфейса
+  var mk=iso(mondayOf(d)),w=mk===iso(mon)?S:HW[mk],o=Core.dayRecord(d,w&&w.d&&w.d[(d.getDay()+6)%7],TYPES,iso(now0));
+  o.em=o.inv?"⚠︎":o.cls==="hol"?"🎉":o.cls==="type"?EM[o.f.tp]:o.f.kind==="extra"&&o.b?"➕":"";
   return o;
 }
-function counted(r){return r.cls==="over"||r.cls==="under"||r.cls==="ok"}
+function counted(r){return Core.isClosed(r)}
 function scanLocal(){try{for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i),m=/^hours:(\d{4}-\d{2}-\d{2})$/.exec(k);if(!m||m[1]===iso(mon))continue;var o=JSON.parse(localStorage.getItem(k));if(o&&o.d)HW[m[1]]=padW(o)}}catch(e){}}
 async function hLoad(){
   scanLocal();
@@ -1174,7 +1047,7 @@ $("dots").addEventListener("click",function(e){var b=e.target.closest(".dt");if(
 function tick(){
   if(!LS||FREEZE)return;
   var n=new Date(),nm=n.getHours()*60+n.getMinutes()+n.getSeconds()/60+n.getMilliseconds()/60000;
-  var w=Math.max(0,nm-LS.st-BRK),total=LS.base+(LS.cnt?w:0),remain=Math.max(0,LS.W-total),over=nm>=LS.tg,sl=!!(DAYI&&DAYI.isToday&&SEL===LS.i);
+  var L=Screen.liveTick(LS,nm),w=L.w,total=L.total,remain=L.remain,over=L.over,sl=!!(DAYI&&DAYI.isToday&&SEL===LS.i);
   var pn=performance.now();
   if(!QUIET&&!reduced&&!NOMS&&pn>=msHold&&(!MS30||pn-lastMs>=33)){     // каждый кадр — только тысячные (не во время свайпа)
     lastMs=pn;
@@ -1191,7 +1064,7 @@ function tick(){
     setT(e.tot,hmsF(w));setT(e.lab,over?"переработка идёт":"до ухода осталось");
     setT(e.val,over?"+"+hmsF(nm-LS.tg):hmsF(LS.tg-nm));e.val.classList.toggle("over",over);
   }
-  var fr2=LS.W>0?Math.max(0,Math.min(1,total/LS.W)):0,df2=LS.ex?null:sl?Math.min(1,Math.max(0,(nm-LS.st)/Math.max(1,LS.tg-LS.st))):LASTD;
+  var fr2=L.frac,df2=LS.ex?null:sl?Math.min(1,Math.max(0,(nm-LS.st)/Math.max(1,LS.tg-LS.st))):LASTD;
   setWeekRing(fr2);if(sl&&!LS.ex)setDayRing(df2,nm>LS.tg);
   $("sum").classList.toggle("done",remain<=0);$("sum").classList.toggle("ovr",total-LS.W>5);if(remain<=0&&LS.W>0&&window.wcCheck)wcCheck();
   if(EMV!=="day")setT($("rl"),remain<=0?(total-LS.W>=1?"сверх нормы недели":"норма недели выполнена"):"осталось до "+(LS.W/60)+" ч");

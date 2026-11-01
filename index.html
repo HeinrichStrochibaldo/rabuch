@@ -339,6 +339,7 @@ html,body{overscroll-behavior:none}
 
 /* спрятанные переключатели под пальцем — ради тактильного щелчка на iOS */
 #sum .big,#sum .ring{cursor:pointer;-webkit-tap-highlight-color:transparent}
+@media (max-width:359px){.set{grid-template-columns:repeat(7,minmax(0,1fr))}.set .rst{min-width:0;width:100%;padding:8px 0}}   /* семь кнопок по 48 px не помещаются на старых маленьких iPhone */
 .hsw{display:none}.hsw-over{position:absolute;inset:0;width:100%;height:100%;margin:0;opacity:.011;cursor:pointer;z-index:2;-webkit-tap-highlight-color:transparent}
 </style>
 </head>
@@ -422,7 +423,7 @@ function dynType(){var ts=1;try{if(window.CSS&&CSS.supports("font","-apple-syste
   if(document.documentElement.style.getPropertyValue("--ts")!==String(ts)){document.documentElement.style.setProperty("--ts",ts);return true}return false}
 dynType();
 var SPLON=!(window.matchMedia&&matchMedia("(prefers-reduced-motion:reduce)").matches)&&!document.hidden;if(SPLON)document.body.classList.add("splon");
-var VER="1.12.6",STANDALONE=!!(window.navigator.standalone||(window.matchMedia&&matchMedia("(display-mode: standalone)").matches));
+var VER="1.12.7",STANDALONE=!!(window.navigator.standalone||(window.matchMedia&&matchMedia("(display-mode: standalone)").matches));
 var NAMES=["Понедельник","Вторник","Среда","Четверг","Пятница","Суббота","Воскресенье"],START=Core.DAY_START,BRK=Core.LUNCH,MINP=Core.MIN_PRESENCE,C=326.73;
 var reduced=window.matchMedia&&matchMedia("(prefers-reduced-motion:reduce)").matches;
 var now0=new Date();
@@ -1105,11 +1106,13 @@ function goBtn(){
   if(!b.firstChild||!b.querySelector(".gl"))b.innerHTML='<span class="gk">›</span><span class="gl"></span>';
   b.querySelector(".gl").textContent=tx;b.classList.toggle("sec",st==="back");
 }
+// запись — сразу при отпускании пальца: телефон могут заблокировать тут же, а в фоне таймеры и анимации стоят. Возвращает показ результата
 function goAct(){
-  var g=GO;if(!g)return;var i=g.i,k=g.k,n=new Date(),v=p2(n.getHours())+":"+p2(n.getMinutes()),prev=S.d[i][k]||"";
-  var run=function(){els[i].fl[k].value=v;setF(i,k,v);sndClick();update();if(k==="a")chargeRing();if(k==="b"&&i===todayIdx&&longRest())setTimeout(fireworks,420);
+  var g=GO;if(!g)return null;var i=g.i,k=g.k,n=new Date(),v=p2(n.getHours())+":"+p2(n.getMinutes()),prev=S.d[i][k]||"";
+  els[i].fl[k].value=v;setF(i,k,v);
+  var run=function(){sndClick();update();if(k==="a")chargeRing();if(k==="b"&&i===todayIdx&&longRest())setTimeout(fireworks,420);
     toast((k==="a"?"Приход ":"Уход ")+v,function(){els[i].fl[k].value=prev;setF(i,k,prev);update()})};
-  if(k==="b"&&!reduced)leaveScene(run);else run();
+  return function(){if(k==="b"&&!reduced)leaveScene(run);else run()};
 }
 $("go").addEventListener("click",function(){if(GOS==="back")goToday()});
 // сдвиг пальцем, как «Выключить» в iOS: случайное нажатие ничего не делает
@@ -1120,7 +1123,7 @@ $("go").addEventListener("click",function(){if(GOS==="back")goToday()});
   b.addEventListener("pointerdown",function(e){if(GOS==="back"||!GO)return;D={x:e.clientX,dx:0};try{b.setPointerCapture(e.pointerId)}catch(x){}var k=kn();if(k)k.style.transition="none"});
   b.addEventListener("pointermove",function(e){if(!D)return;D.dx=Math.max(0,Math.min(max(),e.clientX-D.x));var k=kn(),l=b.querySelector(".gl");if(k)k.style.transform="translateX("+D.dx+"px)";if(l)l.style.opacity=Math.max(0,1-D.dx/max()*1.6)});
   function end(){if(!D)return;var d=D;D=null;var k=kn(),l=b.querySelector(".gl");
-    if(d.dx>=max()*.85){if(k){k.style.transition="transform .12s";k.style.transform="translateX("+max()+"px)"}setTimeout(function(){goAct();if(k){k.style.transition="none";k.style.transform=""}if(l)l.style.opacity=""},130);return}
+    if(d.dx>=max()*.85){if(k){k.style.transition="transform .12s";k.style.transform="translateX("+max()+"px)"}var show=goAct();setTimeout(function(){if(show)show();if(k){k.style.transition="none";k.style.transform=""}if(l)l.style.opacity=""},130);return}
     if(k){k.style.transition="transform .3s cubic-bezier(.2,.8,.2,1)";k.style.transform=""}if(l)l.style.opacity="";
     if(d.dx<6&&k){k.classList.remove("nudge");void k.offsetWidth;k.classList.add("nudge")}}
   b.addEventListener("pointerup",end);b.addEventListener("pointercancel",end);
@@ -1473,7 +1476,7 @@ function payDraw(){
   var tm2=td.getFullYear()*12+td.getMonth(),vm=PS.y*12+PS.m;
   if(vm!==tm2){inp.hidden=true;ok.hidden=true;   // поле ввода — только в месяце той выплаты, которую ждём
     lab.innerHTML=(vm<tm2?"Все выплаты "+MPR2[PS.m]+" отмечены":tg.k<=iso(now0)?"Сначала внесите: "+nm:"Пока рано — следующая выплата "+td.getDate()+" "+MG[td.getMonth()])+'<br><button class="plink" id="pgo">'+(vm<tm2?"К "+MDT2[td.getMonth()]+" ›":"К ней ›")+'</button>';
-    $("pgo").onclick=function(){PS.y=td.getFullYear();PS.m=td.getMonth();payDraw()};return}
+    document.getElementById("pgo").onclick=function(){PS.y=td.getFullYear();PS.m=td.getMonth();payDraw()};return}
   if(!tg.open){var op=new Date(td);op.setDate(op.getDate()-3);lab.innerHTML="Следующая: <b>"+nm+"</b><br>внести можно с "+op.getDate()+" "+MG[op.getMonth()];inp.hidden=true;ok.hidden=true;return}
   lab.innerHTML="<b>"+nm+"</b>";inp.hidden=false;ok.hidden=false;
   var prev=0;Object.keys(PAY).sort().forEach(function(x){if(x<tg.k&&payE(x,tg.w))prev=payE(x,tg.w)});

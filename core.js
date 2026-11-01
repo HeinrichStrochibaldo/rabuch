@@ -161,6 +161,9 @@
   /** Закрытый день: учитывается в банке и в балансах. */
   const isClosed = rec => rec.cls === "over" || rec.cls === "under" || rec.cls === "ok";
 
+  /** Недоработка, которую банк месяца покрывает целиком. Только для цвета: в расчётах это обычная недоработка. */
+  const coveredByBank = (rec, bank) => rec.cls === "under" && rec.w + LUNCH >= MIN_PRESENCE && bank + rec.df >= -EPSILON;
+
   // ---- банк месяца: переработки и недоработки закрытых дней переносятся в пределах месяца ----
 
   /** Сумма разниц закрытых дней месяца month («ГГГГ-ММ») до даты before (не включая). */
@@ -241,7 +244,11 @@
       };
     }
 
-    const target = info.map((f, i) => rest[i] ? rest[i].fT : startOf(marks[i]) + (f.norm || 0) + LUNCH);
+    // цель — всегда полный день: ранний уход за счёт банка лишь возможность (rest[i].fT), а долг сдвигает цель позже
+    const target = info.map((f, i) => {
+      const full = startOf(marks[i]) + (f.norm || 0) + LUNCH;
+      return rest[i] ? Math.max(full, rest[i].fT) : full;
+    });
     return { info, work, target, rest, norm, counted, total, live, monthDelta, closedDays, month };
   }
 
@@ -250,7 +257,7 @@
     HOLIDAYS, SHORT_DAYS, WORKING_SATURDAYS,
     pad2, isoDate, monthKey, addDays, mondayOf, parseIso, minutesOf, startOf, shiftEnd,
     calendarKind, dayInfo, isMonthEnd, countsToNorm,
-    dayWork, dayRecord, isClosed, monthBank, weekPlan,
+    dayWork, dayRecord, isClosed, coveredByBank, monthBank, weekPlan,
   };
   if (typeof module === "object" && module.exports) module.exports = core;
   else root.RabuchCore = core;

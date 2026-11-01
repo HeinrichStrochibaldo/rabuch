@@ -98,24 +98,18 @@
     };
   }
 
-  /** «День остатка» — последний рабочий день недели в месяце: сюда сводится норма с учётом банка. */
+  /** «День остатка» — последний рабочий день недели в месяце: цель — полный день, ранний уход за счёт банка только разрешён. */
   function restDay(i, ctx) {
     const { plan, marks, now, todayIdx } = ctx, G = plan.rest[i], f = plan.info[i], r = plan.work[i];
-    const start = startOf(marks[i]), usual = start + f.norm + LUNCH;
-    const out = { forecast: { label: G.end ? "Конец месяца" : G.known ? "Остаток недели" : "Прогноз ухода" } };
-    if (G.rem <= 0) {
-      const from = start + MIN_PRESENCE, canGo = i < todayIdx || (i === todayIdx && now >= from);
-      out.forecast.value = text(canGo ? "можно" : clockT(from));
-      out.forecast.sun = canGo ? null : from;
-      out.chip = { text: canGo ? "норма набрана — можно домой" : "норма набрана — можно с " + clock(from), cls: "" };
+    const start = startOf(marks[i]), usual = start + f.norm + LUNCH, goal = plan.target[i];
+    const out = { forecast: { label: G.end ? "Конец месяца" : G.known ? "Остаток недели" : "Прогноз ухода", value: num(goal, "clockT", true), sun: goal } };
+    if (G.fT < usual - EPSILON) {
+      const who = G.rem <= 0 ? "норма набрана — " : "с банком ";
+      const canGo = now + (todayIdx - i) * 1440 >= G.fT;   // в сутках от начала дня i: ночная смена заканчивается уже завтра
+      out.chip = { text: who + (canGo ? "можно домой" : "можно с " + clockT(G.fT)), cls: "" };
     } else {
-      const d = usual - G.fT;
-      out.forecast.value = num(G.fT, "clockT", true);
-      out.forecast.sun = G.fT;
-      out.chip = {
-        text: d > EPSILON ? "на " + hmm(d) + " раньше, чем в " + clockT(usual) : d < -EPSILON ? "на " + hmm(-d) + " позже, чем в " + clockT(usual) : "как обычно",
-        cls: d < -EPSILON ? "under" : "",
-      };
+      const late = goal - usual;
+      out.chip = late > EPSILON ? { text: "на " + hmm(late) + " позже, чем в " + clockT(usual), cls: "under" } : { text: "как обычно", cls: "" };
     }
     if (r && !r.live) {   // день закрыт — плашка подводит итог недели или месяца
       if (G.end) {
@@ -132,7 +126,7 @@
 
   /** Нижняя строка карточки: итог закрытого дня, живой остаток или когда можно уходить. */
   function workResult(i, ctx) {
-    const { plan, now } = ctx, r = plan.work[i], goal = plan.target[i], G = plan.rest[i];
+    const { plan, now } = ctx, r = plan.work[i], goal = plan.target[i];
     if (r && !r.live) {
       const d = r.b - goal;
       return { lab: d > EPSILON ? "переработка" : d < -EPSILON ? "недоработка" : "ровно в срок", val: { value: num(d, "sg"), cls: tone(d) } };
@@ -140,7 +134,7 @@
     if (r) return now < goal
       ? { lab: "до ухода осталось", val: { value: text(hmm(goal - now)), cls: "" } }
       : { lab: "переработка идёт", val: { value: text("+" + hmm(now - goal)), cls: "over" } };
-    return { lab: G ? (G.rem > 0 ? "уход в " + clockT(G.fT) : "норма набрана") : "уход с " + clockT(goal), val: { value: text("—"), cls: "" } };
+    return { lab: "уход с " + clockT(goal), val: { value: text("—"), cls: "" } };
   }
 
   /** Подозрительные отметки — плашка-предупреждение поверх обычной. */
@@ -171,12 +165,12 @@
 
   /** «пришёл → ушёл»: пустое место занято серым (по графику / цель ухода), забытый уход — красным. */
   function markHints(i, ctx) {
-    const { plan, marks, todayIdx } = ctx, mark = marks[i] || {}, f = plan.info[i], G = plan.rest[i];
+    const { plan, marks, todayIdx } = ctx, mark = marks[i] || {}, f = plan.info[i];
     const hb = !!mark.b, missed = i < todayIdx && !hb, extra = f.kind === "extra";
     return {
       arrive: mark.a ? "" : clockT(startOf(mark)),
-      leaveLabel: hb || missed || extra ? "ушёл" : G ? (G.end ? "конец месяца" : "остаток недели") : "цель ухода",
-      leave: hb ? "" : missed || extra ? "—:—" : G ? (G.rem <= 0 ? "можно" : clockT(G.fT)) : clockT(plan.target[i]),
+      leaveLabel: hb || missed || extra ? "ушёл" : "цель ухода",
+      leave: hb ? "" : missed || extra ? "—:—" : clockT(plan.target[i]),
       missed,
     };
   }

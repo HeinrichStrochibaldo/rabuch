@@ -219,9 +219,9 @@
   }
 
   /** Подпись под большим числом в режиме «неделя». */
-  function weekCaption(norm, counted) {
+  function weekCaption(norm, counted, todayKind) {
     return norm <= 0 ? "на этой неделе нет рабочих часов"
-      : norm - counted <= 0 ? (counted - norm >= 1 ? "сверх нормы недели" : "норма недели выполнена")
+      : norm - counted <= 0 ? (counted - norm >= 1 ? "сверх нормы недели" : todayKind === "rest" ? "неделя закрыта, хороших выходных" : "норма недели выполнена")
       : "осталось до " + norm / 60 + " ч";
   }
 
@@ -247,11 +247,11 @@
         label = "Итог " + MONTHS_GEN[prev.getMonth()];
       }
     }
-    const cls = !days ? "" : Math.abs(sum) <= EPSILON ? "ok" : sum > 0 ? "over" : "under";
+    const cls = !days ? "phrase" : Math.abs(sum) <= EPSILON ? "ok" : sum > 0 ? "over" : "under";
     return {
       label, cls,
-      value: !days ? "—" : cls === "ok" ? "0:00" : sg(sum),
-      note: !days ? "нет данных" : cls === "ok" ? "в норме" : cls === "over" ? "переработка" : "недоработка",
+      value: !days ? "месяц только начался" : cls === "ok" ? "0:00" : sg(sum),
+      note: !days ? "" : cls === "ok" ? "в норме" : cls === "over" ? "переработка" : "недоработка",
     };
   }
 
@@ -271,6 +271,7 @@
   /** Что знает большой таймер о выбранном дне (null — день без рабочих часов). */
   function dayFocus(sel, ctx) {
     const { plan, marks, todayIdx } = ctx, f = plan.info[sel], r = plan.work[sel], mark = marks[sel] || {};
+    if (f.kind === "hol") return { hol: true, isToday: sel === todayIdx };
     if (f.kind !== "work" && f.kind !== "extra") return null;
     const st = startOf(mark), leave = minutesOf(mark.b), b = shiftEnd(st, leave);
     return {
@@ -292,7 +293,8 @@
    */
   function dayHeadline(D, now) {
     const h = (big, caption, ms = null) => ({ big, caption, ms });
-    if (!D) return h("—", "в этот день нет рабочих часов");
+    if (D && D.hol && D.isToday) return { ...h("сегодня можно не считать", ""), phrase: true };
+    if (!D || D.hol) return h("—", "в этот день нет рабочих часов");
     if (D.inv) return h("—", "проверьте время: уход раньше прихода");
     if (D.ex) {
       if (D.b != null) return h(hmm(D.w), "доп. день · отработано");
@@ -302,7 +304,7 @@
     if (D.b != null) {
       const d = D.w - D.norm;
       const caption = D.b - D.st < MIN_PRESENCE ? "итог дня: меньше 4,5 ч — не отработан" : d > EPSILON ? "итог дня: переработка" : d < -EPSILON ? "итог дня: недоработка" : "итог дня: в срок";
-      return h((d < 0 ? "−" : "+") + hmm(Math.abs(d)), caption);
+      return { ...h((d < 0 ? "−" : "+") + hmm(Math.abs(d)), caption), final: true };
     }
     if (D.isToday && !D.ha && now >= D.st + D.norm + LUNCH)
       return h("0:00", "итог дня: по графику " + clock(D.st) + "–" + clock(D.st + D.norm + LUNCH));

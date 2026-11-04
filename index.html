@@ -16,10 +16,18 @@
 <link rel="icon" type="image/png" href="icon-192.png">
 
 <style>
-:root{--k-eve:linear-gradient(160deg,#eef1f7,#e2e7f1);--bg:#f3f6f4;--card:#fff;--ink:#14201b;--mute:#64736c;--line:#dde5e0;--ok:#0f766e;--over:#d97706;--under:#64748b;--tint:#e6f2ef;--k-bg:linear-gradient(160deg,#ffffff,#f3f8f6);--k-sh:0 1px 2px rgba(15,42,36,.05),0 10px 30px rgba(15,42,36,.09);--k-ink:#14201b;--k-mute:rgba(20,32,27,.58);--k-faint:rgba(20,32,27,.09);--k-glass:rgba(20,32,27,.035);--k-glass-b:rgba(20,32,27,.09);--k-acc:#0d9488;--k-acc-bg:rgba(13,148,136,.12);--k-over:#d97706;--k-over-bg:rgba(217,119,6,.13);--k-under:#64748b;--k-under-bg:rgba(100,116,139,.13);--k-err:#e11d48;--k-err-bg:rgba(225,29,72,.1);--k-ring:#14b8a6;--k-ring2:#1f3a33;--go-bg:#0d9488;--go-ink:#fff;
+/* Словарь цветов: один цвет — один смысл (светлая / тёмная тема).
+   бирюзовый       в норме, идёт             --k-acc   #0d9488 / #5eead4
+   оранжевый       переработка               --k-over  #d97706 / #fbbf24
+   серо-синий      недоработка               --k-under #64748b / #a5b4c3
+   серо-бирюзовый  недоработка из банка      --k-bank  108,160,152
+   красный         только ошибки             --k-err   #e11d48 / #fb7185
+   индиго          отпуск, больничный, отгул в календаре
+   В календаре заливки светлее тех же оттенков: на них должен читаться тёмный текст. */
+:root{--k-eve:linear-gradient(160deg,#eef1f7,#e2e7f1);--bg:#f3f6f4;--card:#fff;--ink:#14201b;--mute:#64736c;--line:#dde5e0;--ok:#0f766e;--over:#d97706;--under:#64748b;--tint:#e6f2ef;--k-bg:linear-gradient(160deg,#ffffff,#f3f8f6);--k-sh:0 1px 2px rgba(15,42,36,.05),0 10px 30px rgba(15,42,36,.09);--k-ink:#14201b;--k-mute:rgba(20,32,27,.58);--k-faint:rgba(20,32,27,.09);--k-glass:rgba(20,32,27,.035);--k-glass-b:rgba(20,32,27,.09);--k-acc:#0d9488;--k-acc-bg:rgba(13,148,136,.12);--k-over:#d97706;--k-over-bg:rgba(217,119,6,.13);--k-under:#64748b;--k-under-bg:rgba(100,116,139,.13);--k-label:rgba(20,32,27,.72);--k-bank:108,160,152;--k-err:#e11d48;--k-err-bg:rgba(225,29,72,.1);--k-ring:#14b8a6;--k-ring2:#1f3a33;--go-bg:#0d9488;--go-ink:#fff;
 box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#101714;--card:#18221e;--ink:#e8f0ec;--mute:#93a39b;--line:#27332e;--ok:#4fd1c0;--over:#fbbf24;--under:#a5b4c3;--tint:#1c2e29;--k-bg:linear-gradient(160deg,#11302a,#0d241f);--k-eve:linear-gradient(160deg,#10203a,#0a1424);--k-sh:0 10px 30px rgba(0,0,0,.25);--k-ink:#eaf6f2;--k-mute:rgba(234,246,242,.65);--k-faint:rgba(234,246,242,.14);--k-glass:rgba(255,255,255,.05);--k-glass-b:rgba(255,255,255,.1);--k-acc:#5eead4;--k-acc-bg:rgba(94,234,212,.16);--k-over:#fbbf24;--k-over-bg:rgba(251,191,36,.16);--k-under:#a5b4c3;--k-under-bg:rgba(165,180,195,.15);--k-err:#fb7185;--k-err-bg:rgba(251,113,133,.15);--k-ring:#5eead4;--k-ring2:#eaf6f2;--go-bg:#5eead4;--go-ink:#0b1f1a;}}
-:root[data-theme="dark"]{--bg:#101714;--card:#18221e;--ink:#e8f0ec;--mute:#93a39b;--line:#27332e;--ok:#4fd1c0;--over:#fbbf24;--under:#a5b4c3;--tint:#1c2e29;--k-bg:linear-gradient(160deg,#11302a,#0d241f);--k-eve:linear-gradient(160deg,#10203a,#0a1424);--k-sh:0 10px 30px rgba(0,0,0,.25);--k-ink:#eaf6f2;--k-mute:rgba(234,246,242,.65);--k-faint:rgba(234,246,242,.14);--k-glass:rgba(255,255,255,.05);--k-glass-b:rgba(255,255,255,.1);--k-acc:#5eead4;--k-acc-bg:rgba(94,234,212,.16);--k-over:#fbbf24;--k-over-bg:rgba(251,191,36,.16);--k-under:#a5b4c3;--k-under-bg:rgba(165,180,195,.15);--k-err:#fb7185;--k-err-bg:rgba(251,113,133,.15);--k-ring:#5eead4;--k-ring2:#eaf6f2;--go-bg:#5eead4;--go-ink:#0b1f1a;}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#101714;--card:#18221e;--ink:#e8f0ec;--mute:#93a39b;--line:#27332e;--ok:#4fd1c0;--over:#fbbf24;--under:#a5b4c3;--tint:#1c2e29;--k-bg:linear-gradient(160deg,#11302a,#0d241f);--k-eve:linear-gradient(160deg,#10203a,#0a1424);--k-sh:0 10px 30px rgba(0,0,0,.25);--k-ink:#eaf6f2;--k-mute:rgba(234,246,242,.65);--k-faint:rgba(234,246,242,.14);--k-glass:rgba(255,255,255,.05);--k-glass-b:rgba(255,255,255,.1);--k-acc:#5eead4;--k-acc-bg:rgba(94,234,212,.16);--k-over:#fbbf24;--k-over-bg:rgba(251,191,36,.16);--k-under:#a5b4c3;--k-under-bg:rgba(165,180,195,.15);--k-label:rgba(234,246,242,.72);--k-err:#fb7185;--k-err-bg:rgba(251,113,133,.15);--k-ring:#5eead4;--k-ring2:#eaf6f2;--go-bg:#5eead4;--go-ink:#0b1f1a;}}
+:root[data-theme="dark"]{--bg:#101714;--card:#18221e;--ink:#e8f0ec;--mute:#93a39b;--line:#27332e;--ok:#4fd1c0;--over:#fbbf24;--under:#a5b4c3;--tint:#1c2e29;--k-bg:linear-gradient(160deg,#11302a,#0d241f);--k-eve:linear-gradient(160deg,#10203a,#0a1424);--k-sh:0 10px 30px rgba(0,0,0,.25);--k-ink:#eaf6f2;--k-mute:rgba(234,246,242,.65);--k-faint:rgba(234,246,242,.14);--k-glass:rgba(255,255,255,.05);--k-glass-b:rgba(255,255,255,.1);--k-acc:#5eead4;--k-acc-bg:rgba(94,234,212,.16);--k-over:#fbbf24;--k-over-bg:rgba(251,191,36,.16);--k-under:#a5b4c3;--k-under-bg:rgba(165,180,195,.15);--k-label:rgba(234,246,242,.72);--k-err:#fb7185;--k-err-bg:rgba(251,113,133,.15);--k-ring:#5eead4;--k-ring2:#eaf6f2;--go-bg:#5eead4;--go-ink:#0b1f1a;}
 html{scroll-padding-top:env(safe-area-inset-top,0px);touch-action:manipulation;-webkit-text-size-adjust:100%}
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.4 -apple-system,BlinkMacSystemFont,"SF Pro Text",system-ui,"Segoe UI",Roboto,sans-serif;font-variant-numeric:tabular-nums}
@@ -147,13 +155,13 @@ input[type=time]:focus{outline:none;border-color:var(--ok);box-shadow:0 0 0 3px 
 .yg{display:grid;grid-template-columns:repeat(7,1fr);gap:2px}
 .yg i{aspect-ratio:1;border-radius:2px}
 .c.pre,.hc.v-pre{opacity:.28;pointer-events:none}.yg i.v-pre{opacity:.25}
-.v-over{background:rgba(245,158,11,.85)}.v-ok{background:rgba(45,212,191,.8)}.v-under{background:rgba(148,163,184,.75)}.v-bank{background:rgba(108,160,152,.7)}.v-type{background:rgba(129,140,248,.35)}.v-hol{background:rgba(148,163,184,.2)}.v-none{box-shadow:inset 0 0 0 1px var(--mute);opacity:.75}.v-fut{background:rgba(148,163,184,.1)}
+.v-over{background:rgba(245,158,11,.85)}.v-ok{background:rgba(45,212,191,.8)}.v-under{background:rgba(148,163,184,.75)}.v-bank{background:rgba(var(--k-bank),.7)}.v-type{background:rgba(129,140,248,.35)}.v-hol{background:rgba(148,163,184,.2)}.v-none{box-shadow:inset 0 0 0 1px var(--mute);opacity:.75}.v-fut{background:rgba(148,163,184,.1)}
 .hg{display:grid;grid-template-columns:repeat(7,1fr);gap:3px}
 .hc.v-over b,.hc.v-ok b{color:#0b1f1a}.c.sel2{box-shadow:0 0 0 2px var(--ok)}
 .hs{font-size:calc(14px*var(--ts,1));color:var(--mute);margin-top:10px;text-align:center}.hs b{color:var(--ink)}
 .wr{display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;font:inherit;border:0;border-radius:12px;padding:10px 12px;margin-bottom:4px;color:var(--ink);text-align:left;cursor:pointer}
 .wr small{color:var(--mute);margin-left:6px}
-.wr.v-over{background:rgba(245,158,11,.25)}.wr.v-ok{background:rgba(45,212,191,.22)}.wr.v-under{background:rgba(148,163,184,.25)}.wr.v-bank{background:rgba(108,160,152,.22)}.wr.v-type{background:rgba(129,140,248,.18)}.wr.v-hol,.wr.v-rest,.wr.v-fut,.wr.v-none{background:var(--bg)}
+.wr.v-over{background:rgba(245,158,11,.25)}.wr.v-ok{background:rgba(45,212,191,.22)}.wr.v-under{background:rgba(148,163,184,.25)}.wr.v-bank{background:rgba(var(--k-bank),.22)}.wr.v-type{background:rgba(129,140,248,.18)}.wr.v-hol,.wr.v-rest,.wr.v-fut,.wr.v-none{background:var(--bg)}
 .hdet{margin-top:10px;border-top:1px solid var(--line);padding-top:10px}
 .hdet .t{font-weight:700;margin-bottom:6px}.hdet .m{color:var(--mute);font-size:calc(14px*var(--ts,1));margin-top:8px}
 .hdet input[type=time]{font-size:18px}
@@ -179,7 +187,7 @@ input[type=time]:focus{outline:none;border-color:var(--ok);box-shadow:0 0 0 3px 
 .dt{flex:0 1 54px;min-width:0;height:calc(40px*var(--ts,1));justify-content:flex-start;align-self:flex-start;font:inherit;background:none;border:0;padding:6px 0 7px;border-radius:14px;color:var(--k-mute);cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:5px;transition:background .25s,color .25s;-webkit-tap-highlight-color:transparent}
 .dt b{font-size:calc(13px*var(--ts,1));font-weight:600;line-height:1}
 .dt i{display:block;width:8px;height:8px;margin:1px 0;border-radius:50%;font-style:normal;font-size:calc(10px*var(--ts,1));line-height:10px;text-align:center;box-shadow:inset 0 0 0 1.5px var(--k-faint)}
-.dt[data-c=over] i{background:var(--k-over);box-shadow:none}.dt[data-c=ok] i{background:var(--k-acc);box-shadow:none}.dt[data-c=under] i{background:var(--k-under);box-shadow:none}.dt[data-c=bank] i{background:rgba(108,160,152,.9);box-shadow:none}.dt[data-c=none] i{box-shadow:inset 0 0 0 1.5px var(--k-err)}
+.dt[data-c=over] i{background:var(--k-over);box-shadow:none}.dt[data-c=ok] i{background:var(--k-acc);box-shadow:none}.dt[data-c=under] i{background:var(--k-under);box-shadow:none}.dt[data-c=bank] i{background:rgba(var(--k-bank),.9);box-shadow:none}.dt[data-c=none] i{box-shadow:inset 0 0 0 1.5px var(--k-err)}
 .dt.emj i{width:auto;height:10px;margin:0;box-shadow:none;background:none}
 .dt.td b{color:var(--k-acc)}.dt.on{background:var(--k-glass);color:var(--k-ink);box-shadow:inset 0 0 0 1px var(--k-glass-b)}
 .sum .day.off{opacity:0;pointer-events:none}
@@ -265,7 +273,7 @@ html,body{overscroll-behavior:none}
 .pgr{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .pq{position:relative;border:1px solid var(--line);background:var(--bg);border-radius:16px;padding:10px 12px 12px;min-height:84px;box-sizing:border-box;text-align:left;transition:background .3s,border-color .3s}
 .pq .t{font-size:calc(13px*var(--ts,1));color:var(--mute)}.pq .a{font-size:calc(20px*var(--ts,1));font-weight:700;letter-spacing:-.01em;margin-top:6px}
-.pq .a.w{font-size:calc(14px*var(--ts,1));font-weight:500;color:var(--mute)}.pq .a.m{font-size:calc(14px*var(--ts,1));font-weight:600;color:var(--over)}.pq .a.n{font-size:calc(14px*var(--ts,1));font-weight:500;color:var(--mute)}
+.pq .a.w{font-size:calc(14px*var(--ts,1));font-weight:500;color:var(--mute)}.pq .a.m{font-size:calc(14px*var(--ts,1));font-weight:600;color:var(--ink)}.pq .a.n{font-size:calc(14px*var(--ts,1));font-weight:500;color:var(--mute)}
 .pq.f{background:var(--tint);border-color:transparent}.pq.f::after{content:"✓";position:absolute;right:11px;top:9px;font-size:13px;color:var(--ok);font-weight:700}
 .pq.x{opacity:.45}.pq.tg{border-color:var(--ok);box-shadow:0 0 0 1px var(--ok)}
 .pq.vac{grid-column:1/-1;min-height:0}
@@ -327,7 +335,7 @@ html,body{overscroll-behavior:none}
 .sum .day .marks label.ma input{text-align:left}.sum .day .marks label.ma input::-webkit-date-and-time-value{text-align:left}
 .sum .day .marks .ph{font-size:22px;font-weight:500;color:var(--k-mute);font-variant-numeric:tabular-nums;line-height:1.2}
 .sum .day .marks .ph:empty{display:none}
-.sum .day .marks label.mk.miss .lb,.sum .day .marks label.mk.miss .ph{color:var(--k-err,#dc2626)}
+.sum .day .marks label.mk.miss .lb,.sum .day .marks label.mk.miss .ph{color:var(--k-err)}
 .day.nowk .tot{visibility:hidden}.sum .day .marks input[type=time]{line-height:1.2;height:auto;padding:0;margin:0}
 .day:not(.void):not(.live) .tot::before{content:"работа ";font-size:calc(12px*var(--ts,1));font-weight:400;color:var(--k-mute)}
 
@@ -346,6 +354,26 @@ html,body{overscroll-behavior:none}
 /* спрятанные переключатели под пальцем — ради тактильного щелчка на iOS */
 #sum .big,#sum .ring{cursor:pointer;-webkit-tap-highlight-color:transparent}
 @media (max-width:359px){.set{grid-template-columns:repeat(7,minmax(0,1fr))}.set .rst{min-width:0;width:100%;padding:8px 0}}   /* семь кнопок по 48 px не помещаются на старых маленьких iPhone */
+/* нижний ряд: линейные иконки в манере колокольчика */
+.set .rst{color:var(--ok);padding:0}.set .rst svg{display:block}
+/* мелкие подписи: контраст от 4,5:1 на всех фонах карточки; высота строк прежняя — раскладка не сдвигается */
+.sum .day .marks .lb{font-size:calc(13px*var(--ts,1));line-height:calc(14.4px*var(--ts,1));color:var(--k-label)}
+.sum .day .d,.sum .day .lr,.sum .day .dl .k{color:var(--k-label)}
+.sum .day .dl .k{font-size:calc(14px*var(--ts,1));line-height:calc(18.2px*var(--ts,1))}
+.dt{color:var(--k-label)}.dt b{font-size:calc(14px*var(--ts,1));line-height:calc(13px*var(--ts,1))}
+.side .k,.rl{font-size:calc(14px*var(--ts,1));line-height:calc(18.2px*var(--ts,1));opacity:1;color:var(--k-label)}
+.cap{font-size:calc(13px*var(--ts,1));line-height:calc(16.8px*var(--ts,1));opacity:1;color:var(--k-label)}
+/* весь блок у нижнего края, ближе к большому пальцу; кнопки всегда на одном месте. Отступы экрана уже есть у :root */
+main{box-sizing:border-box;min-height:calc(100dvh - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;justify-content:flex-end;padding-bottom:10px}
+/* перекат цифр, как на табло */
+.rc{display:inline-block;position:relative;clip-path:inset(0)}.rc b{font-weight:inherit;visibility:hidden}.rc i{position:absolute;left:0;top:0;font-style:normal}
+.rc-o{animation:rcOut .3s ease-out forwards}.rc-n{animation:rcIn .3s ease-out forwards}
+@keyframes rcOut{to{transform:translateY(-100%);opacity:0}}
+@keyframes rcIn{from{transform:translateY(100%);opacity:0}}
+/* фраза вместо прочерка: высота блока та же */
+.side .b.phrase{font-size:17px;font-weight:500;letter-spacing:0;line-height:37.4px;white-space:nowrap}
+@media (max-width:359px){.side .b.phrase{font-size:14px}}
+.big.phrase .rl{visibility:hidden}.big.phrase .rt{font-size:21px;font-weight:600;letter-spacing:0;line-height:48.4px;transform:translateY(-9px)}
 .hsw{display:none}.hsw-over{position:absolute;inset:0;width:100%;height:100%;margin:0;opacity:.011;cursor:pointer;z-index:2;-webkit-tap-highlight-color:transparent}
 </style>
 </head>
@@ -353,7 +381,7 @@ html,body{overscroll-behavior:none}
 <main>
 <h1><span id="wk"></span><button id="sy" class="sy">☁︎ …</button><button class="nb" id="nb" aria-label="Уведомления"><svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 16.5V11a6 6 0 0 1 12 0v5.5l1.6 2H4.4z"/><path d="M10 21a2.1 2.1 0 0 0 4 0"/></svg><i></i></button><button class="np" id="np"></button></h1>
 <div class="sytx" id="sytx" hidden></div>
-<button class="miss bkr" id="empty" hidden>Данных пока нет · Восстановить из копии ›</button>
+<button class="miss bkr" id="empty" hidden>Здесь пока пусто · Восстановить из копии ›</button>
 <section class="sum rise" id="sum">
   <div class="ring">
     <svg viewBox="0 0 120 120"><circle class="trk" cx="60" cy="60" r="52"/><circle class="trk trk2" cx="60" cy="60" r="40"/><circle class="prg2" id="ring2" cx="60" cy="60" r="40"/><circle class="prg" id="ring" cx="60" cy="60" r="52"/></svg>
@@ -368,13 +396,13 @@ html,body{overscroll-behavior:none}
 </section>
 <button class="go" id="go" hidden></button>
 <div class="set">
-  <button class="rst" id="hist" style="margin-left:0" title="История">🗓</button>
-  <button class="rst" id="payb" style="margin-left:0" title="Зарплата">💰</button>
-  <button class="rst" id="watb" style="margin-left:0" title="Просмотр">🎬</button>
-  <button class="rst tyb" data-t="vac" style="margin-left:0" title="Отпуск">🌴</button>
-  <button class="rst tyb" data-t="sick" style="margin-left:0" title="Больничный">🤒</button>
-  <button class="rst tyb" data-t="off" style="margin-left:0" title="Отгул">💤</button>
-  <button class="rst tyb" id="addx" data-t="x" style="margin-left:0" title="Доп. день в выходной">➕</button>
+  <button class="rst" id="hist" style="margin-left:0" title="История"><svg viewBox="0 0 24 24" width="23" height="23" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5.5" width="16" height="15" rx="2.5"/><path d="M4 10.5h16M8.5 3.5v4M15.5 3.5v4"/></svg></button>
+  <button class="rst" id="payb" style="margin-left:0" title="Зарплата"><svg viewBox="0 0 24 24" width="23" height="23" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M10.2 17V7.5h2.9a2.75 2.75 0 0 1 0 5.5H8.6M8.6 15.2h5"/></svg></button>
+  <button class="rst" id="watb" style="margin-left:0" title="Просмотр"><svg viewBox="0 0 24 24" width="23" height="23" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="14" rx="3"/><path d="M10 9l5 3-5 3z"/></svg></button>
+  <button class="rst tyb" data-t="vac" style="margin-left:0" title="Отпуск"><svg viewBox="0 0 24 24" width="23" height="23" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M11.5 20.5c.2-3.6.8-6.7 2.2-9.4M6.5 20.5h10M13.7 11.1C12.6 8.4 9 7.3 6 8.8M13.7 11.1c1.4-2.9 4.6-3.6 7-1.8M13.7 11.1c-2.9-.6-5.9.8-7.1 3.8M13.7 11.1c2.9.1 5 1.9 5.6 4.5"/></svg></button>
+  <button class="rst tyb" data-t="sick" style="margin-left:0" title="Больничный"><svg viewBox="0 0 24 24" width="23" height="23" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M14 14.4V5.5a2 2 0 0 0-4 0v8.9a4 4 0 1 0 4 0z"/><path d="M12 9.5v7.5"/></svg></button>
+  <button class="rst tyb" data-t="off" style="margin-left:0" title="Отгул"><svg viewBox="0 0 24 24" width="23" height="23" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M19.5 14.6A8 8 0 0 1 9.4 4.5a8 8 0 1 0 10.1 10.1z"/></svg></button>
+  <button class="rst tyb" id="addx" data-t="x" style="margin-left:0" title="Доп. день в выходной"><svg viewBox="0 0 24 24" width="23" height="23" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5.5v13M5.5 12h13"/></svg></button>
 </div>
 </main>
 <div class="nc" id="nc"><div class="ncb" id="ncb" style="position:absolute;inset:0"></div><div class="ncp" id="ncp"></div></div>
@@ -429,7 +457,7 @@ function dynType(){var ts=1;try{if(window.CSS&&CSS.supports("font","-apple-syste
   if(document.documentElement.style.getPropertyValue("--ts")!==String(ts)){document.documentElement.style.setProperty("--ts",ts);return true}return false}
 dynType();
 var SPLON=!(window.matchMedia&&matchMedia("(prefers-reduced-motion:reduce)").matches)&&!document.hidden;if(SPLON)document.body.classList.add("splon");
-var VER="1.12.8",STANDALONE=!!(window.navigator.standalone||(window.matchMedia&&matchMedia("(display-mode: standalone)").matches));
+var VER="1.12.9",STANDALONE=!!(window.navigator.standalone||(window.matchMedia&&matchMedia("(display-mode: standalone)").matches));
 var NAMES=["Понедельник","Вторник","Среда","Четверг","Пятница","Суббота","Воскресенье"],START=Core.DAY_START,BRK=Core.LUNCH,MINP=Core.MIN_PRESENCE,C=326.73;
 var reduced=window.matchMedia&&matchMedia("(prefers-reduced-motion:reduce)").matches;
 var now0=new Date();
@@ -486,9 +514,23 @@ PM="auto";try{var pj=JSON.parse(localStorage.getItem("hours:pm")||"null");if(pj&
 function autoMode(){var M=MODEL,f=M&&M.INF[todayIdx];if(f&&f.kind==="extra")return"day";if(!f||f.kind!=="work"||(M.RIS&&M.RIS[todayIdx]))return"week";return"day"}
 var EMV="week",PU=false,RP="",ringEl=document.querySelector(".ring");
 function showPct(wf,df){LASTW=wf;LASTD=df;var d=EMV==="day",nul=d?df==null:!!(MODEL&&MODEL.W<=0);var pv=d?df:wf;setT($("pn"),nul?"—":String(pv>=1?100:Math.min(99,Math.floor(pv*100+1e-9))));if(nul!==PU){PU=nul;$("pu").style.display=nul?"none":""}setT($("cap"),d?"день":"неделя");if(RP!==EMV){RP=EMV;ringEl.classList.toggle("dm",d)}}
+// новое значение перекатывается, как на табло; только между числами и не при «Уменьшении движения»
+var ROLLNUM=/^[+−]?\d/;
+function rollT(el,v){
+  var was=el._rollTo!=null?el._rollTo:el.textContent;
+  if(was===v)return;
+  if(reduced||document.hidden||!ROLLNUM.test(was)||!ROLLNUM.test(v)){el._rollTo=null;setT(el,v);return}
+  var cell=function(a,b){return'<span class="rc"><b>'+b+'</b><i class="rc-o">'+a+'</i><i class="rc-n">'+b+'</i></span>'},h="";
+  if(was.length!==v.length)h=cell(was,v);
+  else for(var i=0;i<v.length;i++)h+=was[i]===v[i]?v[i]:cell(was[i],v[i]);
+  el.innerHTML=h;el._rollTo=v;
+  setTimeout(function(){if(el._rollTo!==v)return;el._rollTo=null;if(el.querySelector(".rc"))el.textContent=v},320);
+}
 function dayBig(nm){
-  var H=Screen.dayHeadline(DAYI,nm),rem=$("rem"),ms=$("ms");
-  rem._v=null;setT(rem,H.big);setT($("rl"),H.caption);
+  var H=Screen.dayHeadline(DAYI,nm),rem=$("rem"),ms=$("ms"),key=H.final?SEL:null;
+  rem._v=null;$("rem").parentNode.parentNode.classList.toggle("phrase",!!H.phrase);
+  if(key!=null&&rem._rk===key)rollT(rem,H.big);else{rem._rollTo=null;setT(rem,H.big)}   // другой день или другой вид — сразу, катится только смена итога того же дня
+  rem._rk=key;setT($("rl"),H.caption);
   if(H.ms==null||reduced)ms.style.display="none";else{ms.style.display="inline-block";if(!QUIET)setT(ms,ms3(H.ms))}
 }
 var SDR={q:-2,o:null};
@@ -653,7 +695,7 @@ function renderCard(i,v){
 function renderBalance(bankNow,P){
   var mT=iso(now0).slice(0,7),sum=bankNow(mT);
   var B=Screen.monthBalance({sum:sum,days:(BKN[mT]||0)+(P.closedDays[mT]||0),today:now0,recordOf:rec0});
-  setT($("bk"),B.label);setCls($("bal"),"b",B.cls);setT($("bal"),B.value);setT($("pw"),B.note);
+  setT($("bk"),B.label);setCls($("bal"),"b",B.cls);rollT($("bal"),B.value);setT($("pw"),B.note);
 }
 // полоска дней под карточкой
 function renderDots(){
@@ -669,7 +711,8 @@ function applySel(nm){
   els.forEach(function(e,i){e.chip.style.visibility=Screen.chipHidden(i,ti,EMV,M.plan,e.chip._c)?"hidden":""});   // итог закрытого дня уже крупно сверху — плашку не дублируем
   if(EMV==="day")dayBig(nm);
   else{
-    setT($("rl"),Screen.weekCaption(M.W,M.counted));
+    $("rem")._rk=null;$("rem").parentNode.parentNode.classList.remove("phrase");
+    setT($("rl"),Screen.weekCaption(M.W,M.counted,M.INF[todayIdx].kind));
     if(M.live==null){setNum($("rem"),M.W>0&&M.remain<=0?-(M.counted-M.W):M.remain,Screen.remFmt,true);$("ms").style.display="none"}
     else{$("rem")._v=null;$("ms").style.display=reduced?"none":"inline-block"}
   }

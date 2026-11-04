@@ -363,8 +363,6 @@ html,body{overscroll-behavior:none}
 .dt{color:var(--k-label)}.dt b{font-size:calc(14px*var(--ts,1));line-height:calc(13px*var(--ts,1))}
 .side .k,.rl{font-size:calc(14px*var(--ts,1));line-height:calc(18.2px*var(--ts,1));opacity:1;color:var(--k-label)}
 .cap{font-size:calc(13px*var(--ts,1));line-height:calc(16.8px*var(--ts,1));opacity:1;color:var(--k-label)}
-/* весь блок у нижнего края, ближе к большому пальцу; кнопки всегда на одном месте. Отступы экрана уже есть у :root */
-main{box-sizing:border-box;min-height:calc(100dvh - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;justify-content:flex-end;padding-bottom:10px}
 /* перекат цифр, как на табло */
 .rc{display:inline-block;position:relative;clip-path:inset(0)}.rc b{font-weight:inherit;visibility:hidden}.rc i{position:absolute;left:0;top:0;font-style:normal}
 .rc-o{animation:rcOut .3s ease-out forwards}.rc-n{animation:rcIn .3s ease-out forwards}
@@ -457,7 +455,7 @@ function dynType(){var ts=1;try{if(window.CSS&&CSS.supports("font","-apple-syste
   if(document.documentElement.style.getPropertyValue("--ts")!==String(ts)){document.documentElement.style.setProperty("--ts",ts);return true}return false}
 dynType();
 var SPLON=!(window.matchMedia&&matchMedia("(prefers-reduced-motion:reduce)").matches)&&!document.hidden;if(SPLON)document.body.classList.add("splon");
-var VER="1.12.9",STANDALONE=!!(window.navigator.standalone||(window.matchMedia&&matchMedia("(display-mode: standalone)").matches));
+var VER="1.12.10",STANDALONE=!!(window.navigator.standalone||(window.matchMedia&&matchMedia("(display-mode: standalone)").matches));
 var NAMES=["Понедельник","Вторник","Среда","Четверг","Пятница","Суббота","Воскресенье"],START=Core.DAY_START,BRK=Core.LUNCH,MINP=Core.MIN_PRESENCE,C=326.73;
 var reduced=window.matchMedia&&matchMedia("(prefers-reduced-motion:reduce)").matches;
 var now0=new Date();
@@ -944,9 +942,12 @@ function hRender(keep){
   }else if(v==="m"){
     $("ht").textContent=MN[HS.m]+" "+HS.y;
     var o2=(new Date(HS.y,HS.m,1).getDay()+6)%7,dm=new Date(HS.y,HS.m+1,0).getDate();
-    for(i=0;i<o2;i++)h+="<span></span>";
+    // всегда шесть рядов: высота окна не прыгает при листании, места рядов заняты блёклыми днями соседних месяцев
+    var nbr=function(n){return'<button class="c hc nx" tabindex="-1"><b>'+n+'</b><i></i></button>'},pl0=new Date(HS.y,HS.m,0).getDate();
+    for(i=0;i<o2;i++)h+=nbr(pl0-o2+1+i);
     for(d=1;d<=dm;d++){r=rec(new Date(HS.y,HS.m,d));sum+=r.w;if(counted(r))bal+=r.df;
       h+='<button class="c hc v-'+r.vc+(r.k===HS.sel?" sel2":"")+(r.k===iso(now0)?" tdy":"")+'" data-k="'+r.k+'"><b>'+d+'</b><i>'+r.em+'</i></button>'}
+    for(i=1;i<=42-o2-dm;i++)h+=nbr(i);
     $("hb").innerHTML='<div class="wd">'+DN.map(function(x){return"<span>"+x+"</span>"}).join("")+'</div><div class="hg">'+h+'</div>';
     det=HS.sel&&HS.sel.slice(0,7)===HS.y+"-"+p2(HS.m+1)?hDetail(HS.sel):'<div class="hs">Отработано: <b>'+hm(sum)+'</b> · баланс <b>'+sg(bal)+'</b></div>';
   }else{
